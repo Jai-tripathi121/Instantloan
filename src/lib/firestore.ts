@@ -63,10 +63,17 @@ export interface BankConfig {
 
 // ─── Applications ─────────────────────────────────────────────
 
+/** Remove undefined fields — Firestore rejects them */
+function clean<T extends object>(obj: T): T {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== undefined)
+  ) as T;
+}
+
 export async function saveApplication(data: Omit<LoanApplication, "id" | "createdAt" | "updatedAt">) {
   if (!isFirebaseConfigured()) throw new Error("Firebase not configured");
   const ref = await withTimeout(addDoc(collection(db, "applications"), {
-    ...data,
+    ...clean(data),
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   }));

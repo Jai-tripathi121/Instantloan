@@ -11,7 +11,7 @@ function isConfigured() {
 /** Race an upload against a 6-second timeout — resolves undefined if either fails or times out */
 async function tryUpload(file: File | null, path: string): Promise<string | undefined> {
   if (!file || !isConfigured()) return undefined;
-  const timeout = new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 6000));
+  const timeout = new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 4000));
   const upload = (async () => {
     try {
       const storageRef = ref(storage, path);
