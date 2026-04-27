@@ -40,8 +40,8 @@ export default function Apply() {
     try {
       const ref = `${selectedBank?.bankName?.replace(/\s/g, "").toUpperCase()}${Date.now().toString().slice(-8)}`;
 
-      // Document upload (best-effort — never blocks submission)
-      setSubmitStep("Documents upload ho rahe hain...");
+      // Document upload — best-effort with 6s timeout, never blocks submission
+      setSubmitStep("Documents save ho rahe hain (max 6 sec)...");
       let docUrls: { aadhaarUrl?: string; panCardUrl?: string; photoUrl?: string } = {};
       try { docUrls = await uploadApplicationDocs(ref, aadhaar, panCard, photo); } catch { /* proceed without doc URLs */ }
 
