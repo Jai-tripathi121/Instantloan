@@ -3,6 +3,7 @@ import {
   collection, addDoc, updateDoc, doc, getDoc, setDoc,
   getDocs, query, orderBy, serverTimestamp, where,
 } from "firebase/firestore";
+import type { EmploymentType } from "./bank-data";
 
 function isFirebaseConfigured() {
   return (
@@ -56,8 +57,23 @@ export interface BankConfig {
   minIncome?: number;
   maxFoir?: number;
   minCibil?: number;
+  minCibilSalaried?: number;
+  minCibilSelfEmployed?: number;
+  minCibilBusiness?: number;
+  allowedEmploymentTypes?: EmploymentType[];
   interestRate?: { personal?: number; home?: number; auto?: number; business?: number; gold?: number; education?: number; lap?: number };
   processingFeePercent?: number;
+  updatedAt?: unknown;
+}
+
+export interface GlobalSettings {
+  globalFoirCap?: number;
+  incomeMultiplierSalaried?: number;
+  incomeMultiplierSelfEmployed?: number;
+  incomeMultiplierBusiness?: number;
+  maxBouncesStrict?: number;
+  maxBouncesAll?: number;
+  platformActive?: boolean;
   updatedAt?: unknown;
 }
 
@@ -116,6 +132,25 @@ export async function savePaymentRecord(data: {
 }) {
   if (!isFirebaseConfigured()) return;
   await withTimeout(addDoc(collection(db, "payments"), { ...data, createdAt: serverTimestamp() }));
+}
+
+// ─── Global Settings ──────────────────────────────────────────
+
+export async function getGlobalSettings(): Promise<GlobalSettings> {
+  if (!isFirebaseConfigured()) return {};
+  try {
+    const snap = await withTimeout(getDoc(doc(db, "config", "global")));
+    if (!snap.exists()) return {};
+    return snap.data() as GlobalSettings;
+  } catch { return {}; }
+}
+
+export async function saveGlobalSettings(settings: Omit<GlobalSettings, "updatedAt">) {
+  if (!isFirebaseConfigured()) throw new Error("Firebase not configured");
+  await withTimeout(setDoc(doc(db, "config", "global"), {
+    ...clean(settings as object),
+    updatedAt: serverTimestamp(),
+  }, { merge: true }));
 }
 
 // ─── Bank Config ──────────────────────────────────────────────

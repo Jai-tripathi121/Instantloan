@@ -1,7 +1,7 @@
 "use client";
 export const dynamic = "force-dynamic";
 import { useEffect, useState, useMemo } from "react";
-import { getAllApplications, updateApplicationStatus, LoanApplication, BankConfig, getAllBankConfigs, saveBankConfig } from "@/lib/firestore";
+import { getAllApplications, updateApplicationStatus, LoanApplication, BankConfig, GlobalSettings, getAllBankConfigs, saveBankConfig, getGlobalSettings, saveGlobalSettings } from "@/lib/firestore";
 import { DEFAULT_BANKS, BankCriteria } from "@/lib/bank-data";
 import BankLogo from "@/components/BankLogo";
 import {
@@ -60,6 +60,12 @@ export default function AdminPage() {
   const [bankSaving, setBankSaving] = useState(false);
   const [bankSearch, setBankSearch] = useState("");
 
+  // Global settings
+  const [globalSettings, setGlobalSettings] = useState<GlobalSettings>({});
+  const [editingGlobal, setEditingGlobal] = useState(false);
+  const [globalEdit, setGlobalEdit] = useState<GlobalSettings>({});
+  const [savingGlobal, setSavingGlobal] = useState(false);
+
   const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "instantloan@2026";
   const firebaseReady = !!(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== "placeholder");
 
@@ -72,8 +78,18 @@ export default function AdminPage() {
     try { setBankConfigs(await getAllBankConfigs()); } catch { }
   }
 
+  async function loadGlobalSettings() {
+    try { setGlobalSettings(await getGlobalSettings()); } catch { }
+  }
+
+  async function saveGlobal() {
+    setSavingGlobal(true);
+    try { await saveGlobalSettings(globalEdit); setGlobalSettings(globalEdit); setEditingGlobal(false); } catch { }
+    setSavingGlobal(false);
+  }
+
   function handleLogin() {
-    if (password === ADMIN_PASS) { setAuthed(true); load(); loadBankConfigs(); }
+    if (password === ADMIN_PASS) { setAuthed(true); load(); loadBankConfigs(); loadGlobalSettings(); }
     else { setPassword(""); alert("Galat password"); }
   }
 
@@ -91,6 +107,10 @@ export default function AdminPage() {
       ...(cfg.minIncome !== undefined ? { minIncome: cfg.minIncome } : {}),
       ...(cfg.maxFoir !== undefined ? { maxFoir: cfg.maxFoir } : {}),
       ...(cfg.minCibil !== undefined ? { minCibil: cfg.minCibil } : {}),
+      ...(cfg.minCibilSalaried !== undefined ? { minCibilSalaried: cfg.minCibilSalaried } : {}),
+      ...(cfg.minCibilSelfEmployed !== undefined ? { minCibilSelfEmployed: cfg.minCibilSelfEmployed } : {}),
+      ...(cfg.minCibilBusiness !== undefined ? { minCibilBusiness: cfg.minCibilBusiness } : {}),
+      ...(cfg.allowedEmploymentTypes !== undefined ? { allowedEmploymentTypes: cfg.allowedEmploymentTypes } : {}),
       ...(cfg.processingFeePercent !== undefined ? { processingFeePercent: cfg.processingFeePercent } : {}),
       interestRate: cfg.interestRate ? {
         personal: cfg.interestRate.personal ?? bank.interestRate.personal,
@@ -206,7 +226,7 @@ export default function AdminPage() {
           <button onClick={exportCSV} className="flex items-center gap-1.5 text-xs text-gray-600 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg font-bold transition-all">
             <Download size={13} /> Export
           </button>
-          <button onClick={() => { load(); loadBankConfigs(); }} disabled={loading}
+          <button onClick={() => { load(); loadBankConfigs(); loadGlobalSettings(); }} disabled={loading}
             className="flex items-center gap-1.5 text-xs text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition-all">
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
           </button>
@@ -306,6 +326,78 @@ export default function AdminPage() {
 
         {/* ─── BANKS TAB ─── */}
         {tab === "banks" && (
+          <>
+          {/* Global Settings Card */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
+            <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-violet-600" />
+                <h3 className="font-black text-gray-900">Global Eligibility Settings</h3>
+                {globalSettings.platformActive === false && (
+                  <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">Platform Off</span>
+                )}
+              </div>
+              {!editingGlobal ? (
+                <button onClick={() => { setGlobalEdit({ ...globalSettings }); setEditingGlobal(true); }}
+                  className="flex items-center gap-1.5 text-xs text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition-all">
+                  <Edit3 size={12} /> Edit
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={saveGlobal} disabled={savingGlobal}
+                    className="flex items-center gap-1.5 text-xs btn-gradient text-white px-3 py-1.5 rounded-lg font-bold">
+                    <Save size={12} /> {savingGlobal ? "Saving..." : "Save"}
+                  </button>
+                  <button onClick={() => setEditingGlobal(false)}
+                    className="text-xs bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg font-bold">Cancel</button>
+                </div>
+              )}
+            </div>
+            {!editingGlobal ? (
+              <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                {[
+                  ["Global FOIR Cap", globalSettings.globalFoirCap ? `${Math.round(globalSettings.globalFoirCap * 100)}%` : "Default (55%)"],
+                  ["Income Mult. Salaried", globalSettings.incomeMultiplierSalaried != null ? `×${globalSettings.incomeMultiplierSalaried}` : "×1.00"],
+                  ["Income Mult. Self-Emp", globalSettings.incomeMultiplierSelfEmployed != null ? `×${globalSettings.incomeMultiplierSelfEmployed}` : "×0.90"],
+                  ["Income Mult. Business", globalSettings.incomeMultiplierBusiness != null ? `×${globalSettings.incomeMultiplierBusiness}` : "×0.85"],
+                  ["Max Bounces (Strict)", globalSettings.maxBouncesStrict != null ? String(globalSettings.maxBouncesStrict) : "2"],
+                  ["Max Bounces (All)", globalSettings.maxBouncesAll != null ? String(globalSettings.maxBouncesAll) : "4"],
+                  ["Platform Active", globalSettings.platformActive === false ? "❌ Off" : "✅ On"],
+                ].map(([label, val]) => (
+                  <div key={label} className="bg-slate-50 rounded-xl p-3">
+                    <p className="text-xs text-gray-400 mb-0.5 font-bold">{label}</p>
+                    <p className="font-black text-gray-900 text-sm">{val}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
+                  {[
+                    { label: "Global FOIR Cap (%)", val: globalEdit.globalFoirCap ? Math.round(globalEdit.globalFoirCap * 100) : "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, globalFoirCap: v ? Number(v) / 100 : undefined })) },
+                    { label: "Income Mult. Salaried", val: globalEdit.incomeMultiplierSalaried ?? "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, incomeMultiplierSalaried: v ? Number(v) : undefined })) },
+                    { label: "Income Mult. Self-Emp", val: globalEdit.incomeMultiplierSelfEmployed ?? "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, incomeMultiplierSelfEmployed: v ? Number(v) : undefined })) },
+                    { label: "Income Mult. Business", val: globalEdit.incomeMultiplierBusiness ?? "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, incomeMultiplierBusiness: v ? Number(v) : undefined })) },
+                    { label: "Max Bounces (Strict)", val: globalEdit.maxBouncesStrict ?? "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, maxBouncesStrict: v ? Number(v) : undefined })) },
+                    { label: "Max Bounces (All Banks)", val: globalEdit.maxBouncesAll ?? "", onChange: (v: string) => setGlobalEdit((p) => ({ ...p, maxBouncesAll: v ? Number(v) : undefined })) },
+                  ].map(({ label, val, onChange }) => (
+                    <div key={label}>
+                      <label className="text-xs text-gray-500 font-bold block mb-0.5">{label}</label>
+                      <input type="number" step="0.01" value={val as number} onChange={(e) => onChange(e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                    </div>
+                  ))}
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer w-fit">
+                  <input type="checkbox" checked={globalEdit.platformActive !== false}
+                    onChange={(e) => setGlobalEdit((p) => ({ ...p, platformActive: e.target.checked }))}
+                    className="w-4 h-4 accent-violet-600" />
+                  <span className="text-sm font-bold text-gray-700">Platform Active (uncheck to disable new applications)</span>
+                </label>
+              </div>
+            )}
+          </div>
+
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -350,7 +442,7 @@ export default function AdminPage() {
                       {/* Actions */}
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {!isEditing && (
-                          <button onClick={() => { setEditingBank(bank.id); setEditValues({ minIncome: eff.minIncome, maxFoir: eff.maxFoir, processingFeePercent: eff.processingFeePercent, interestRate: { personal: eff.interestRate.personal, home: eff.interestRate.home, auto: eff.interestRate.auto, business: eff.interestRate.business, gold: eff.interestRate.gold, education: eff.interestRate.education, lap: eff.interestRate.lap } }); }}
+                          <button onClick={() => { setEditingBank(bank.id); setEditValues({ minIncome: eff.minIncome, maxFoir: eff.maxFoir, processingFeePercent: eff.processingFeePercent, minCibilSalaried: (eff as BankCriteria & { minCibilSalaried?: number }).minCibilSalaried ?? bank.minCibil, minCibilSelfEmployed: (eff as BankCriteria & { minCibilSelfEmployed?: number }).minCibilSelfEmployed ?? bank.minCibil, minCibilBusiness: (eff as BankCriteria & { minCibilBusiness?: number }).minCibilBusiness ?? bank.minCibil, allowedEmploymentTypes: (eff as BankCriteria & { allowedEmploymentTypes?: string[] }).allowedEmploymentTypes ?? bank.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"], interestRate: { personal: eff.interestRate.personal, home: eff.interestRate.home, auto: eff.interestRate.auto, business: eff.interestRate.business, gold: eff.interestRate.gold, education: eff.interestRate.education, lap: eff.interestRate.lap } }); }}
                             className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-violet-100 transition-all">
                             <Edit3 size={13} className="text-gray-500" />
                           </button>
@@ -383,6 +475,41 @@ export default function AdminPage() {
                             </div>
                           ))}
                         </div>
+                        {/* Employment Types */}
+                        <p className="text-xs font-black text-violet-600 mb-1.5 mt-1">Allowed Employment Types</p>
+                        <div className="flex gap-4 mb-2">
+                          {(["salaried", "self-employed", "business"] as const).map((emp) => (
+                            <label key={emp} className="flex items-center gap-1.5 cursor-pointer">
+                              <input type="checkbox"
+                                checked={(editValues.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"]).includes(emp)}
+                                onChange={(e) => {
+                                  const cur = editValues.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"];
+                                  setEditValues((p) => ({ ...p, allowedEmploymentTypes: e.target.checked ? [...cur, emp] : cur.filter((x) => x !== emp) }));
+                                }}
+                                className="w-3.5 h-3.5 accent-violet-600" />
+                              <span className="text-xs font-bold text-gray-700 capitalize">{emp}</span>
+                            </label>
+                          ))}
+                        </div>
+
+                        {/* Per-employment CIBIL */}
+                        <p className="text-xs font-black text-violet-600 mb-1.5">Min CIBIL by Employment</p>
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                          {([
+                            { label: "Salaried", key: "minCibilSalaried" as const },
+                            { label: "Self-Emp", key: "minCibilSelfEmployed" as const },
+                            { label: "Business", key: "minCibilBusiness" as const },
+                          ]).map(({ label, key }) => (
+                            <div key={key}>
+                              <label className="text-xs text-gray-500 font-bold block mb-0.5">{label}</label>
+                              <input type="number" step="1" value={editValues[key] ?? ""}
+                                onChange={(e) => setEditValues((p) => ({ ...p, [key]: e.target.value ? Number(e.target.value) : undefined }))}
+                                placeholder={String(bank.minCibil ?? 650)}
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                            </div>
+                          ))}
+                        </div>
+
                         <p className="text-xs font-black text-violet-600 mb-1.5 mt-1">Interest Rates (% p.a.)</p>
                         <div className="grid grid-cols-2 gap-2 mb-2">
                           {(["personal", "home", "auto", "business", "gold", "education", "lap"] as const).map((key) => (
@@ -412,6 +539,7 @@ export default function AdminPage() {
               })}
             </div>
           </div>
+          </>
         )}
 
         {/* ─── APPLICATIONS TAB ─── */}

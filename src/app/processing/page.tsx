@@ -2,8 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { matchBanks, getAgeFromDOB } from "@/lib/bank-data";
-import { getAllBankConfigs } from "@/lib/firestore";
+import { matchBanks, getAgeFromDOB, EmploymentType } from "@/lib/bank-data";
+import { getAllBankConfigs, getGlobalSettings } from "@/lib/firestore";
 import { CheckCircle } from "lucide-react";
 
 const STEPS = [
@@ -49,8 +49,18 @@ export default function Processing() {
       const tenure = loanRequirement.tenure ?? 36;
       const cibilScore = userDetails.cibilScore;
 
-      const bankOverrides = await getAllBankConfigs().catch(() => ({}));
-      const offers = matchBanks({ income, foir, age, loanType, requestedAmount: amount, tenure, cibilScore, bankOverrides });
+      const [bankOverrides, globalSettings] = await Promise.all([
+        getAllBankConfigs().catch(() => ({})),
+        getGlobalSettings().catch(() => ({})),
+      ]);
+      const offers = matchBanks({
+        income, foir, age, loanType, requestedAmount: amount, tenure, cibilScore,
+        employmentType: (userDetails.employmentType ?? "salaried") as EmploymentType,
+        bounceCount: statementAnalysis?.bounceCount,
+        salaryCredits: statementAnalysis?.salaryCredits,
+        bankOverrides,
+        globalSettings,
+      });
       setBankOffers(offers);
 
       setTimeout(() => router.push("/results"), 500);
