@@ -39,8 +39,13 @@ export default function Apply() {
     setSubmitting(true);
     try {
       const ref = `${selectedBank?.bankName?.replace(/\s/g, "").toUpperCase()}${Date.now().toString().slice(-8)}`;
+
+      // Document upload (best-effort — never blocks submission)
       setSubmitStep("Documents upload ho rahe hain...");
-      const docUrls = await uploadApplicationDocs(ref, aadhaar, panCard, photo);
+      let docUrls: { aadhaarUrl?: string; panCardUrl?: string; photoUrl?: string } = {};
+      try { docUrls = await uploadApplicationDocs(ref, aadhaar, panCard, photo); } catch { /* proceed without doc URLs */ }
+
+      // Save application to Firestore
       setSubmitStep("Application save ho rahi hai...");
       await saveApplication({
         name: userDetails.name ?? "", mobile: userDetails.mobile ?? "",
@@ -58,15 +63,23 @@ export default function Apply() {
         referenceNo: ref, cibilScore: userDetails.cibilScore,
         foir: statementAnalysis?.foir, ...docUrls,
       });
+
+      // Notify (best-effort)
       setSubmitStep("Confirmation SMS bheja ja raha hai...");
-      await fetch("/api/notify", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobile: userDetails.mobile, name: userDetails.name, bankName: selectedBank?.bankName, amount: selectedBank?.approvedAmount, referenceNo: ref }),
-      });
+      try {
+        await fetch("/api/notify", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mobile: userDetails.mobile, name: userDetails.name, bankName: selectedBank?.bankName, amount: selectedBank?.approvedAmount, referenceNo: ref }),
+        });
+      } catch { /* notification failure should not block confirmation */ }
+
       setApplicationRef(ref);
       router.push("/confirmation");
-    } catch {
-      setSubmitting(false); setSubmitStep(""); alert("Submission fail ho gayi. Dobara try karo.");
+    } catch (err) {
+      console.error("Submit error:", err);
+      setSubmitting(false);
+      setSubmitStep("");
+      alert("Application save nahi hui. Internet check karo aur dobara try karo.");
     }
   }
 

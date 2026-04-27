@@ -1,10 +1,11 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    // Application documents — write from server SDK only
+    // Application documents uploaded by users at submission time
     match /applications/{appId}/{document} {
-      allow read: if false;
-      allow write: if false;
+      allow read:   if false;   // Never expose docs publicly
+      allow write:  if true;    // Users upload Aadhaar/PAN/photo
+      allow delete: if false;
     }
   }
 }
