@@ -130,7 +130,7 @@ export default function Landing() {
               </div>
               <div className="text-right">
                 <div className="bg-emerald-400 text-emerald-900 text-xs font-black px-2.5 py-1 rounded-full mb-1">{t(lang, "priceOff")}</div>
-                <p className="text-white/50 text-xs">One-time · {t(lang, "nonRefundable")}</p>
+                <p className="text-white/50 text-xs">{t(lang, "nonRefundable")}</p>
               </div>
             </div>
           </div>
