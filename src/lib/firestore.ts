@@ -4,6 +4,7 @@ import {
   getDocs, query, orderBy, serverTimestamp, where,
 } from "firebase/firestore";
 import type { EmploymentType } from "./bank-data";
+import type { DecisionAudit } from "./store";
 
 function isFirebaseConfigured() {
   return (
@@ -46,6 +47,8 @@ export interface LoanApplication {
   photoUrl?: string;
   cibilScore?: number;
   foir?: number;
+  decisionAudit?: DecisionAudit;
+  policyVersion?: string;
   createdAt?: unknown;
   updatedAt?: unknown;
 }
@@ -149,6 +152,7 @@ export async function saveGlobalSettings(settings: Omit<GlobalSettings, "updated
   if (!isFirebaseConfigured()) throw new Error("Firebase not configured");
   await withTimeout(setDoc(doc(db, "config", "global"), {
     ...clean(settings as object),
+    configVersion: Date.now().toString(36),
     updatedAt: serverTimestamp(),
   }, { merge: true }));
 }
@@ -169,6 +173,7 @@ export async function saveBankConfig(config: BankConfig) {
   if (!isFirebaseConfigured()) throw new Error("Firebase not configured");
   await withTimeout(setDoc(doc(db, "bankConfig", config.bankId), {
     ...config,
+    configVersion: Date.now().toString(36),
     updatedAt: serverTimestamp(),
   }, { merge: true }));
 }

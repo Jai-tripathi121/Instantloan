@@ -9,7 +9,7 @@ import BankLogo from "@/components/BankLogo";
 
 export default function Apply() {
   const router = useRouter();
-  const { userDetails, selectedBank, loanRequirement, statementAnalysis, setApplicationRef, setLastRoute } = useAppStore();
+  const { userDetails, selectedBank, loanRequirement, statementAnalysis, decisionAudit, setApplicationRef, setLastRoute } = useAppStore();
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [aadhaar, setAadhaar] = useState<File | null>(null);
@@ -61,7 +61,10 @@ export default function Apply() {
         emi: selectedBank?.emi ?? 0,
         address, pincode, paymentId: "paid", status: "submitted",
         referenceNo: ref, cibilScore: userDetails.cibilScore,
-        foir: statementAnalysis?.foir, ...docUrls,
+        foir: statementAnalysis?.foir,
+        policyVersion: decisionAudit?.policyVersion,
+        decisionAudit: decisionAudit ?? undefined,
+        ...docUrls,
       });
 
       // Notify (best-effort)

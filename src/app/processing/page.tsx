@@ -17,7 +17,7 @@ const STEPS = [
 
 export default function Processing() {
   const router = useRouter();
-  const { statementAnalysis, userDetails, loanRequirement, setBankOffers } = useAppStore();
+  const { statementAnalysis, userDetails, loanRequirement, setBankOffers, setDecisionAudit } = useAppStore();
   const [currentStep, setCurrentStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -53,7 +53,7 @@ export default function Processing() {
         getAllBankConfigs().catch(() => ({})),
         getGlobalSettings().catch(() => ({})),
       ]);
-      const offers = matchBanks({
+      const { offers, audit } = matchBanks({
         income, foir, age, loanType, requestedAmount: amount, tenure, cibilScore,
         employmentType: (userDetails.employmentType ?? "salaried") as EmploymentType,
         bounceCount: statementAnalysis?.bounceCount,
@@ -62,6 +62,7 @@ export default function Processing() {
         globalSettings,
       });
       setBankOffers(offers);
+      setDecisionAudit(audit);
 
       setTimeout(() => router.push("/results"), 500);
     }, elapsed));

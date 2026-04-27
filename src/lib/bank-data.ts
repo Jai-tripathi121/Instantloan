@@ -1,4 +1,4 @@
-import { BankOffer, LoanType } from "./store";
+import type { BankOffer, LoanType, RiskGrade, RejectedBank, DecisionAudit } from "./store";
 
 const LOGO_BASE = "https://raw.githubusercontent.com/praveenpuglia/indian-banks/master/assets/logos";
 
@@ -39,6 +39,47 @@ export interface GlobalSettings {
   maxBouncesStrict?: number;           // Bounces ≥ this → reject from strict private banks (default 2)
   maxBouncesAll?: number;              // Bounces ≥ this → reject from ALL banks (default 4)
   platformActive?: boolean;
+}
+
+// ─── Policy version stamp (bump when rules change) ────────────
+export const POLICY_VERSION = "v2026.04.27";
+
+// ─── Risk grade from applicant profile ────────────────────────
+export function computeRiskGrade(
+  cibil: number | undefined,
+  foir: number,
+  bounces: number,
+): RiskGrade {
+  if (cibil === undefined) {
+    if (foir <= 0.45 && bounces === 0) return "B";
+    if (foir <= 0.55 && bounces <= 1) return "C";
+    return "D";
+  }
+  if (cibil >= 750 && foir <= 0.40 && bounces === 0) return "A";
+  if (cibil >= 700 && foir <= 0.50 && bounces <= 1) return "B";
+  if (cibil >= 650 && foir <= 0.55 && bounces <= 2) return "C";
+  return "D";
+}
+
+// ─── Per-bank approval probability ────────────────────────────
+export function computeApprovalProbability(
+  cibil: number | undefined,
+  bankMinCibil: number,
+  foir: number,
+  bankMaxFoir: number,
+  bounces: number,
+): number {
+  // How far above the bank's CIBIL floor (0–1 over a 100-point range)
+  const cibilMargin = cibil != null
+    ? Math.min(Math.max((cibil - bankMinCibil) / 100, 0), 1)
+    : 0.30;  // unknown score → conservative baseline
+  // How far below the bank's FOIR cap (0–1 over a 30-point band)
+  const foirMargin = Math.min(Math.max((bankMaxFoir - foir) / 0.30, 0), 1);
+  // Bounces reduce confidence by 15% each, capped at 40%
+  const bouncePenalty = Math.min(bounces * 0.15, 0.40);
+  return Math.max(5, Math.min(99, Math.round(
+    (cibilMargin * 0.55 + foirMargin * 0.40 - bouncePenalty) * 100,
+  )));
 }
 
 // ─── CIBIL score → interest rate adjustment ───────────────────
@@ -444,7 +485,7 @@ export function matchBanks(params: {
   salaryCredits?: number;
   bankOverrides?: Record<string, BankOverride>;
   globalSettings?: GlobalSettings;
-}): BankOffer[] {
+}): { offers: BankOffer[]; audit: DecisionAudit } {
   const {
     income, foir, age, loanType, requestedAmount, tenure,
     cibilScore, employmentType = "salaried",
@@ -452,7 +493,7 @@ export function matchBanks(params: {
     bankOverrides = {}, globalSettings = {},
   } = params;
 
-  // ── Global income multiplier (admin-configurable) ──────────────
+  // ── Global income multiplier ───────────────────────────────────
   const incomeMult =
     employmentType === "self-employed" ? (globalSettings.incomeMultiplierSelfEmployed ?? 0.90) :
     employmentType === "business"      ? (globalSettings.incomeMultiplierBusiness      ?? 0.85) :
@@ -463,15 +504,35 @@ export function matchBanks(params: {
   const maxBouncesStrict = globalSettings.maxBouncesStrict ?? 2;
   const maxBouncesAll    = globalSettings.maxBouncesAll    ?? 4;
 
-  // Hard reject if bounces exceed global ceiling
-  if (bounceCount >= maxBouncesAll) return [];
+  // ── Risk grade (computed once for entire profile) ──────────────
+  const riskGrade = computeRiskGrade(cibilScore, foir, bounceCount);
+
+  // ── Shared audit state ─────────────────────────────────────────
+  const rejectedBanks: RejectedBank[] = [];
+  const inputSnapshot: DecisionAudit["inputSnapshot"] = {
+    income, effectiveIncome, foir, cibilScore, employmentType,
+    bounceCount, loanType, requestedAmount,
+  };
+
+  function buildAudit(eligibleCount: number): DecisionAudit {
+    return { policyVersion: POLICY_VERSION, timestamp: Date.now(), inputSnapshot, riskGrade, rejectedBanks, eligibleCount };
+  }
+
+  // Hard reject: bounces exceed global ceiling → all banks out
+  if (bounceCount >= maxBouncesAll) {
+    DEFAULT_BANKS.forEach(b => rejectedBanks.push({ bankId: b.id, bankName: b.bankName, reason: "bounces_exceeded_global" }));
+    return { offers: [], audit: buildAudit(0) };
+  }
 
   const offers: BankOffer[] = [];
 
   for (const bank of DEFAULT_BANKS) {
     const ov = bankOverrides[bank.id] ?? {};
 
-    // Merge overrides
+    const reject = (reason: RejectedBank["reason"]) =>
+      rejectedBanks.push({ bankId: bank.id, bankName: bank.bankName, reason });
+
+    // ── Merge admin overrides ──────────────────────────────────────
     const b: BankCriteria = {
       ...bank,
       ...(ov.minIncome            !== undefined ? { minIncome: ov.minIncome }                       : {}),
@@ -495,79 +556,66 @@ export function matchBanks(params: {
       active: ov.active ?? bank.active,
     };
 
-    // ── Hard filters ──────────────────────────────────────────────
+    // ── Hard filters (each records its rejection reason) ──────────
+    if (!b.active)                   { reject("inactive");               continue; }
+    if (!b.loanTypes.includes(loanType)) { reject("loan_type_not_offered"); continue; }
+    if (effectiveIncome < b.minIncome)   { reject("income_below_min");       continue; }
+    if (age < b.minAge || age > b.maxAge){ reject("age_out_of_range");        continue; }
 
-    if (!b.active) continue;
-    if (!b.loanTypes.includes(loanType)) continue;
-    if (effectiveIncome < b.minIncome) continue;
-    if (age < b.minAge || age > b.maxAge) continue;
-
-    // Employment type check
     const allowedEmpTypes = b.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"];
-    if (!allowedEmpTypes.includes(employmentType)) continue;
+    if (!allowedEmpTypes.includes(employmentType)) { reject("employment_type_not_allowed"); continue; }
 
-    // Per-employment-type CIBIL check
-    if (cibilScore) {
-      const minCibil =
-        employmentType === "salaried"     ? (b.minCibilSalaried     ?? b.minCibil) :
-        employmentType === "self-employed" ? (b.minCibilSelfEmployed ?? b.minCibil + 30) :
-                                             (b.minCibilBusiness     ?? b.minCibil + 30);
-      if (cibilScore < minCibil) continue;
+    const activeMinCibil =
+      employmentType === "salaried"      ? (b.minCibilSalaried     ?? b.minCibil) :
+      employmentType === "self-employed" ? (b.minCibilSelfEmployed ?? b.minCibil + 30) :
+                                           (b.minCibilBusiness     ?? b.minCibil + 30);
+    if (cibilScore && cibilScore < activeMinCibil) { reject("cibil_below_min"); continue; }
+
+    if (bounceCount >= maxBouncesStrict && b.sector === "private" && b.minCibil >= 680) {
+      reject("bounces_exceeded_strict"); continue;
+    }
+    if (employmentType === "salaried" && salaryCredits !== undefined && salaryCredits < 3 && b.minCibil >= 700) {
+      reject("salary_credits_insufficient"); continue;
     }
 
-    // Bounce check — strict private banks reject on 2+ bounces
-    if (bounceCount >= maxBouncesStrict && b.sector === "private" && b.minCibil >= 680) continue;
-
-    // Salary credits check (< 3 credits in 6 months = unstable income for salaried)
-    if (employmentType === "salaried" && salaryCredits !== undefined && salaryCredits < 3 && b.minCibil >= 700) continue;
-
-    // ── Approved amount calculation ───────────────────────────────
-
+    // ── Amount calculation ─────────────────────────────────────────
     const foirCap = Math.min(b.maxFoir, globalSettings.globalFoirCap ?? b.maxFoir);
-    if (foir >= foirCap) continue; // already at or above FOIR cap
+    if (foir >= foirCap) { reject("foir_exceeded"); continue; }
 
     let availableAfterFoir = Math.floor(effectiveIncome * (foirCap - foir) * tenure);
-
-    // Bounce penalty — reduce approval by 20% per bounce (up to 40%)
     if (bounceCount > 0) {
-      const penalty = Math.min(bounceCount * 0.20, 0.40);
-      availableAfterFoir = Math.floor(availableAfterFoir * (1 - penalty));
+      availableAfterFoir = Math.floor(availableAfterFoir * (1 - Math.min(bounceCount * 0.20, 0.40)));
     }
 
-    const maxForBank = b.maxLoanAmount[loanType];
-    const approvedAmount = Math.min(requestedAmount, maxForBank, availableAfterFoir);
-    if (approvedAmount < b.minLoanAmount) continue;
+    const approvedAmount = Math.min(requestedAmount, b.maxLoanAmount[loanType], availableAfterFoir);
+    if (approvedAmount < b.minLoanAmount) { reject("amount_below_min"); continue; }
 
-    // ── Interest rate calculation ─────────────────────────────────
-
+    // ── Interest rate ──────────────────────────────────────────────
     let rate = b.interestRate[loanType];
-    rate += cibilRateAdj(cibilScore);          // CIBIL tier adjustment
-    rate += empRateAdj(employmentType);        // Employment type surcharge
-    rate = Math.max(rate, b.interestRate[loanType] - 1.5); // floor: never more than 1.5% below base
-    rate = Math.round(rate * 100) / 100;       // round to 2 decimals
+    rate += cibilRateAdj(cibilScore);
+    rate += empRateAdj(employmentType);
+    rate = Math.max(rate, b.interestRate[loanType] - 1.5);
+    rate = Math.round(rate * 100) / 100;
 
     const emi = calcEMI(approvedAmount, rate, tenure);
     const processingFee = Math.round((approvedAmount * b.processingFeePercent) / 100);
+    const approvalProbability = computeApprovalProbability(cibilScore, activeMinCibil, foir, foirCap, bounceCount);
 
     offers.push({
-      bankName:       b.bankName,
-      logo:           b.logo,
-      logoUrl:        `${LOGO_BASE}/${b.logoSlug}/symbol.svg`,
-      approvedAmount,
-      interestRate:   rate,
-      tenure,
-      emi,
-      processingFee,
-      color:          b.color,
+      bankName: b.bankName, logo: b.logo,
+      logoUrl: `${LOGO_BASE}/${b.logoSlug}/symbol.svg`,
+      approvedAmount, interestRate: rate, tenure, emi, processingFee, color: b.color,
+      riskGrade, approvalProbability,
     });
   }
 
-  // Sort: best rate first, tie-break by highest approved amount
-  return offers.sort((a, b) =>
+  const sortedOffers = offers.sort((a, b) =>
     a.interestRate !== b.interestRate
       ? a.interestRate - b.interestRate
-      : b.approvedAmount - a.approvedAmount
+      : b.approvedAmount - a.approvedAmount,
   );
+
+  return { offers: sortedOffers, audit: buildAudit(sortedOffers.length) };
 }
 
 export const BANKS = DEFAULT_BANKS;

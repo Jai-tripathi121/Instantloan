@@ -3,7 +3,24 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import { useAppStore, BankOffer } from "@/lib/store";
 import { t } from "@/lib/i18n";
-import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles } from "lucide-react";
+import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck } from "lucide-react";
+import type { RiskGrade } from "@/lib/store";
+
+const GRADE_CONFIG: Record<RiskGrade, { label: string; bg: string; text: string; bar: string }> = {
+  A: { label: "Grade A", bg: "bg-emerald-100", text: "text-emerald-700", bar: "bg-emerald-500" },
+  B: { label: "Grade B", bg: "bg-blue-100",    text: "text-blue-700",    bar: "bg-blue-500" },
+  C: { label: "Grade C", bg: "bg-amber-100",   text: "text-amber-700",   bar: "bg-amber-400" },
+  D: { label: "Grade D", bg: "bg-red-100",     text: "text-red-700",     bar: "bg-red-400" },
+};
+
+function RiskGradeBadge({ grade }: { grade: RiskGrade }) {
+  const cfg = GRADE_CONFIG[grade];
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs font-black px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
+      <ShieldCheck size={10} /> {cfg.label}
+    </span>
+  );
+}
 import BankLogo from "@/components/BankLogo";
 
 const LOGO_BASE = "https://raw.githubusercontent.com/praveenpuglia/indian-banks/master/assets/logos";
@@ -25,8 +42,11 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
           <BankLogo logoUrl={offer.logoUrl} logo={offer.logo} color={offer.color} size={44} />
           <div>
             <p className="font-black text-gray-900">{offer.bankName}</p>
-            <div className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
-              <CheckCircle size={11} /> Pre-Approved
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
+                <CheckCircle size={11} /> Pre-Approved
+              </div>
+              {offer.riskGrade && <RiskGradeBadge grade={offer.riskGrade} />}
             </div>
           </div>
         </div>
@@ -36,6 +56,28 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
           </div>
         )}
       </div>
+
+      {/* Approval probability bar */}
+      {offer.approvalProbability !== undefined && (
+        <div className="px-4 py-2 bg-white border-t border-gray-50">
+          <div className="flex justify-between text-xs mb-1.5">
+            <span className="font-bold text-gray-500">Approval Probability</span>
+            <span className={`font-black ${offer.approvalProbability >= 70 ? "text-emerald-600" : offer.approvalProbability >= 40 ? "text-amber-600" : "text-red-500"}`}>
+              {offer.approvalProbability}%
+            </span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${
+                offer.approvalProbability >= 70 ? GRADE_CONFIG.A.bar :
+                offer.approvalProbability >= 50 ? GRADE_CONFIG.B.bar :
+                offer.approvalProbability >= 30 ? GRADE_CONFIG.C.bar : GRADE_CONFIG.D.bar
+              }`}
+              style={{ width: `${offer.approvalProbability}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Details */}
       <div className="p-4 pt-3 bg-white">

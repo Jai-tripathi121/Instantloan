@@ -1,9 +1,17 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppStore, LoanType } from "@/lib/store";
 import { t } from "@/lib/i18n";
-import { ArrowLeft, Wallet, Home, Car, Building2, Tag, CheckCircle, ChevronRight, IndianRupee, GraduationCap, Landmark, Coins } from "lucide-react";
+import { matchBanks, getAgeFromDOB, computeRiskGrade, POLICY_VERSION } from "@/lib/bank-data";
+import { ArrowLeft, Wallet, Home, Car, Building2, Tag, CheckCircle, ChevronRight, IndianRupee, GraduationCap, Landmark, Coins, ShieldCheck } from "lucide-react";
+
+const GRADE_COLORS: Record<string, string> = {
+  A: "text-emerald-700 bg-emerald-100",
+  B: "text-blue-700 bg-blue-100",
+  C: "text-amber-700 bg-amber-100",
+  D: "text-red-700 bg-red-100",
+};
 
 const LOAN_TYPES: { type: LoanType; label: string; sub: string; icon: typeof Wallet; color: string; bg: string }[] = [
   { type: "personal",  label: "Personal",   sub: "Bina collateral",      icon: Wallet,       color: "text-violet-600", bg: "bg-violet-100" },
@@ -30,7 +38,7 @@ const PROMOS: Record<string, number> = { FIRST99: 49, SAVE50: 49, LOAN50: 49, IN
 
 export default function LoanRequirement() {
   const router = useRouter();
-  const { setLoanRequirement, setLastRoute, loanRequirement, lang } = useAppStore();
+  const { setLoanRequirement, setLastRoute, loanRequirement, userDetails, lang } = useAppStore();
 
   const [loanType, setLoanType] = useState<LoanType>(loanRequirement.loanType ?? "personal");
   const [amount, setAmount] = useState(loanRequirement.amount ?? 500000);
@@ -39,6 +47,31 @@ export default function LoanRequirement() {
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState("");
   const [price, setPrice] = useState(99);
+
+  // ── Pre-approval snapshot (computed from profile, no server call) ──
+  const preApproval = useMemo(() => {
+    const inc = userDetails.monthlyIncome;
+    if (!inc || inc < 10000) return null;
+    const age = userDetails.dob ? getAgeFromDOB(userDetails.dob) : 30;
+    const empType = userDetails.employmentType ?? "salaried";
+    const cibil = userDetails.cibilScore;
+    const grade = computeRiskGrade(cibil, 0.20, 0);
+    const { offers } = matchBanks({
+      income: inc, foir: 0.20, age,
+      loanType: "personal",
+      requestedAmount: inc * 36,  // generous ceiling for preview
+      tenure: 36,
+      cibilScore: cibil,
+      employmentType: empType,
+    });
+    if (!offers.length) return null;
+    return {
+      count: offers.length,
+      maxAmount: Math.max(...offers.map((o) => o.approvedAmount)),
+      bestRate: offers[0].interestRate,
+      grade,
+    };
+  }, [userDetails.monthlyIncome, userDetails.cibilScore, userDetails.employmentType, userDetails.dob]);
 
   useEffect(() => { setLastRoute("/loan-requirement"); }, []);
 
@@ -77,10 +110,32 @@ export default function LoanRequirement() {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-4">
         <h2 className="text-2xl font-black text-gray-900">{t(lang, "loanTitle")}</h2>
         <p className="text-gray-500 text-sm mt-1">{t(lang, "loanSub")}</p>
       </div>
+
+      {preApproval && (
+        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <CheckCircle size={20} className="text-emerald-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-emerald-800">
+              Pre-Approved Profile ✦ {preApproval.count} banks eligible
+            </p>
+            <p className="text-xs text-emerald-600 mt-0.5">
+              Up to ₹{preApproval.maxAmount >= 100000
+                ? `${(preApproval.maxAmount / 100000).toFixed(1)}L`
+                : preApproval.maxAmount.toLocaleString("en-IN")
+              } · from {preApproval.bestRate}% p.a.
+            </p>
+          </div>
+          <span className={`flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full flex-shrink-0 ${GRADE_COLORS[preApproval.grade]}`}>
+            <ShieldCheck size={10} /> {preApproval.grade}
+          </span>
+        </div>
+      )}
 
       <div className="space-y-6 flex-1">
         {/* Loan Type */}

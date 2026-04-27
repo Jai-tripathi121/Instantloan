@@ -4,6 +4,44 @@ import type { LangCode } from "./i18n";
 
 export type EmploymentType = "salaried" | "self-employed" | "business";
 export type LoanType = "personal" | "home" | "auto" | "business" | "gold" | "education" | "lap";
+export type RiskGrade = "A" | "B" | "C" | "D";
+
+export type RejectionReason =
+  | "inactive"
+  | "loan_type_not_offered"
+  | "income_below_min"
+  | "age_out_of_range"
+  | "employment_type_not_allowed"
+  | "cibil_below_min"
+  | "bounces_exceeded_global"
+  | "bounces_exceeded_strict"
+  | "salary_credits_insufficient"
+  | "foir_exceeded"
+  | "amount_below_min";
+
+export interface RejectedBank {
+  bankId: string;
+  bankName: string;
+  reason: RejectionReason;
+}
+
+export interface DecisionAudit {
+  policyVersion: string;
+  timestamp: number;
+  inputSnapshot: {
+    income: number;
+    effectiveIncome: number;
+    foir: number;
+    cibilScore?: number;
+    employmentType: string;
+    bounceCount: number;
+    loanType: string;
+    requestedAmount: number;
+  };
+  riskGrade: RiskGrade;
+  rejectedBanks: RejectedBank[];
+  eligibleCount: number;
+}
 
 export interface UserDetails {
   name: string;
@@ -41,6 +79,8 @@ export interface BankOffer {
   emi: number;
   processingFee: number;
   color: string;
+  riskGrade?: RiskGrade;
+  approvalProbability?: number;
 }
 
 export interface AppState {
@@ -50,6 +90,7 @@ export interface AppState {
   statementAnalysis: StatementAnalysis | null;
   bankOffers: BankOffer[];
   selectedBank: BankOffer | null;
+  decisionAudit: DecisionAudit | null;
   paymentDone: boolean;
   applicationRef: string;
   otpVerified: boolean;
@@ -62,6 +103,7 @@ export interface AppState {
   setStatementAnalysis: (analysis: StatementAnalysis) => void;
   setBankOffers: (offers: BankOffer[]) => void;
   setSelectedBank: (bank: BankOffer) => void;
+  setDecisionAudit: (audit: DecisionAudit | null) => void;
   setPaymentDone: (done: boolean) => void;
   setApplicationRef: (ref: string) => void;
   setOtpVerified: (v: boolean) => void;
@@ -77,6 +119,7 @@ const initialState = {
   statementAnalysis: null,
   bankOffers: [],
   selectedBank: null,
+  decisionAudit: null,
   paymentDone: false,
   applicationRef: "",
   otpVerified: false,
@@ -97,6 +140,7 @@ export const useAppStore = create<AppState>()(
       setStatementAnalysis: (analysis) => set({ statementAnalysis: analysis }),
       setBankOffers: (offers) => set({ bankOffers: offers }),
       setSelectedBank: (bank) => set({ selectedBank: bank }),
+      setDecisionAudit: (audit) => set({ decisionAudit: audit }),
       setPaymentDone: (done) => set({ paymentDone: done }),
       setApplicationRef: (ref) => set({ applicationRef: ref }),
       setOtpVerified: (v) => set({ otpVerified: v }),
