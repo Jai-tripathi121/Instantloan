@@ -2,11 +2,12 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { t } from "@/lib/i18n";
 import { User, Phone, CreditCard, Calendar, Briefcase, IndianRupee, CheckCircle, Send, ArrowLeft, ChevronRight } from "lucide-react";
 
 export default function Details() {
   const router = useRouter();
-  const { setUserDetails, setOtpVerified, setLastRoute, userDetails, otpVerified } = useAppStore();
+  const { setUserDetails, setOtpVerified, setLastRoute, userDetails, otpVerified, lang } = useAppStore();
 
   const [name, setName] = useState(userDetails.name ?? "");
   const [mobile, setMobile] = useState(userDetails.mobile ?? "");
@@ -73,7 +74,7 @@ export default function Details() {
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 1 of 4</span><span>Aapki Details</span></div>
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 1 of 4</span><span>{t(lang, "detailsTitle")}</span></div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-1/4 transition-all" />
           </div>
@@ -81,15 +82,15 @@ export default function Details() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-2xl font-black text-gray-900">Aapke Baare Mein Batao</h2>
-        <p className="text-gray-500 text-sm mt-1">Sirf bank eligibility match ke liye use hoga</p>
+        <h2 className="text-2xl font-black text-gray-900">{t(lang, "detailsTitle")}</h2>
+        <p className="text-gray-500 text-sm mt-1">{t(lang, "detailsSub")}</p>
       </div>
 
       <div className="space-y-4 flex-1">
         {/* Name */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <User size={14} className="text-violet-500" /> Poora Naam
+            <User size={14} className="text-violet-500" /> {t(lang, "labelName")}
           </label>
           <input type="text" placeholder="PAN card ke anusaar" value={name} onChange={(e) => setName(e.target.value)} className={inp("name")} />
           {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
@@ -98,7 +99,7 @@ export default function Details() {
         {/* Mobile + OTP */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <Phone size={14} className="text-violet-500" /> Mobile Number
+            <Phone size={14} className="text-violet-500" /> {t(lang, "labelMobile")}
           </label>
           <div className="flex gap-2">
             <input type="tel" inputMode="numeric" placeholder="10-digit mobile" value={mobile}
@@ -107,12 +108,12 @@ export default function Details() {
             {!verified ? (
               <button onClick={sendOtp} disabled={otpLoading}
                 className="px-4 py-2 btn-gradient text-white rounded-xl text-sm font-bold whitespace-nowrap disabled:opacity-60 flex items-center gap-1.5">
-                <Send size={13} /> {otpLoading ? "..." : otpSent ? "Resend" : "OTP Lo"}
+                <Send size={13} /> {otpLoading ? "..." : otpSent ? "Resend" : t(lang, "btnSendOtp")}
               </button>
             ) : (
               <div className="flex items-center px-3 gap-1 bg-emerald-50 rounded-xl border-2 border-emerald-200">
                 <CheckCircle size={18} className="text-emerald-500 fill-emerald-100" />
-                <span className="text-xs font-bold text-emerald-600">Verified</span>
+                <span className="text-xs font-bold text-emerald-600">{t(lang, "verified")}</span>
               </div>
             )}
           </div>
@@ -126,7 +127,7 @@ export default function Details() {
                   className="flex-1 border-2 border-violet-200 rounded-xl px-4 py-2.5 text-base focus:outline-none focus:border-violet-500 bg-white" />
                 <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
                   className="px-4 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold disabled:opacity-60">
-                  {otpLoading ? "..." : "Verify"}
+                  {otpLoading ? "..." : t(lang, "btnVerify")}
                 </button>
               </div>
               {otpError && <p className="text-xs text-red-500 mt-1">{otpError}</p>}
@@ -139,7 +140,7 @@ export default function Details() {
         {/* PAN */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <CreditCard size={14} className="text-violet-500" /> PAN Number
+            <CreditCard size={14} className="text-violet-500" /> {t(lang, "labelPan")}
           </label>
           <input type="text" placeholder="ABCDE1234F" value={pan} onChange={(e) => setPan(e.target.value.toUpperCase())} className={inp("pan")} />
           {errors.pan && <p className="text-xs text-red-500 mt-1">{errors.pan}</p>}
@@ -148,7 +149,7 @@ export default function Details() {
         {/* DOB */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <Calendar size={14} className="text-violet-500" /> Date of Birth
+            <Calendar size={14} className="text-violet-500" /> {t(lang, "labelDob")}
           </label>
           <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className={inp("dob")} />
           {errors.dob && <p className="text-xs text-red-500 mt-1">{errors.dob}</p>}
@@ -157,13 +158,13 @@ export default function Details() {
         {/* Employment */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-2">
-            <Briefcase size={14} className="text-violet-500" /> Employment Type
+            <Briefcase size={14} className="text-violet-500" /> {t(lang, "labelEmpType")}
           </label>
           <div className="grid grid-cols-3 gap-2">
-            {(["salaried", "self-employed", "business"] as const).map((t) => (
-              <button key={t} onClick={() => setEmploymentType(t)}
-                className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${employmentType === t ? "border-violet-500 bg-violet-50 text-violet-700" : "border-gray-100 text-gray-600"}`}>
-                {t === "salaried" ? "Salaried" : t === "self-employed" ? "Self Emp." : "Business"}
+            {(["salaried", "self-employed", "business"] as const).map((et) => (
+              <button key={et} onClick={() => setEmploymentType(et)}
+                className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${employmentType === et ? "border-violet-500 bg-violet-50 text-violet-700" : "border-gray-100 text-gray-600"}`}>
+                {et === "salaried" ? "Salaried" : et === "self-employed" ? "Self Emp." : "Business"}
               </button>
             ))}
           </div>
@@ -172,7 +173,7 @@ export default function Details() {
         {/* Income */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <IndianRupee size={14} className="text-violet-500" /> Monthly Income (₹)
+            <IndianRupee size={14} className="text-violet-500" /> {t(lang, "labelIncome")}
           </label>
           <input type="number" inputMode="numeric" placeholder="jaise 50000" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} className={inp("monthlyIncome")} />
           {errors.monthlyIncome && <p className="text-xs text-red-500 mt-1">{errors.monthlyIncome}</p>}
@@ -181,7 +182,7 @@ export default function Details() {
         {/* CIBIL */}
         <div>
           <label className="text-sm font-bold text-gray-700 mb-1.5 block">
-            CIBIL Score <span className="text-gray-400 font-normal">(optional)</span>
+            {t(lang, "labelCibil")} <span className="text-gray-400 font-normal">(optional)</span>
           </label>
           <input type="number" inputMode="numeric" placeholder="300–900, jaise 750" value={cibilScore}
             onChange={(e) => setCibilScore(e.target.value)}
@@ -192,7 +193,7 @@ export default function Details() {
 
       <button onClick={handleNext}
         className="mt-6 w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
-        Aage Badho <ChevronRight size={22} />
+        {t(lang, "btnNext")} <ChevronRight size={22} />
       </button>
     </div>
   );

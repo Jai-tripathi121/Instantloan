@@ -3,6 +3,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { t } from "@/lib/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Shield, Zap, Smartphone, Lock, ChevronRight, Search, RotateCcw, Sparkles, BadgeCheck, Clock3 } from "lucide-react";
 
 const LOGO_BASE = "https://raw.githubusercontent.com/praveenpuglia/indian-banks/master/assets/logos";
@@ -15,11 +17,11 @@ const BANKS_SCROLL = [
   { name: "FED",   slug: "fdrl", color: "#0F766E" }, { name: "RBL",   slug: "ratn", color: "#059669" },
 ];
 
-const FEATURES = [
-  { icon: Shield,      label: "Zero CIBIL Impact",  desc: "Soft check only — score safe",    grad: "from-violet-500 to-violet-600" },
-  { icon: Zap,         label: "Result in 60 Sec",   desc: "AI eligibility turant milti hai", grad: "from-amber-400 to-orange-500"  },
-  { icon: Smartphone,  label: "No App Chahiye",      desc: "Seedha browser se karo",          grad: "from-emerald-500 to-teal-500"  },
-  { icon: Lock,        label: "100% Private",        desc: "Data sirf aapke phone pe",        grad: "from-pink-500 to-rose-500"     },
+const FEATURE_ICONS = [
+  { icon: Shield, grad: "from-violet-500 to-violet-600", lk: "feat1" as const, dk: "feat1d" as const },
+  { icon: Zap,    grad: "from-amber-400 to-orange-500",  lk: "feat2" as const, dk: "feat2d" as const },
+  { icon: Smartphone, grad: "from-emerald-500 to-teal-500", lk: "feat3" as const, dk: "feat3d" as const },
+  { icon: Lock,   grad: "from-pink-500 to-rose-500",     lk: "feat4" as const, dk: "feat4d" as const },
 ];
 
 const RESUME_ROUTES: Record<number, string> = {
@@ -28,7 +30,7 @@ const RESUME_ROUTES: Record<number, string> = {
 
 export default function Landing() {
   const router = useRouter();
-  const { userDetails, otpVerified, lastRoute, loanRequirement, step, resetSession } = useAppStore();
+  const { userDetails, otpVerified, lastRoute, loanRequirement, step, resetSession, lang } = useAppStore();
   const [mounted, setMounted] = useState(false);
   useEffect(() => { setMounted(true); }, []);
 
@@ -52,11 +54,14 @@ export default function Landing() {
                 <p className="text-white/50 text-xs">Loan Eligibility Checker</p>
               </div>
             </div>
-            <Link href="/status"
-              className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white/90 border border-white/20"
-              style={{ background: "rgba(255,255,255,0.1)" }}>
-              <Search size={13} /> Track
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+              <Link href="/status"
+                className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white/90 border border-white/20"
+                style={{ background: "rgba(255,255,255,0.1)" }}>
+                <Search size={13} /> Track
+              </Link>
+            </div>
           </div>
 
           {/* Resume Banner */}
@@ -64,7 +69,7 @@ export default function Landing() {
             <div className="mb-6 rounded-2xl p-4 border border-white/20" style={{ background: "rgba(255,255,255,0.1)" }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-black">Welcome back, {userDetails.name?.split(" ")[0] || "User"}! 👋</p>
+                  <p className="text-sm font-black">{t(lang, "welcomeBack")}, {userDetails.name?.split(" ")[0] || "User"}! 👋</p>
                   <p className="text-xs text-white/60 mt-0.5">
                     {loanRequirement.loanType ? `${loanRequirement.loanType} loan check adhoori hai` : "Aapka session saved hai"}
                   </p>
@@ -75,7 +80,7 @@ export default function Landing() {
               </div>
               <button onClick={() => router.push(resumeRoute)}
                 className="mt-3 w-full bg-white text-violet-700 font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5">
-                <ChevronRight size={15} /> Wahan se shuru karo jahan chhoda tha
+                <ChevronRight size={15} /> {t(lang, "ctaResume")}
               </button>
             </div>
           )}
@@ -84,16 +89,16 @@ export default function Landing() {
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full mb-5 border border-white/20"
             style={{ background: "rgba(255,255,255,0.1)" }}>
             <Sparkles size={11} className="text-yellow-400" />
-            33 Banks · AI Powered · Zero CIBIL Impact
+            {t(lang, "heroBadge")}
           </div>
 
           {/* Headline */}
           <h1 className="text-[2.6rem] font-black leading-[1.1] mb-3">
-            Loan Milega?<br />
-            <span className="gradient-text">2 min mein pata karo!</span>
+            {t(lang, "heroHeading").split("\n")[0]}<br />
+            <span className="gradient-text">{t(lang, "heroHeading").split("\n")[1] ?? ""}</span>
           </h1>
           <p className="text-white/65 text-sm leading-relaxed mb-6">
-            AI aapka bank statement locally analyse karta hai. 33 banks mein match hoti hai. Aapka koi data server pe nahi jata.
+            {t(lang, "heroSub")}
           </p>
 
           {/* Bank logos */}
@@ -117,45 +122,45 @@ export default function Landing() {
           <div className="rounded-2xl p-4 mb-5 border border-white/20" style={{ background: "rgba(255,255,255,0.1)" }}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-white/60 text-xs font-medium mb-1">AI Eligibility Report</p>
+                <p className="text-white/60 text-xs font-medium mb-1">{t(lang, "priceLabel")}</p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-4xl font-black">₹99</span>
                   <span className="text-white/35 text-base line-through">₹499</span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="bg-emerald-400 text-emerald-900 text-xs font-black px-2.5 py-1 rounded-full mb-1">80% OFF</div>
-                <p className="text-white/50 text-xs">One-time · Non-refundable</p>
+                <div className="bg-emerald-400 text-emerald-900 text-xs font-black px-2.5 py-1 rounded-full mb-1">{t(lang, "priceOff")}</div>
+                <p className="text-white/50 text-xs">One-time · {t(lang, "nonRefundable")}</p>
               </div>
             </div>
           </div>
 
           {/* CTA */}
-          <button onClick={() => router.push(hasSession ? "/details" : "/details")}
+          <button onClick={() => router.push("/details")}
             className="btn-gradient w-full text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-4">
-            {hasSession ? "Naya Check Karo" : "Abhi Check Karo"} <ChevronRight size={22} />
+            {t(lang, "ctaCheck")} <ChevronRight size={22} />
           </button>
 
           {/* Trust row */}
           <div className="flex items-center justify-center gap-5 text-xs text-white/50">
-            <span className="flex items-center gap-1"><BadgeCheck size={12} className="text-emerald-400" /> Secure</span>
-            <span className="flex items-center gap-1"><Clock3 size={12} className="text-blue-300" /> 2 min result</span>
-            <span className="flex items-center gap-1"><Smartphone size={12} className="text-violet-300" /> No app</span>
+            <span className="flex items-center gap-1"><BadgeCheck size={12} className="text-emerald-400" /> {t(lang, "trustSecure")}</span>
+            <span className="flex items-center gap-1"><Clock3 size={12} className="text-blue-300" /> {t(lang, "trustSpeed")}</span>
+            <span className="flex items-center gap-1"><Smartphone size={12} className="text-violet-300" /> {t(lang, "trustNoApp")}</span>
           </div>
         </div>
       </div>
 
       {/* ── FEATURES ───────────────────────────── */}
       <div className="max-w-md mx-auto px-5 py-8">
-        <p className="text-xs font-black text-gray-400 uppercase tracking-widest text-center mb-5">Kyun InstantLoan?</p>
+        <p className="text-xs font-black text-gray-400 uppercase tracking-widest text-center mb-5">{t(lang, "whyTitle")}</p>
         <div className="grid grid-cols-2 gap-3">
-          {FEATURES.map((f) => (
-            <div key={f.label} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+          {FEATURE_ICONS.map((f) => (
+            <div key={f.lk} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 bg-gradient-to-br ${f.grad}`}>
                 <f.icon size={20} className="text-white" />
               </div>
-              <p className="font-black text-gray-900 text-sm leading-tight">{f.label}</p>
-              <p className="text-xs text-gray-500 mt-1">{f.desc}</p>
+              <p className="font-black text-gray-900 text-sm leading-tight">{t(lang, f.lk)}</p>
+              <p className="text-xs text-gray-500 mt-1">{t(lang, f.dk)}</p>
             </div>
           ))}
         </div>
@@ -178,19 +183,16 @@ export default function Landing() {
 
         {/* How it works */}
         <div className="mt-5 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm font-black text-gray-800 mb-4">Kaise Kaam Karta Hai?</p>
-          {[
-            ["1", "Details bharein", "Naam, PAN, income — 1 min mein"],
-            ["2", "Statement upload karein", "AI locally analyse karta hai — data safe"],
-            ["3", "Banks match hongi", "Best offers instant milenge"],
-            ["4", "Apply karein", "Sirf approve hone par hard inquiry"],
-          ].map(([num, title, desc]) => (
-            <div key={num} className="flex gap-3 mb-3 last:mb-0">
+          <p className="text-sm font-black text-gray-800 mb-4">{t(lang, "howTitle")}</p>
+          {([
+            ["step1","step1d"], ["step2","step2d"], ["step3","step3d"], ["step4","step4d"],
+          ] as const).map(([sk, skd], i) => (
+            <div key={sk} className="flex gap-3 mb-3 last:mb-0">
               <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #4338ca)" }}>{num}</div>
+                style={{ background: "linear-gradient(135deg, #7c3aed, #4338ca)" }}>{i + 1}</div>
               <div>
-                <p className="text-sm font-bold text-gray-900">{title}</p>
-                <p className="text-xs text-gray-500">{desc}</p>
+                <p className="text-sm font-bold text-gray-900">{t(lang, sk)}</p>
+                <p className="text-xs text-gray-500">{t(lang, skd)}</p>
               </div>
             </div>
           ))}

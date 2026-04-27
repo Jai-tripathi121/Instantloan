@@ -2,6 +2,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
 import { useAppStore, BankOffer } from "@/lib/store";
+import { t } from "@/lib/i18n";
 import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles } from "lucide-react";
 import BankLogo from "@/components/BankLogo";
 
@@ -14,7 +15,7 @@ const DEMO_OFFERS: BankOffer[] = [
   { bankName: "SBI",        logo: "SBI",  logoUrl: `${LOGO_BASE}/sbin/symbol.svg`, approvedAmount: 400000, interestRate: 11.15, tenure: 36, emi: 13100, processingFee: 4000, color: "#1E3A8A" },
 ];
 
-function BankCard({ offer, rank, onApply }: { offer: BankOffer; rank: number; onApply: () => void }) {
+function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank: number; onApply: () => void; applyLabel: string }) {
   const isTop = rank === 0;
   return (
     <div className={`rounded-2xl overflow-hidden border-2 transition-all card-hover ${isTop ? "border-violet-200 shadow-lg shadow-violet-100" : "border-gray-100"}`}>
@@ -69,7 +70,7 @@ function BankCard({ offer, rank, onApply }: { offer: BankOffer; rank: number; on
 
         <button onClick={onApply}
           className={`w-full font-black py-3 rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 ${isTop ? "btn-gradient text-white" : "bg-gray-900 text-white"}`}>
-          {offer.bankName} mein Apply Karo <ChevronRight size={16} />
+          {offer.bankName} {applyLabel} <ChevronRight size={16} />
         </button>
       </div>
     </div>
@@ -79,7 +80,7 @@ function BankCard({ offer, rank, onApply }: { offer: BankOffer; rank: number; on
 function ResultsInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const { bankOffers, statementAnalysis, userDetails, setSelectedBank, setBankOffers, setLastRoute } = useAppStore();
+  const { bankOffers, statementAnalysis, userDetails, setSelectedBank, setBankOffers, setLastRoute, lang } = useAppStore();
 
   useEffect(() => {
     setLastRoute("/results");
@@ -117,9 +118,9 @@ function ResultsInner() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Sparkles size={18} className="text-yellow-400" />
-              <h2 className="text-2xl font-black">Aap Eligible Ho!</h2>
+              <h2 className="text-2xl font-black">{t(lang, "resultHeading")}</h2>
             </div>
-            <p className="text-white/70 text-sm">{bankOffers.length} banks loan approve karne ke liye ready hain</p>
+            <p className="text-white/70 text-sm">{bankOffers.length} {t(lang, "resultSub")}</p>
           </div>
           <button onClick={shareWA} className="flex items-center gap-1.5 bg-green-500 text-white text-xs font-black px-3 py-2 rounded-xl">
             <Share2 size={13} /> Share
@@ -143,7 +144,7 @@ function ResultsInner() {
 
       <div className="space-y-4">
         {bankOffers.map((offer, i) => (
-          <BankCard key={i} offer={offer} rank={i} onApply={() => handleApply(offer)} />
+          <BankCard key={i} offer={offer} rank={i} onApply={() => handleApply(offer)} applyLabel={t(lang, "applyBtn")} />
         ))}
       </div>
 

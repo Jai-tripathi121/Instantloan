@@ -2,11 +2,20 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { ArrowLeft, Lock, CheckCircle, ChevronRight, Sparkles } from "lucide-react";
+import { t } from "@/lib/i18n";
+import { ArrowLeft, Lock, CheckCircle, ChevronRight, Sparkles, Smartphone, Copy, Check, Building2, CreditCard } from "lucide-react";
 
 declare global {
   interface Window { Razorpay: new (o: Record<string, unknown>) => { open: () => void }; }
 }
+
+const UPI_ID = "10236301289@IDFB0020132.ifsc.npci";
+const BANK_DETAILS = {
+  bank: "IDFC First Bank",
+  holder: "Postmac Ventures Pvt Ltd",
+  account: "10236301289",
+  ifsc: "IDFB0020132",
+};
 
 const BENEFITS = [
   "AI se aapka bank statement analyse hoga",
@@ -20,8 +29,14 @@ const BENEFITS = [
 
 export default function Payment() {
   const router = useRouter();
-  const { setPaymentDone, userDetails, setLastRoute } = useAppStore();
+  const { setPaymentDone, userDetails, setLastRoute, lang } = useAppStore();
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState<"razorpay" | "upi" | "bank">("razorpay");
+  const [copiedUpi, setCopiedUpi] = useState(false);
+  const [copiedAcc, setCopiedAcc] = useState(false);
+  const [copiedIfsc, setCopiedIfsc] = useState(false);
+  const [manualRef, setManualRef] = useState("");
+  const [manualSubmitting, setManualSubmitting] = useState(false);
 
   async function loadRazorpay(): Promise<boolean> {
     return new Promise((resolve) => {
@@ -49,72 +64,226 @@ export default function Payment() {
     rzp.open(); setLoading(false);
   }
 
+  function copy(text: string, setter: (v: boolean) => void) {
+    navigator.clipboard.writeText(text).then(() => {
+      setter(true);
+      setTimeout(() => setter(false), 2000);
+    });
+  }
+
+  function openUpiApp() {
+    window.location.href = `upi://pay?pa=${UPI_ID}&pn=InstantLoan&am=99&cu=INR&tn=AI+Eligibility+Report`;
+  }
+
+  async function handleManualConfirm() {
+    if (!manualRef.trim()) { alert("UTR / Transaction ID daalo"); return; }
+    setManualSubmitting(true);
+    // Mark payment done and proceed — admin will verify the UTR
+    setPaymentDone(true);
+    setLastRoute("/results");
+    router.push("/processing");
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto px-5 py-6">
+      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 4 of 4</span><span>Payment</span></div>
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 4 of 4</span><span>{t(lang, "payTitle")}</span></div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-full transition-all" />
           </div>
         </div>
       </div>
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-black text-gray-900">Report Unlock Karo</h2>
-        <p className="text-gray-500 text-sm mt-1">One-time payment — aur puri zindagi ka faida</p>
+      <div className="mb-5">
+        <h2 className="text-2xl font-black text-gray-900">{t(lang, "payTitle")}</h2>
+        <p className="text-gray-500 text-sm mt-1">{t(lang, "paySub")}</p>
       </div>
 
-      {/* Price hero card */}
-      <div className="relative overflow-hidden rounded-3xl mb-6" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #4f46e5 50%, #2563eb 100%)" }}>
+      {/* Price hero */}
+      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #4f46e5 50%, #2563eb 100%)" }}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-8 -translate-x-8" />
-        <div className="relative p-6 text-white text-center">
-          <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-bold px-3 py-1 rounded-full mb-3">
+        <div className="relative p-5 text-white text-center">
+          <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-bold px-3 py-1 rounded-full mb-2">
             <Sparkles size={12} /> AI Eligibility Report
           </div>
           <div className="flex items-end justify-center gap-2 mb-1">
-            <span className="text-6xl font-black">₹99</span>
-            <span className="text-white/50 text-xl line-through mb-2">₹499</span>
+            <span className="text-5xl font-black">₹99</span>
+            <span className="text-white/50 text-xl line-through mb-1">₹499</span>
           </div>
           <p className="text-white/70 text-xs">One-time · Non-refundable · Instant delivery</p>
         </div>
       </div>
 
-      {/* Benefits */}
-      <div className="bg-slate-50 rounded-2xl p-5 mb-6">
-        <p className="text-sm font-black text-gray-800 mb-3">₹99 mein kya milega</p>
-        <div className="space-y-2.5">
-          {BENEFITS.map((item, i) => (
-            <div key={i} className="flex items-center gap-2.5">
-              <div className="w-5 h-5 bg-violet-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <CheckCircle size={13} className="text-violet-600" />
-              </div>
-              <p className="text-sm text-gray-700">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Payment methods */}
-      <div className="flex justify-center gap-3 mb-6">
-        {["UPI", "Credit Card", "Debit Card", "Net Banking"].map((m) => (
-          <span key={m} className="text-xs bg-gray-100 rounded-lg px-2.5 py-1.5 text-gray-500 font-semibold">{m}</span>
+      {/* Payment method tabs */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl mb-5">
+        {([
+          { key: "razorpay", label: "Card / UPI", icon: CreditCard },
+          { key: "upi",      label: "UPI QR",     icon: Smartphone },
+          { key: "bank",     label: "Bank Transfer", icon: Building2 },
+        ] as { key: typeof tab; label: string; icon: typeof CreditCard }[]).map((t) => (
+          <button key={t.key} onClick={() => setTab(t.key)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === t.key ? "bg-white shadow text-violet-700" : "text-gray-500"}`}>
+            <t.icon size={13} /> {t.label}
+          </button>
         ))}
       </div>
 
-      <button onClick={handlePay} disabled={loading}
-        className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2">
-        {loading ? "Payment open ho rahi hai..." : (<>₹99 Pay Karo & Report Lo <ChevronRight size={22} /></>)}
-      </button>
+      {/* ── RAZORPAY TAB ── */}
+      {tab === "razorpay" && (
+        <div className="flex-1 flex flex-col">
+          <div className="bg-slate-50 rounded-2xl p-4 mb-5">
+            <p className="text-sm font-black text-gray-800 mb-3">₹99 mein kya milega</p>
+            <div className="space-y-2">
+              {BENEFITS.map((item, i) => (
+                <div key={i} className="flex items-center gap-2.5">
+                  <div className="w-5 h-5 bg-violet-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle size={13} className="text-violet-600" />
+                  </div>
+                  <p className="text-sm text-gray-700">{item}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-center gap-2 mb-5 flex-wrap">
+            {["UPI", "Credit Card", "Debit Card", "Net Banking"].map((m) => (
+              <span key={m} className="text-xs bg-gray-100 rounded-lg px-2.5 py-1.5 text-gray-500 font-semibold">{m}</span>
+            ))}
+          </div>
+          <button onClick={handlePay} disabled={loading}
+            className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2">
+            {loading ? t(lang, "loading") : (<>₹99 {t(lang, "applyBtn")} <ChevronRight size={22} /></>)}
+          </button>
+          <div className="flex items-center justify-center gap-1.5 mt-3">
+            <Lock size={12} className="text-gray-400" />
+            <p className="text-xs text-gray-400">Razorpay se secured · PCI-DSS compliant</p>
+          </div>
+        </div>
+      )}
 
-      <div className="flex items-center justify-center gap-1.5 mt-3">
-        <Lock size={12} className="text-gray-400" />
-        <p className="text-xs text-gray-400">Razorpay se secured · PCI-DSS compliant</p>
-      </div>
+      {/* ── UPI QR TAB ── */}
+      {tab === "upi" && (
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white border-2 border-gray-100 rounded-2xl p-5 mb-4 text-center">
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">QR Code Scan Karo</p>
+            {/* QR code via API */}
+            <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=InstantLoan&am=99&cu=INR&tn=AI+Eligibility+Report`)}`}
+                alt="UPI QR Code"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <p className="text-xs text-gray-400 mb-4">Scan with GPay · PhonePe · Paytm</p>
+
+            {/* UPI ID copy */}
+            <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between border border-gray-100 mb-3">
+              <div className="text-left">
+                <p className="text-xs text-gray-400 font-bold mb-0.5">UPI ID</p>
+                <p className="font-black text-gray-900 text-sm">{UPI_ID}</p>
+              </div>
+              <button onClick={() => copy(UPI_ID, setCopiedUpi)}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedUpi ? "bg-emerald-100" : "bg-white border border-gray-200"}`}>
+                {copiedUpi ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+              </button>
+            </div>
+
+            <button onClick={openUpiApp}
+              className="w-full border-2 border-violet-200 text-violet-700 font-black py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-violet-50 transition-all">
+              <Smartphone size={16} /> Open UPI App
+            </button>
+          </div>
+
+          {/* After payment - enter UTR */}
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
+            <p className="text-sm font-black text-amber-800 mb-2">Payment ke baad UTR daalo</p>
+            <input type="text" placeholder="UTR / Transaction ID (12 digits)" value={manualRef}
+              onChange={(e) => setManualRef(e.target.value.toUpperCase())}
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+            <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
+              className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+              {manualSubmitting ? "Verify ho raha hai..." : (<><CheckCircle size={16} /> Payment Done — Aage Badho</>)}
+            </button>
+          </div>
+          <p className="text-xs text-center text-gray-400">UTR aapke payment app mein milega. Admin 1-2 ghante mein verify karega.</p>
+        </div>
+      )}
+
+      {/* ── BANK TRANSFER TAB ── */}
+      {tab === "bank" && (
+        <div className="flex-1 flex flex-col">
+          <div className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden mb-4">
+            <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+              <Building2 size={15} className="text-violet-600" />
+              <p className="text-sm font-black text-gray-800">Bank Transfer Details</p>
+            </div>
+
+            {/* Bank name */}
+            <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+              <p className="text-xs text-gray-400 font-bold">BANK</p>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-md overflow-hidden bg-red-700 flex items-center justify-center">
+                  <span className="text-white text-xs font-black">IF</span>
+                </div>
+                <p className="font-black text-gray-900 text-sm">{BANK_DETAILS.bank}</p>
+              </div>
+            </div>
+
+            {/* A/C Holder */}
+            <div className="px-5 py-3.5 border-b border-gray-50">
+              <p className="text-xs text-gray-400 font-bold mb-0.5">A/C HOLDER</p>
+              <p className="font-black text-gray-900">{BANK_DETAILS.holder}</p>
+            </div>
+
+            {/* A/C Number */}
+            <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 font-bold mb-0.5">A/C NUMBER</p>
+                <p className="font-black text-gray-900 tracking-wider">{BANK_DETAILS.account}</p>
+              </div>
+              <button onClick={() => copy(BANK_DETAILS.account, setCopiedAcc)}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedAcc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
+                {copiedAcc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+              </button>
+            </div>
+
+            {/* IFSC */}
+            <div className="px-5 py-3.5 flex items-center justify-between">
+              <div>
+                <p className="text-xs text-gray-400 font-bold mb-0.5">IFSC</p>
+                <p className="font-black text-gray-900 tracking-wider">{BANK_DETAILS.ifsc}</p>
+              </div>
+              <button onClick={() => copy(BANK_DETAILS.ifsc, setCopiedIfsc)}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedIfsc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
+                {copiedIfsc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Amount reminder */}
+          <div className="bg-violet-50 border border-violet-100 rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
+            <p className="text-sm font-bold text-violet-700">Transfer Amount</p>
+            <p className="text-2xl font-black text-violet-700">₹99</p>
+          </div>
+
+          {/* UTR entry */}
+          <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
+            <p className="text-sm font-black text-amber-800 mb-2">Transfer ke baad UTR / Ref daalo</p>
+            <input type="text" placeholder="UTR / Transaction Reference" value={manualRef}
+              onChange={(e) => setManualRef(e.target.value.toUpperCase())}
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+            <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
+              className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+              {manualSubmitting ? "Verify ho raha hai..." : (<><CheckCircle size={16} /> Payment Done — Aage Badho</>)}
+            </button>
+          </div>
+          <p className="text-xs text-center text-gray-400">NEFT/IMPS/UPI transfer karo. UTR bank app ya SMS mein milega.</p>
+        </div>
+      )}
     </div>
   );
 }

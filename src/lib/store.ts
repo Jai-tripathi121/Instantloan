@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { LangCode } from "./i18n";
 
 export type EmploymentType = "salaried" | "self-employed" | "business";
 export type LoanType = "personal" | "home" | "auto" | "business" | "gold" | "education" | "lap";
@@ -53,6 +54,7 @@ export interface AppState {
   applicationRef: string;
   otpVerified: boolean;
   lastRoute: string;
+  lang: LangCode;
 
   setStep: (step: number) => void;
   setUserDetails: (details: Partial<UserDetails>) => void;
@@ -64,6 +66,7 @@ export interface AppState {
   setApplicationRef: (ref: string) => void;
   setOtpVerified: (v: boolean) => void;
   setLastRoute: (route: string) => void;
+  setLang: (lang: LangCode) => void;
   resetSession: () => void;
 }
 
@@ -78,6 +81,7 @@ const initialState = {
   applicationRef: "",
   otpVerified: false,
   lastRoute: "",
+  lang: "hi" as LangCode,
 };
 
 export const useAppStore = create<AppState>()(
@@ -97,6 +101,7 @@ export const useAppStore = create<AppState>()(
       setApplicationRef: (ref) => set({ applicationRef: ref }),
       setOtpVerified: (v) => set({ otpVerified: v }),
       setLastRoute: (route) => set({ lastRoute: route }),
+      setLang: (lang) => set({ lang }),
       resetSession: () => set({ ...initialState }),
     }),
     {
@@ -115,6 +120,7 @@ export const useAppStore = create<AppState>()(
         lastRoute: s.lastRoute,
         applicationRef: s.applicationRef,
         step: s.step,
+        lang: s.lang,
       }),
     }
   )

@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAppStore, LoanType } from "@/lib/store";
+import { t } from "@/lib/i18n";
 import { ArrowLeft, Wallet, Home, Car, Building2, Tag, CheckCircle, ChevronRight, IndianRupee, GraduationCap, Landmark, Coins } from "lucide-react";
 
 const LOAN_TYPES: { type: LoanType; label: string; sub: string; icon: typeof Wallet; color: string; bg: string }[] = [
@@ -29,7 +30,7 @@ const PROMOS: Record<string, number> = { FIRST99: 49, SAVE50: 49, LOAN50: 49, IN
 
 export default function LoanRequirement() {
   const router = useRouter();
-  const { setLoanRequirement, setLastRoute, loanRequirement } = useAppStore();
+  const { setLoanRequirement, setLastRoute, loanRequirement, lang } = useAppStore();
 
   const [loanType, setLoanType] = useState<LoanType>(loanRequirement.loanType ?? "personal");
   const [amount, setAmount] = useState(loanRequirement.amount ?? 500000);
@@ -69,7 +70,7 @@ export default function LoanRequirement() {
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 2 of 4</span><span>Loan Details</span></div>
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 2 of 4</span><span>{t(lang, "loanTitle")}</span></div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-2/4 transition-all" />
           </div>
@@ -77,14 +78,14 @@ export default function LoanRequirement() {
       </div>
 
       <div className="mb-6">
-        <h2 className="text-2xl font-black text-gray-900">Loan Details Batao</h2>
-        <p className="text-gray-500 text-sm mt-1">Aapko kya chahiye?</p>
+        <h2 className="text-2xl font-black text-gray-900">{t(lang, "loanTitle")}</h2>
+        <p className="text-gray-500 text-sm mt-1">{t(lang, "loanSub")}</p>
       </div>
 
       <div className="space-y-6 flex-1">
         {/* Loan Type */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">Loan Type</label>
+          <label className="block text-sm font-bold text-gray-700 mb-2">{t(lang, "labelLoanType")}</label>
           <div className="grid grid-cols-2 gap-2.5">
             {LOAN_TYPES.map((lt, idx) => {
               const active = loanType === lt.type;
@@ -110,7 +111,7 @@ export default function LoanRequirement() {
         <div className="bg-gradient-to-r from-violet-50 to-indigo-50 rounded-2xl p-4 border border-violet-100">
           <div className="flex justify-between items-center mb-4">
             <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
-              <IndianRupee size={14} className="text-violet-500" /> Loan Amount
+              <IndianRupee size={14} className="text-violet-500" /> {t(lang, "labelAmount")}
             </label>
             <span className="text-2xl font-black text-violet-600">{fmt(clampedAmount)}</span>
           </div>
@@ -125,7 +126,7 @@ export default function LoanRequirement() {
         {/* Tenure */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            Tenure: <span className="text-violet-600">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
+            {t(lang, "labelTenure")}: <span className="text-violet-600">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {TENURES.map((t) => (
@@ -172,7 +173,7 @@ export default function LoanRequirement() {
 
       <button onClick={handleNext}
         className="mt-6 w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
-        Aage Badho <ChevronRight size={22} />
+        {t(lang, "btnNext")} <ChevronRight size={22} />
       </button>
     </div>
   );

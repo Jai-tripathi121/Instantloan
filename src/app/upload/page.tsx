@@ -3,13 +3,14 @@ import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { mergeWithDeclared } from "@/lib/pdf-parser";
+import { t } from "@/lib/i18n";
 import { ArrowLeft, Shield, FileText, Lock, ChevronRight, CheckCircle, AlertTriangle } from "lucide-react";
 
 const BANKS = ["SBI", "PNB", "HDFC", "ICICI", "Axis", "BOB", "Kotak", "Union", "Canara", "IndusInd", "IDFC", "Yes", "Federal"];
 
 export default function Upload() {
   const router = useRouter();
-  const { setStatementAnalysis, userDetails, setLastRoute } = useAppStore();
+  const { setStatementAnalysis, userDetails, setLastRoute, lang } = useAppStore();
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -53,7 +54,7 @@ export default function Upload() {
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 3 of 4</span><span>Bank Statement</span></div>
+          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 3 of 4</span><span>{t(lang, "uploadTitle")}</span></div>
           <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-3/4 transition-all" />
           </div>
@@ -61,8 +62,8 @@ export default function Upload() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-black text-gray-900">Bank Statement Upload Karo</h2>
-        <p className="text-gray-500 text-sm mt-1">Last 6 mahine ki PDF apne bank se</p>
+        <h2 className="text-2xl font-black text-gray-900">{t(lang, "uploadTitle")}</h2>
+        <p className="text-gray-500 text-sm mt-1">{t(lang, "uploadSub")}</p>
       </div>
 
       {/* Privacy notice */}
@@ -71,8 +72,8 @@ export default function Upload() {
           <Shield size={18} className="text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-emerald-800">100% Private — Sirf Aapke Device Pe</p>
-          <p className="text-xs text-emerald-700 mt-0.5">Statement kisi server pe upload nahi hoti. AI browser mein locally run karta hai.</p>
+          <p className="text-sm font-bold text-emerald-800">{t(lang, "uploadPrivacy")}</p>
+          <p className="text-xs text-emerald-700 mt-0.5">{t(lang, "uploadPrivacyDesc")}</p>
         </div>
       </div>
 
@@ -94,8 +95,8 @@ export default function Upload() {
         ) : (
           <>
             <FileText size={44} className="text-violet-300 mx-auto mb-2" />
-            <p className="font-bold text-gray-600">PDF Upload Karo</p>
-            <p className="text-xs text-gray-400 mt-1">Tap karo ya drag & drop karo yahan</p>
+            <p className="font-bold text-gray-600">{t(lang, "uploadBtn")}</p>
+            <p className="text-xs text-gray-400 mt-1">{t(lang, "uploadDrop")}</p>
           </>
         )}
       </div>
@@ -130,7 +131,7 @@ export default function Upload() {
 
       <button onClick={handleAnalyse} disabled={!file || parsing}
         className={`w-full font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-gray-400"}`}>
-        {parsing ? "Statement padh raha hai..." : (<>Analyse Karo <ChevronRight size={22} /></>)}
+        {parsing ? t(lang, "loading") : (<>{t(lang, "btnAnalyse")} <ChevronRight size={22} /></>)}
       </button>
     </div>
   );
