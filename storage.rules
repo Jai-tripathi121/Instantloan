@@ -1,0 +1,10 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Application documents — write from server SDK only
+    match /applications/{appId}/{document} {
+      allow read: if false;
+      allow write: if false;
+    }
+  }
+}
