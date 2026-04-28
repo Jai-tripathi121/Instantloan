@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { mergeWithDeclared } from "@/lib/pdf-parser";
+import { saveSession } from "@/lib/firestore";
 import { t } from "@/lib/i18n";
 import { ArrowLeft, Shield, FileText, Lock, ChevronRight, CheckCircle, AlertTriangle } from "lucide-react";
 
@@ -10,7 +11,7 @@ const BANKS = ["SBI", "PNB", "HDFC", "ICICI", "Axis", "BOB", "Kotak", "Union", "
 
 export default function Upload() {
   const router = useRouter();
-  const { setStatementAnalysis, userDetails, setLastRoute, lang } = useAppStore();
+  const { setStatementAnalysis, userDetails, loanRequirement, setLastRoute, lang } = useAppStore();
   const [file, setFile] = useState<File | null>(null);
   const [password, setPassword] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -33,6 +34,15 @@ export default function Upload() {
       const parsed = await parsePDF(file);
       const final = merge(parsed, userDetails.monthlyIncome ?? 0);
       setStatementAnalysis(final);
+      saveSession(userDetails.mobile ?? "", {
+        step: 3, lastRoute: "/payment",
+        userDetails: {
+          name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob,
+          employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome,
+          cibilScore: userDetails.cibilScore,
+        },
+        loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+      });
       router.push("/payment");
     } catch {
       const declared = userDetails.monthlyIncome ?? 0;
@@ -43,6 +53,15 @@ export default function Upload() {
       }, declared);
       setStatementAnalysis(fallback);
       setParseError("PDF nahi pada — declared income use ho rahi hai.");
+      saveSession(userDetails.mobile ?? "", {
+        step: 3, lastRoute: "/payment",
+        userDetails: {
+          name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob,
+          employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome,
+          cibilScore: userDetails.cibilScore,
+        },
+        loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+      });
       router.push("/payment");
     } finally { setParsing(false); }
   }

@@ -157,6 +157,67 @@ export async function saveGlobalSettings(settings: Omit<GlobalSettings, "updated
   }, { merge: true }));
 }
 
+// ─── User Sessions ────────────────────────────────────────────
+
+export interface UserSession {
+  mobile: string;
+  step: number;
+  lastRoute: string;
+  userDetails: {
+    name?: string;
+    pan?: string;
+    dob?: string;
+    employmentType?: string;
+    monthlyIncome?: number;
+    cibilScore?: number;
+  };
+  loanRequirement?: {
+    loanType?: string;
+    amount?: number;
+    tenure?: number;
+  };
+  paymentDone?: boolean;
+  applicationRef?: string;
+  updatedAt?: unknown;
+}
+
+/** Fire-and-forget session save — never throws, never blocks the user */
+export async function saveSession(
+  mobile: string,
+  data: Omit<UserSession, "mobile" | "updatedAt">,
+) {
+  if (!isFirebaseConfigured() || !mobile) return;
+  try {
+    await withTimeout(
+      setDoc(doc(db, "sessions", mobile), {
+        mobile, ...clean(data as object), updatedAt: serverTimestamp(),
+      }, { merge: true }),
+      4000,
+    );
+  } catch { /* non-critical */ }
+}
+
+export async function getSession(mobile: string): Promise<UserSession | null> {
+  if (!isFirebaseConfigured() || !mobile) return null;
+  try {
+    const snap = await withTimeout(getDoc(doc(db, "sessions", mobile)), 4000);
+    if (!snap.exists()) return null;
+    return { mobile, ...snap.data() } as UserSession;
+  } catch { return null; }
+}
+
+export async function clearSession(mobile: string) {
+  if (!isFirebaseConfigured() || !mobile) return;
+  try {
+    await withTimeout(
+      setDoc(doc(db, "sessions", mobile), {
+        mobile, step: 0, lastRoute: "", updatedAt: serverTimestamp(),
+      }),
+      4000,
+    );
+  } catch { }
+}
+
 // ─── Bank Config ──────────────────────────────────────────────
 
 export async function getAllBankConfigs(): Promise<Record<string, BankConfig>> {

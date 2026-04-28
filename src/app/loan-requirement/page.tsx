@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from "react";
 import { useAppStore, LoanType } from "@/lib/store";
 import { t } from "@/lib/i18n";
 import { matchBanks, getAgeFromDOB, computeRiskGrade, POLICY_VERSION } from "@/lib/bank-data";
+import { saveSession } from "@/lib/firestore";
 import { ArrowLeft, Wallet, Home, Car, Building2, Tag, CheckCircle, ChevronRight, IndianRupee, GraduationCap, Landmark, Coins, ShieldCheck } from "lucide-react";
 
 const GRADE_COLORS: Record<string, string> = {
@@ -85,7 +86,17 @@ export default function LoanRequirement() {
   }
 
   function handleNext() {
-    setLoanRequirement({ loanType, amount, tenure });
+    setLoanRequirement({ loanType, amount: clampedAmount, tenure });
+    saveSession(userDetails.mobile ?? "", {
+      step: 2,
+      lastRoute: "/upload",
+      userDetails: {
+        name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob,
+        employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome,
+        cibilScore: userDetails.cibilScore,
+      },
+      loanRequirement: { loanType, amount: clampedAmount, tenure },
+    });
     setLastRoute("/upload");
     router.push("/upload");
   }

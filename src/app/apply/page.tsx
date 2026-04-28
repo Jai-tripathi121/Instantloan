@@ -4,12 +4,13 @@ import { useState, useRef, useEffect } from "react";
 import { useAppStore } from "@/lib/store";
 import { saveApplication } from "@/lib/firestore";
 import { uploadApplicationDocs } from "@/lib/storage";
+import { saveSession } from "@/lib/firestore";
 import { ArrowLeft, MapPin, Hash, Camera, User, ChevronRight, Loader2, CheckCircle } from "lucide-react";
 import BankLogo from "@/components/BankLogo";
 
 export default function Apply() {
   const router = useRouter();
-  const { userDetails, selectedBank, loanRequirement, statementAnalysis, decisionAudit, setApplicationRef, setLastRoute } = useAppStore();
+  const { userDetails, selectedBank, loanRequirement, statementAnalysis, decisionAudit, setApplicationRef, setLastRoute } = useAppStore(); // loanRequirement used for session save
   const [address, setAddress] = useState("");
   const [pincode, setPincode] = useState("");
   const [aadhaar, setAadhaar] = useState<File | null>(null);
@@ -77,6 +78,13 @@ export default function Apply() {
       } catch { /* notification failure should not block confirmation */ }
 
       setApplicationRef(ref);
+      // Mark session as fully submitted so resume shows confirmation
+      saveSession(userDetails.mobile ?? "", {
+        step: 6, lastRoute: "/confirmation", paymentDone: true,
+        applicationRef: ref,
+        userDetails: { name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob, employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome, cibilScore: userDetails.cibilScore },
+        loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+      });
       router.push("/confirmation");
     } catch (err) {
       console.error("Submit error:", err);

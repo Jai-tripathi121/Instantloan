@@ -5,6 +5,7 @@ import { useAppStore, BankOffer } from "@/lib/store";
 import { t } from "@/lib/i18n";
 import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck } from "lucide-react";
 import type { RiskGrade } from "@/lib/store";
+import { saveSession } from "@/lib/firestore";
 
 const GRADE_CONFIG: Record<RiskGrade, { label: string; bg: string; text: string; bar: string }> = {
   A: { label: "Grade A", bg: "bg-emerald-100", text: "text-emerald-700", bar: "bg-emerald-500" },
@@ -122,7 +123,7 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
 function ResultsInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const { bankOffers, statementAnalysis, userDetails, setSelectedBank, setBankOffers, setLastRoute, lang } = useAppStore();
+  const { bankOffers, statementAnalysis, userDetails, loanRequirement, setSelectedBank, setBankOffers, setLastRoute, lang } = useAppStore();
 
   useEffect(() => {
     setLastRoute("/results");
@@ -132,7 +133,15 @@ function ResultsInner() {
   const income = statementAnalysis?.avgMonthlyIncome ?? userDetails.monthlyIncome ?? 50000;
   const foir = statementAnalysis?.foir ?? 0.2;
 
-  function handleApply(offer: BankOffer) { setSelectedBank(offer); router.push("/apply"); }
+  function handleApply(offer: BankOffer) {
+    setSelectedBank(offer);
+    saveSession(userDetails.mobile ?? "", {
+      step: 5, lastRoute: "/apply", paymentDone: true,
+      userDetails: { name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob, employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome, cibilScore: userDetails.cibilScore },
+      loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+    });
+    router.push("/apply");
+  }
 
   function shareWA() {
     const best = bankOffers[0];

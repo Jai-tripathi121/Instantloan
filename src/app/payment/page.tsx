@@ -2,6 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { saveSession } from "@/lib/firestore";
 import { t } from "@/lib/i18n";
 import { ArrowLeft, Lock, CheckCircle, ChevronRight, Sparkles, Smartphone, Copy, Check, Building2, CreditCard } from "lucide-react";
 
@@ -29,7 +30,7 @@ const BENEFITS = [
 
 export default function Payment() {
   const router = useRouter();
-  const { setPaymentDone, userDetails, setLastRoute, lang } = useAppStore();
+  const { setPaymentDone, userDetails, loanRequirement, setLastRoute, lang } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<"razorpay" | "upi" | "bank">("razorpay");
   const [copiedUpi, setCopiedUpi] = useState(false);
@@ -58,7 +59,16 @@ export default function Payment() {
       description: "AI Eligibility Report",
       prefill: { name: userDetails.name ?? "", contact: userDetails.mobile ?? "" },
       theme: { color: "#7c3aed" },
-      handler: () => { setPaymentDone(true); setLastRoute("/results"); router.push("/processing"); },
+      handler: () => {
+        setPaymentDone(true);
+        saveSession(userDetails.mobile ?? "", {
+          step: 4, lastRoute: "/processing", paymentDone: true,
+          userDetails: { name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob, employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome, cibilScore: userDetails.cibilScore },
+          loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+        });
+        setLastRoute("/results");
+        router.push("/processing");
+      },
       modal: { ondismiss: () => setLoading(false) },
     });
     rzp.open(); setLoading(false);
@@ -78,8 +88,12 @@ export default function Payment() {
   async function handleManualConfirm() {
     if (!manualRef.trim()) { alert("UTR / Transaction ID daalo"); return; }
     setManualSubmitting(true);
-    // Mark payment done and proceed — admin will verify the UTR
     setPaymentDone(true);
+    saveSession(userDetails.mobile ?? "", {
+      step: 4, lastRoute: "/processing", paymentDone: true,
+      userDetails: { name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob, employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome, cibilScore: userDetails.cibilScore },
+      loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+    });
     setLastRoute("/results");
     router.push("/processing");
   }
