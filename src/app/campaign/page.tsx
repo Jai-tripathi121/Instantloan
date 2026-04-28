@@ -2,21 +2,21 @@ import Link from "next/link";
 import { Zap, Shield, Building2, Lock, Star, ChevronRight } from "lucide-react";
 
 const FEATURES = [
-  { icon: Zap, title: "60 Seconds", desc: "Turant eligibility report milti hai" },
-  { icon: Shield, title: "Zero CIBIL Impact", desc: "Soft check — aapka score safe rehta hai" },
-  { icon: Building2, title: "8 Real Banks", desc: "SBI, HDFC, ICICI, Axis, PNB aur aur bhi" },
-  { icon: Lock, title: "100% Private", desc: "Statement kabhi aapke device se bahar nahi jaata" },
+  { icon: Zap, title: "60 Seconds", desc: "Instant eligibility report" },
+  { icon: Shield, title: "Zero CIBIL Impact", desc: "Soft check — your score stays safe" },
+  { icon: Building2, title: "33 Real Banks", desc: "SBI, HDFC, ICICI, Axis, PNB and more" },
+  { icon: Lock, title: "100% Private", desc: "Statement never leaves your device" },
 ];
 
 const TESTIMONIALS = [
   {
     name: "Rahul S., Mumbai",
-    text: "InstantLoan ke baad HDFC mein pehli baar mein hi apply kiya. ₹4 lakh personal loan 2 din mein approved!",
+    text: "Applied to HDFC on the first try after using InstantLoan. ₹4 lakh personal loan approved in 2 days!",
     stars: 5,
   },
   {
     name: "Priya M., Bangalore",
-    text: "Freelancer hoon toh socha koi bank approve nahi karega. InstantLoan ne bataya ki PNB karega — hua bhi!",
+    text: "As a freelancer I thought no bank would approve me. InstantLoan showed PNB would — and it did!",
     stars: 5,
   },
 ];
@@ -36,17 +36,17 @@ export default function Campaign() {
           <Zap size={32} className="text-yellow-500" />
         </div>
         <h1 className="text-3xl font-medium text-gray-900 leading-tight mb-3">
-          Aaj ₹99 do.<br />
-          <span className="text-blue-600">Kal lakhs bachao.</span>
+          Pay ₹99 today.<br />
+          <span className="text-blue-600">Save lakhs tomorrow.</span>
         </h1>
         <p className="text-gray-500 text-base leading-relaxed">
-          Galat bank mein apply karne se 40 CIBIL points girte hain. Pehle eligibility check karo — sirf wahan apply karo jahan approval pakka ho.
+          Applying to the wrong bank drops your CIBIL by 40 points. Check eligibility first — apply only where approval is certain.
         </p>
       </div>
 
       <div className="bg-blue-50 rounded-2xl p-4 mb-6 text-center">
         <p className="text-3xl font-medium text-blue-700">10,000+</p>
-        <p className="text-sm text-blue-600 mt-1">loan applications poore India mein matched</p>
+        <p className="text-sm text-blue-600 mt-1">loan applications matched across India</p>
       </div>
 
       <div className="space-y-3 mb-8">
@@ -82,10 +82,10 @@ export default function Campaign() {
           href="/?utm_source=campaign"
           className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-medium py-4 rounded-2xl text-lg shadow-lg shadow-blue-200"
         >
-          Eligibility Check Karo — ₹99 <ChevronRight size={20} />
+          Check Eligibility — ₹99 <ChevronRight size={20} />
         </Link>
         <p className="text-center text-xs text-gray-400 mt-2">
-          Koi app install nahi · 100% private · Zero CIBIL impact
+          No app install · 100% private · Zero CIBIL impact
         </p>
       </div>
     </div>

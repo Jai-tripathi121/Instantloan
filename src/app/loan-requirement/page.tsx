@@ -108,7 +108,7 @@ export default function LoanRequirement() {
   };
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-4 py-5 overflow-x-hidden">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
@@ -192,7 +192,7 @@ export default function LoanRequirement() {
         {/* Tenure */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            {t(lang, "labelTenure")}: <span className="text-blue-800">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
+            {t(lang, "labelTenure")}: <span className="text-blue-800">{tenure >= 12 ? `${Math.round(tenure / 12)} Year` : `${tenure} Month`}</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {TENURES.map((t) => (
@@ -210,17 +210,17 @@ export default function LoanRequirement() {
             <Tag size={14} className="text-pink-500" /> Promo Code <span className="text-gray-400 font-normal">(optional)</span>
           </label>
           {!promoApplied ? (
-            <div className="flex gap-2">
-              <input type="text" placeholder="Code daalo" value={promo}
+            <div className="flex gap-2 w-full">
+              <input type="text" placeholder="Enter promo code" value={promo}
                 onChange={(e) => { setPromo(e.target.value.toUpperCase()); setPromoError(""); }}
-                className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-pink-400 uppercase font-medium" />
-              <button onClick={applyPromo} className="px-4 py-2 bg-pink-500 text-white rounded-xl text-sm font-medium">Apply</button>
+                className="flex-1 min-w-0 border-2 border-gray-100 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-pink-400 uppercase font-medium" />
+              <button onClick={applyPromo} className="shrink-0 px-4 py-2.5 bg-pink-500 text-white rounded-xl text-sm font-medium">Apply</button>
             </div>
           ) : (
-            <div className="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-200 rounded-xl px-4 py-3">
-              <CheckCircle size={16} className="text-emerald-500" />
-              <span className="text-sm text-emerald-700 font-medium">{promo} — Only ₹{price}!</span>
-              <button onClick={() => { setPromoApplied(false); setPrice(99); setPromo(""); }} className="ml-auto text-xs text-gray-400">Hatao</button>
+            <div className="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-200 rounded-xl px-3 py-2.5">
+              <CheckCircle size={15} className="text-emerald-500 shrink-0" />
+              <span className="text-sm text-emerald-700 font-medium truncate">{promo} — Only ₹{price}!</span>
+              <button onClick={() => { setPromoApplied(false); setPrice(99); setPromo(""); }} className="ml-auto text-xs text-gray-400 shrink-0">Remove</button>
             </div>
           )}
           {promoError && <p className="text-xs text-red-500 mt-1">{promoError}</p>}
