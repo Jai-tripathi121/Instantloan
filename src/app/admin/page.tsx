@@ -185,7 +185,7 @@ export default function AdminPage() {
   // ─── Login ────────────────────────────────────────────────────
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)" }}>
+      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#0A1628" }}>
         <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
           <div className="text-center mb-8">
             <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -258,13 +258,13 @@ export default function AdminPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
           {[
-            { icon: Users, label: "Total Applications", val: stats.total, color: "from-blue-500 to-blue-500" },
-            { icon: IndianRupee, label: "Revenue Earned", val: `₹${stats.revenue.toLocaleString("en-IN")}`, color: "from-emerald-500 to-teal-500" },
-            { icon: CheckCircle, label: "Approved", val: stats.approved, color: "from-blue-800 to-blue-800" },
-            { icon: Banknote, label: "Disbursed", val: `₹${(stats.totalDisbursed / 100000).toFixed(1)}L`, color: "from-amber-500 to-orange-500" },
+            { icon: Users, label: "Total Applications", val: stats.total, color: "bg-blue-700" },
+            { icon: IndianRupee, label: "Revenue Earned", val: `₹${stats.revenue.toLocaleString("en-IN")}`, color: "bg-emerald-600" },
+            { icon: CheckCircle, label: "Approved", val: stats.approved, color: "bg-blue-900" },
+            { icon: Banknote, label: "Disbursed", val: `₹${(stats.totalDisbursed / 100000).toFixed(1)}L`, color: "bg-amber-500" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-3`}>
+              <div className={`w-10 h-10 rounded-xl ${s.color} flex items-center justify-center mb-3`}>
                 <s.icon size={18} className="text-white" />
               </div>
               <p className="text-2xl font-black text-gray-900">{s.val}</p>
@@ -569,7 +569,7 @@ export default function AdminPage() {
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
+                  <thead className="bg-slate-50 border-b border-gray-100">
                     <tr>
                       {["Ref No.", "Name", "Mobile", "Bank", "Amount", "Rate", "EMI", "Status", "Action"].map((h) => (
                         <th key={h} className="text-left px-4 py-3 text-xs font-black text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
@@ -611,7 +611,7 @@ export default function AdminPage() {
             {/* Detail panel */}
             {selected && (
               <div className="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-50">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-blue-50">
                   <div className="flex items-center gap-2">
                     <Eye size={16} className="text-blue-800" />
                     <h3 className="font-black text-gray-900">Application Detail</h3>

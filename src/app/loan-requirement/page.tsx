@@ -127,7 +127,7 @@ export default function LoanRequirement() {
       </div>
 
       {preApproval && (
-        <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-center gap-3">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center flex-shrink-0">
             <CheckCircle size={20} className="text-emerald-600" />
           </div>
@@ -174,7 +174,7 @@ export default function LoanRequirement() {
         </div>
 
         {/* Amount */}
-        <div className="bg-gradient-to-r from-blue-50 to-blue-50 rounded-2xl p-4 border border-blue-100">
+        <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
           <div className="flex justify-between items-center mb-4">
             <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
               <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelAmount")}
@@ -227,7 +227,7 @@ export default function LoanRequirement() {
         </div>
 
         {/* Price */}
-        <div className={`rounded-2xl p-4 border-2 text-center ${promoApplied ? "bg-emerald-50 border-emerald-200" : "bg-gradient-to-r from-blue-50 to-blue-50 border-blue-100"}`}>
+        <div className={`rounded-2xl p-4 border-2 text-center ${promoApplied ? "bg-emerald-50 border-emerald-200" : "bg-blue-50 border-blue-100"}`}>
           <p className="text-sm font-bold text-gray-600">AI Report Price</p>
           <div className="flex items-center justify-center gap-2 mt-1">
             {promoApplied && <span className="text-xl text-gray-400 line-through">₹99</span>}

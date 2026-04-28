@@ -86,7 +86,7 @@ export default function Upload() {
       </div>
 
       {/* Privacy notice */}
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-5 flex items-start gap-3">
         <div className="w-9 h-9 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
           <Shield size={18} className="text-white" />
         </div>

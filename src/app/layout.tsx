@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Roboto } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-  variable: "--font-roboto",
+const jackInput = localFont({
+  src: "../../public/fonts/JackInput.ttf",
+  variable: "--font-jack",
   display: "swap",
+  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={roboto.variable}>
+    <html lang="en" className={jackInput.variable}>
       <body className="min-h-screen">{children}</body>
     </html>
   );

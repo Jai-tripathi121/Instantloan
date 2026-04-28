@@ -283,7 +283,7 @@ export default function Details() {
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* Welcome back */}
           <div className="text-center mb-7">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
+            <div className="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
               👋
             </div>
             <h2 className="text-2xl font-black text-gray-900">Welcome back!</h2>
@@ -291,7 +291,7 @@ export default function Details() {
           </div>
 
           {/* Progress card */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-50 border-2 border-blue-100 rounded-3xl p-5 mb-4">
+          <div className="bg-blue-50 border-2 border-blue-100 rounded-3xl p-5 mb-4">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <MapPin size={18} className="text-white" />

@@ -71,7 +71,7 @@ export default function Processing() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 py-6" style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 py-6" style={{ background: "#EFF6FF" }}>
       {/* Circle progress */}
       <div className="relative w-40 h-40 mb-8">
         <svg className="w-40 h-40 -rotate-90" viewBox="0 0 160 160">

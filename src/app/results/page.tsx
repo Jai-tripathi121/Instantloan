@@ -52,7 +52,7 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
           </div>
         </div>
         {isTop && (
-          <div className="flex items-center gap-1 bg-gradient-to-r from-amber-400 to-orange-400 text-white text-xs font-black px-2.5 py-1 rounded-full">
+          <div className="flex items-center gap-1 bg-amber-400 text-white text-xs font-black px-2.5 py-1 rounded-full">
             <Award size={11} /> Best Rate
           </div>
         )}

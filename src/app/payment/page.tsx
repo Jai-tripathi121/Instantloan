@@ -119,7 +119,7 @@ export default function Payment() {
       </div>
 
       {/* Price hero */}
-      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "linear-gradient(135deg, #040C1E 0%, #0F2554 50%, #1E40AF 100%)" }}>
+      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "#0F2554" }}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
         <div className="relative p-5 text-white text-center">
           <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-bold px-3 py-1 rounded-full mb-2">

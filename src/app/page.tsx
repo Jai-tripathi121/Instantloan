@@ -18,10 +18,10 @@ const BANKS_SCROLL = [
 ];
 
 const FEATURE_ICONS = [
-  { icon: Shield,     grad: "from-blue-900 to-blue-700",    lk: "feat1" as const, dk: "feat1d" as const },
-  { icon: Zap,        grad: "from-amber-400 to-orange-500", lk: "feat2" as const, dk: "feat2d" as const },
-  { icon: Smartphone, grad: "from-emerald-600 to-teal-600", lk: "feat3" as const, dk: "feat3d" as const },
-  { icon: Lock,       grad: "from-blue-800 to-blue-900",    lk: "feat4" as const, dk: "feat4d" as const },
+  { icon: Shield,     bg: "bg-blue-900",    lk: "feat1" as const, dk: "feat1d" as const },
+  { icon: Zap,        bg: "bg-amber-500",   lk: "feat2" as const, dk: "feat2d" as const },
+  { icon: Smartphone, bg: "bg-emerald-700", lk: "feat3" as const, dk: "feat3d" as const },
+  { icon: Lock,       bg: "bg-blue-800",    lk: "feat4" as const, dk: "feat4d" as const },
 ];
 
 const RESUME_ROUTES: Record<number, string> = {
@@ -48,7 +48,7 @@ export default function Landing() {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg"
-                style={{ background: "linear-gradient(135deg, #1E40AF, #0F2554)" }}>₹</div>
+                style={{ background: "#0F2554" }}>₹</div>
               <div>
                 <p className="text-white font-black text-lg leading-none">InstantLoan</p>
                 <p className="text-white/50 text-xs">Loan Eligibility Checker</p>
@@ -156,7 +156,7 @@ export default function Landing() {
         <div className="grid grid-cols-2 gap-3">
           {FEATURE_ICONS.map((f) => (
             <div key={f.lk} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 bg-gradient-to-br ${f.grad}`}>
+              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 ${f.bg}`}>
                 <f.icon size={20} className="text-white" />
               </div>
               <p className="font-black text-gray-900 text-sm leading-tight">{t(lang, f.lk)}</p>
@@ -167,7 +167,7 @@ export default function Landing() {
 
         {/* 33 Banks */}
         <div className="mt-5 rounded-2xl overflow-hidden shadow-sm">
-          <div className="text-white text-center px-5 py-5" style={{ background: "linear-gradient(135deg, #0F2554, #1E3A8A)" }}>
+          <div className="text-white text-center px-5 py-5" style={{ background: "#0F2554" }}>
             <p className="text-5xl font-black">33</p>
             <p className="text-blue-200 text-sm font-semibold mt-1">Scheduled Commercial Banks</p>
           </div>
@@ -189,7 +189,7 @@ export default function Landing() {
           ] as const).map(([sk, skd], i) => (
             <div key={sk} className="flex gap-3 mb-3 last:mb-0">
               <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
-                style={{ background: "linear-gradient(135deg, #0F2554, #1E40AF)" }}>{i + 1}</div>
+                style={{ background: "#0F2554" }}>{i + 1}</div>
               <div>
                 <p className="text-sm font-bold text-gray-900">{t(lang, sk)}</p>
                 <p className="text-xs text-gray-500">{t(lang, skd)}</p>

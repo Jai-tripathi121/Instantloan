@@ -26,7 +26,7 @@ export default function Confirmation() {
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {/* Success icon */}
         <div className="relative mb-6">
-          <div className="w-28 h-28 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}>
+          <div className="w-28 h-28 rounded-full flex items-center justify-center" style={{ background: "#10b981" }}>
             <CheckCircle size={56} className="text-white" />
           </div>
           <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
@@ -40,7 +40,7 @@ export default function Confirmation() {
         </p>
 
         {/* Ref number */}
-        <div className="bg-gradient-to-r from-blue-50 to-blue-50 border border-blue-100 rounded-2xl p-4 w-full mb-5">
+        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 w-full mb-5">
           <p className="text-xs text-blue-500 font-bold mb-1 uppercase tracking-wide">Reference Number</p>
           <p className="text-xl font-black text-blue-900 tracking-wider">{applicationRef}</p>
           <p className="text-xs text-gray-400 mt-1">Save this to track your application status</p>

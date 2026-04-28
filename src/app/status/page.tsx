@@ -6,12 +6,12 @@ import { getApplicationByRef, LoanApplication } from "@/lib/firestore";
 import { ArrowLeft, Search, CheckCircle, Clock, FileText, IndianRupee, XCircle, Loader2 } from "lucide-react";
 
 const STATUS_STEPS = ["submitted", "under_review", "approved", "disbursed"];
-const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; grad: string; text: string }> = {
-  submitted:    { label: "Application Submitted",  icon: FileText,     grad: "from-blue-700 to-blue-900",   text: "text-blue-600" },
-  under_review: { label: "Under Bank Review",       icon: Clock,        grad: "from-amber-400 to-orange-500", text: "text-amber-600" },
-  approved:     { label: "Loan Approved",           icon: CheckCircle,  grad: "from-emerald-500 to-teal-500", text: "text-emerald-600" },
-  rejected:     { label: "Application Rejected",   icon: XCircle,      grad: "from-red-500 to-rose-500",     text: "text-red-600" },
-  disbursed:    { label: "Amount Disbursed",        icon: IndianRupee,  grad: "from-blue-800 to-blue-800","text": "text-blue-800" },
+const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; bg: string; text: string }> = {
+  submitted:    { label: "Application Submitted",  icon: FileText,     bg: "bg-blue-800",    text: "text-blue-600" },
+  under_review: { label: "Under Bank Review",       icon: Clock,        bg: "bg-amber-500",   text: "text-amber-600" },
+  approved:     { label: "Loan Approved",           icon: CheckCircle,  bg: "bg-emerald-600", text: "text-emerald-600" },
+  rejected:     { label: "Application Rejected",   icon: XCircle,      bg: "bg-red-600",     text: "text-red-600" },
+  disbursed:    { label: "Amount Disbursed",        icon: IndianRupee,  bg: "bg-blue-900",    text: "text-blue-800" },
 };
 
 export default function StatusPage() {
@@ -64,7 +64,7 @@ export default function StatusPage() {
         return (
           <div className="space-y-4">
             {/* Status banner */}
-            <div className={`rounded-2xl p-5 text-center text-white bg-gradient-to-r ${cfg.grad}`}>
+            <div className={`rounded-2xl p-5 text-center text-white ${cfg.bg}`}>
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Icon size={28} className="text-white" />
               </div>
@@ -87,14 +87,14 @@ export default function StatusPage() {
                       const active = i === currentIdx;
                       return (
                         <div key={step} className="flex items-center gap-3 relative">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 transition-all ${done ? `bg-gradient-to-r ${sCfg.grad}` : active ? `bg-gradient-to-r ${sCfg.grad}` : "bg-gray-100"}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 z-10 transition-all ${done || active ? sCfg.bg : "bg-gray-100"}`}>
                             {done ? <CheckCircle size={16} className="text-white" />
                               : <SIcon size={14} className={active ? "text-white" : "text-gray-400"} />}
                           </div>
                           <div className="flex-1">
                             <p className={`text-sm font-bold ${done || active ? "text-gray-900" : "text-gray-400"}`}>{sCfg.label}</p>
                           </div>
-                          {active && <span className="text-xs font-black px-2 py-0.5 rounded-full text-white" style={{ background: "linear-gradient(135deg, #0F2554, #1E40AF)" }}>Current</span>}
+                          {active && <span className="text-xs font-black px-2 py-0.5 rounded-full text-white bg-blue-800">Current</span>}
                         </div>
                       );
                     })}
