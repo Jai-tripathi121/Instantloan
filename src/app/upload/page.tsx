@@ -81,7 +81,7 @@ export default function Upload() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-black text-gray-900">{t(lang, "uploadTitle")}</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "uploadTitle")}</h2>
         <p className="text-gray-500 text-sm mt-1">{t(lang, "uploadSub")}</p>
       </div>
 
@@ -91,7 +91,7 @@ export default function Upload() {
           <Shield size={18} className="text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold text-emerald-800">{t(lang, "uploadPrivacy")}</p>
+          <p className="text-sm font-medium text-emerald-800">{t(lang, "uploadPrivacy")}</p>
           <p className="text-xs text-emerald-700 mt-0.5">{t(lang, "uploadPrivacyDesc")}</p>
         </div>
       </div>
@@ -108,13 +108,13 @@ export default function Upload() {
         {file ? (
           <>
             <CheckCircle size={44} className="text-emerald-500 mx-auto mb-2" />
-            <p className="font-bold text-emerald-700">{file.name}</p>
+            <p className="font-medium text-emerald-700">{file.name}</p>
             <p className="text-xs text-emerald-500 mt-1">{(file.size / 1024).toFixed(0)} KB · Tap to change</p>
           </>
         ) : (
           <>
             <FileText size={44} className="text-blue-300 mx-auto mb-2" />
-            <p className="font-bold text-gray-600">{t(lang, "uploadBtn")}</p>
+            <p className="font-medium text-gray-600">{t(lang, "uploadBtn")}</p>
             <p className="text-xs text-gray-400 mt-1">{t(lang, "uploadDrop")}</p>
           </>
         )}
@@ -122,7 +122,7 @@ export default function Upload() {
 
       {/* Password */}
       <div className="mb-5">
-        <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+        <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
           <Lock size={14} className="text-blue-700" /> PDF Password <span className="text-gray-400 font-normal">(optional)</span>
         </label>
         <input type="password" placeholder="Leave blank if not password protected" value={password}
@@ -133,7 +133,7 @@ export default function Upload() {
 
       {/* Bank chips */}
       <div className="bg-slate-50 rounded-2xl p-4 mb-5">
-        <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Supported Banks</p>
+        <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Supported Banks</p>
         <div className="flex flex-wrap gap-2">
           {BANKS.map((b) => (
             <span key={b} className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-gray-600 font-semibold">{b}</span>
@@ -149,7 +149,7 @@ export default function Upload() {
       )}
 
       <button onClick={handleAnalyse} disabled={!file || parsing}
-        className={`w-full font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-gray-400"}`}>
+        className={`w-full font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-gray-400"}`}>
         {parsing ? t(lang, "loading") : (<>{t(lang, "btnAnalyse")} <ChevronRight size={22} /></>)}
       </button>
     </div>

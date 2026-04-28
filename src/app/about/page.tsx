@@ -6,14 +6,14 @@ export default function About() {
       <Link href="/" className="text-blue-600 text-sm font-medium mb-6 block">← Back to Home</Link>
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <span className="text-white font-bold text-3xl">₹</span>
+          <span className="text-white font-medium text-3xl">₹</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">About InstantLoan</h1>
+        <h1 className="text-2xl font-medium text-gray-900">About InstantLoan</h1>
         <p className="text-gray-500 text-sm mt-2">India&apos;s first privacy-first loan eligibility platform</p>
       </div>
       <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
         <div className="bg-blue-50 rounded-2xl p-5">
-          <h2 className="font-bold text-blue-900 text-base mb-2">Our Mission</h2>
+          <h2 className="font-medium text-blue-900 text-base mb-2">Our Mission</h2>
           <p className="text-blue-800">To help every Indian know their exact loan eligibility before applying — without risking their CIBIL score, without giving up their financial data, and without downloading any app.</p>
         </div>
         <div>

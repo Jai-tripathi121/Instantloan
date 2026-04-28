@@ -26,16 +26,16 @@ export default function Campaign() {
     <div className="min-h-screen flex flex-col max-w-md mx-auto px-5 py-8 bg-white">
       <div className="flex items-center gap-2 mb-10">
         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
-          <span className="text-white font-bold text-lg">₹</span>
+          <span className="text-white font-medium text-lg">₹</span>
         </div>
-        <span className="text-xl font-bold text-gray-900">InstantLoan</span>
+        <span className="text-xl font-medium text-gray-900">InstantLoan</span>
       </div>
 
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Zap size={32} className="text-yellow-500" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 leading-tight mb-3">
+        <h1 className="text-3xl font-medium text-gray-900 leading-tight mb-3">
           Aaj ₹99 do.<br />
           <span className="text-blue-600">Kal lakhs bachao.</span>
         </h1>
@@ -45,7 +45,7 @@ export default function Campaign() {
       </div>
 
       <div className="bg-blue-50 rounded-2xl p-4 mb-6 text-center">
-        <p className="text-3xl font-bold text-blue-700">10,000+</p>
+        <p className="text-3xl font-medium text-blue-700">10,000+</p>
         <p className="text-sm text-blue-600 mt-1">loan applications poore India mein matched</p>
       </div>
 
@@ -80,7 +80,7 @@ export default function Campaign() {
       <div className="sticky bottom-4">
         <Link
           href="/?utm_source=campaign"
-          className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-bold py-4 rounded-2xl text-lg shadow-lg shadow-blue-200"
+          className="flex items-center justify-center gap-2 w-full bg-blue-600 text-white font-medium py-4 rounded-2xl text-lg shadow-lg shadow-blue-200"
         >
           Eligibility Check Karo — ₹99 <ChevronRight size={20} />
         </Link>

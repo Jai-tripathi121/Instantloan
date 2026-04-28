@@ -193,21 +193,21 @@ export default function Details() {
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* App logo */}
           <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-200">
-            <span className="text-white font-black text-2xl">₹</span>
+            <span className="text-white font-semibold text-2xl">₹</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-1.5">Check Your Eligibility</h1>
+          <h1 className="text-3xl font-semibold text-gray-900 mb-1.5">Check Your Eligibility</h1>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">
             Log in with your mobile — if you've applied before, we'll resume right where you left off
           </p>
 
           {/* Mobile input */}
           <div className="mb-3">
-            <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
               <Phone size={14} className="text-blue-500" /> Mobile Number
             </label>
             <div className="flex gap-2">
               <div className="flex items-center justify-center border-2 border-gray-100 rounded-xl px-3.5 bg-slate-50 min-w-[52px]">
-                <span className="text-sm font-bold text-gray-500">+91</span>
+                <span className="text-sm font-medium text-gray-500">+91</span>
               </div>
               <input
                 type="tel" inputMode="numeric" placeholder="10-digit mobile"
@@ -226,7 +226,7 @@ export default function Details() {
 
           {!verified && (
             <button onClick={sendOtp} disabled={otpLoading || mobile.length !== 10}
-              className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-base mb-4 disabled:opacity-60 flex items-center justify-center gap-2">
+              className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-base mb-4 disabled:opacity-60 flex items-center justify-center gap-2">
               <Send size={16} />
               {otpLoading ? "Sending..." : otpSent ? "Resend OTP" : t(lang, "btnSendOtp")}
             </button>
@@ -234,15 +234,15 @@ export default function Details() {
 
           {otpSent && !verified && (
             <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
-              <p className="text-xs text-blue-800 font-bold mb-3">OTP sent to +91 {mobile}</p>
+              <p className="text-xs text-blue-800 font-medium mb-3">OTP sent to +91 {mobile}</p>
               <div className="flex gap-2 mb-1">
                 <input
                   type="number" inputMode="numeric" placeholder="6-digit OTP"
                   value={otp} onChange={(e) => setOtp(e.target.value)}
-                  className="flex-1 border-2 border-blue-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 bg-white font-black tracking-[0.3em] text-center"
+                  className="flex-1 border-2 border-blue-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 bg-white font-semibold tracking-[0.3em] text-center"
                 />
                 <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
-                  className="px-5 bg-emerald-500 text-white rounded-xl font-black disabled:opacity-60 flex items-center gap-1.5 text-sm">
+                  className="px-5 bg-emerald-500 text-white rounded-xl font-semibold disabled:opacity-60 flex items-center gap-1.5 text-sm">
                   {otpLoading
                     ? <Loader2 size={16} className="animate-spin" />
                     : <><CheckCircle size={15} /> {t(lang, "btnVerify")}</>
@@ -254,7 +254,7 @@ export default function Details() {
           )}
 
           {phase === "checking" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-blue-800 font-bold mt-5 bg-blue-50 rounded-2xl py-4">
+            <div className="flex items-center justify-center gap-2 text-sm text-blue-800 font-medium mt-5 bg-blue-50 rounded-2xl py-4">
               <Loader2 size={16} className="animate-spin" /> Checking your saved progress...
             </div>
           )}
@@ -286,7 +286,7 @@ export default function Details() {
             <div className="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
               👋
             </div>
-            <h2 className="text-2xl font-black text-gray-900">Welcome back!</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">Welcome back!</h2>
             <p className="text-gray-400 text-sm mt-1">+91 {mobile} · {t(lang, "verified")}</p>
           </div>
 
@@ -297,10 +297,10 @@ export default function Details() {
                 <MapPin size={18} className="text-white" />
               </div>
               <div>
-                <p className="text-xs text-blue-500 font-bold uppercase tracking-wide">
+                <p className="text-xs text-blue-500 font-medium uppercase tracking-wide">
                   You were here — {routeInfo.step}
                 </p>
-                <p className="font-black text-gray-900 text-base">{routeInfo.label}</p>
+                <p className="font-semibold text-gray-900 text-base">{routeInfo.label}</p>
               </div>
             </div>
 
@@ -309,19 +309,19 @@ export default function Details() {
               {ud.name && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400 font-medium">Name</span>
-                  <span className="font-bold text-gray-900">{ud.name}</span>
+                  <span className="font-medium text-gray-900">{ud.name}</span>
                 </div>
               )}
               {ud.employmentType && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400 font-medium">Employment</span>
-                  <span className="font-bold text-gray-900 capitalize">{ud.employmentType}</span>
+                  <span className="font-medium text-gray-900 capitalize">{ud.employmentType}</span>
                 </div>
               )}
               {ud.monthlyIncome && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400 font-medium">Income</span>
-                  <span className="font-bold text-gray-900">
+                  <span className="font-medium text-gray-900">
                     ₹{ud.monthlyIncome.toLocaleString("en-IN")}/mo
                   </span>
                 </div>
@@ -329,19 +329,19 @@ export default function Details() {
               {lr?.loanType && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400 font-medium">Loan Type</span>
-                  <span className="font-bold text-gray-900 capitalize">{lr.loanType}</span>
+                  <span className="font-medium text-gray-900 capitalize">{lr.loanType}</span>
                 </div>
               )}
               {lr?.amount && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400 font-medium">Amount</span>
-                  <span className="font-bold text-gray-900">
+                  <span className="font-medium text-gray-900">
                     ₹{lr.amount.toLocaleString("en-IN")}
                   </span>
                 </div>
               )}
               {existingSession.paymentDone && (
-                <div className="flex items-center gap-1.5 text-sm text-emerald-600 font-bold pt-1 border-t border-gray-100">
+                <div className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium pt-1 border-t border-gray-100">
                   <CheckCircle size={13} /> Payment complete
                 </div>
               )}
@@ -349,12 +349,12 @@ export default function Details() {
           </div>
 
           <button onClick={handleResume}
-            className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-3">
+            className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-3">
             <ChevronRight size={20} /> Continue from {routeInfo.label}
           </button>
 
           <button onClick={handleStartFresh}
-            className="w-full flex items-center justify-center gap-2 text-gray-500 font-bold py-3.5 rounded-2xl border-2 border-gray-100 hover:border-gray-200 transition-all">
+            className="w-full flex items-center justify-center gap-2 text-gray-500 font-medium py-3.5 rounded-2xl border-2 border-gray-100 hover:border-gray-200 transition-all">
             <RotateCcw size={15} /> Start Fresh
           </button>
         </div>
@@ -384,18 +384,18 @@ export default function Details() {
       {/* Verified mobile badge */}
       <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3.5 py-2.5 mb-5">
         <CheckCircle size={15} className="text-emerald-500 flex-shrink-0" />
-        <span className="text-xs font-bold text-emerald-700">+91 {mobile} — verified</span>
+        <span className="text-xs font-medium text-emerald-700">+91 {mobile} — verified</span>
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-black text-gray-900">{t(lang, "detailsTitle")}</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "detailsTitle")}</h2>
         <p className="text-gray-500 text-sm mt-1">{t(lang, "detailsSub")}</p>
       </div>
 
       <div className="space-y-4 flex-1">
         {/* Name */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <User size={14} className="text-blue-500" /> {t(lang, "labelName")}
           </label>
           <input type="text" placeholder="As per PAN card" value={name}
@@ -406,7 +406,7 @@ export default function Details() {
 
         {/* PAN */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <CreditCard size={14} className="text-blue-500" /> {t(lang, "labelPan")}
           </label>
           <input type="text" placeholder="ABCDE1234F" value={pan}
@@ -417,7 +417,7 @@ export default function Details() {
 
         {/* DOB */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <Calendar size={14} className="text-blue-500" /> {t(lang, "labelDob")}
           </label>
           <input type="date" value={dob}
@@ -428,13 +428,13 @@ export default function Details() {
 
         {/* Employment */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-2">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
             <Briefcase size={14} className="text-blue-500" /> {t(lang, "labelEmpType")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {(["salaried", "self-employed", "business"] as const).map((et) => (
               <button key={et} onClick={() => setEmploymentType(et)}
-                className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${
+                className={`py-3 rounded-xl text-sm font-medium border-2 transition-all ${
                   employmentType === et
                     ? "border-blue-500 bg-blue-50 text-blue-900"
                     : "border-gray-100 text-gray-600"
@@ -447,7 +447,7 @@ export default function Details() {
 
         {/* Income */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelIncome")}
           </label>
           <input type="number" inputMode="numeric" placeholder="jaise 50000" value={monthlyIncome}
@@ -458,7 +458,7 @@ export default function Details() {
 
         {/* CIBIL */}
         <div>
-          <label className="text-sm font-bold text-gray-700 mb-1.5 block">
+          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
             {t(lang, "labelCibil")} <span className="text-gray-400 font-normal">(optional)</span>
           </label>
           <input type="number" inputMode="numeric" placeholder="300–900, jaise 750"
@@ -469,7 +469,7 @@ export default function Details() {
       </div>
 
       <button onClick={handleNext}
-        className="mt-6 w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
+        className="mt-6 w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
         {t(lang, "btnNext")} <ChevronRight size={22} />
       </button>
     </div>

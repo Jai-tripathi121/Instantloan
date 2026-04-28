@@ -100,7 +100,7 @@ export default function Apply() {
         <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
-        <h2 className="text-xl font-black text-gray-900">Loan Application</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Loan Application</h2>
       </div>
 
       {selectedBank && (
@@ -109,13 +109,13 @@ export default function Apply() {
             <div className="flex items-center gap-3">
               <BankLogo logoUrl={selectedBank.logoUrl} logo={selectedBank.logo} color={selectedBank.color} size={44} />
               <div>
-                <p className="font-black text-gray-900">{selectedBank.bankName}</p>
-                <p className="text-xs font-bold" style={{ color: selectedBank.color }}>₹{selectedBank.approvedAmount.toLocaleString("en-IN")} @ {selectedBank.interestRate}%</p>
+                <p className="font-semibold text-gray-900">{selectedBank.bankName}</p>
+                <p className="text-xs font-medium" style={{ color: selectedBank.color }}>₹{selectedBank.approvedAmount.toLocaleString("en-IN")} @ {selectedBank.interestRate}%</p>
               </div>
             </div>
             <div className="text-right">
               <p className="text-xs text-gray-400">EMI</p>
-              <p className="font-black text-gray-900">₹{selectedBank.emi.toLocaleString("en-IN")}/mo</p>
+              <p className="font-semibold text-gray-900">₹{selectedBank.emi.toLocaleString("en-IN")}/mo</p>
             </div>
           </div>
         </div>
@@ -126,21 +126,21 @@ export default function Apply() {
         <div className="bg-slate-50 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
             <User size={14} className="text-blue-500" />
-            <p className="text-xs font-black text-gray-500 uppercase tracking-wide">Pre-filled Details</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Pre-filled Details</p>
           </div>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <span className="text-gray-400">Name</span><span className="font-bold">{userDetails.name}</span>
-            <span className="text-gray-400">PAN</span><span className="font-bold">{userDetails.pan}</span>
-            <span className="text-gray-400">Mobile</span><span className="font-bold">{userDetails.mobile}</span>
-            <span className="text-gray-400">Employment</span><span className="font-bold capitalize">{userDetails.employmentType}</span>
-            <span className="text-gray-400">Income</span><span className="font-bold">₹{userDetails.monthlyIncome?.toLocaleString("en-IN")}/mo</span>
-            <span className="text-gray-400">Loan Type</span><span className="font-bold capitalize">{loanRequirement.loanType}</span>
+            <span className="text-gray-400">Name</span><span className="font-medium">{userDetails.name}</span>
+            <span className="text-gray-400">PAN</span><span className="font-medium">{userDetails.pan}</span>
+            <span className="text-gray-400">Mobile</span><span className="font-medium">{userDetails.mobile}</span>
+            <span className="text-gray-400">Employment</span><span className="font-medium capitalize">{userDetails.employmentType}</span>
+            <span className="text-gray-400">Income</span><span className="font-medium">₹{userDetails.monthlyIncome?.toLocaleString("en-IN")}/mo</span>
+            <span className="text-gray-400">Loan Type</span><span className="font-medium capitalize">{loanRequirement.loanType}</span>
           </div>
         </div>
 
         {/* Address */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <MapPin size={14} className="text-blue-500" /> Current Address
           </label>
           <textarea rows={3} placeholder="House/Flat No., Street, Area, City" value={address}
@@ -151,7 +151,7 @@ export default function Apply() {
 
         {/* Pincode */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <Hash size={14} className="text-blue-500" /> Pincode
           </label>
           <input type="number" inputMode="numeric" placeholder="6-digit pincode" value={pincode}
@@ -167,7 +167,7 @@ export default function Apply() {
           { label: "Passport Photo (Optional)", file: photo, onFile: setPhoto, ref: photoRef, err: undefined, accept: "image/*" },
         ].map((u) => (
           <div key={u.label}>
-            <label className="block text-sm font-bold text-gray-700 mb-1.5">{u.label}</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">{u.label}</label>
             <div onClick={() => u.ref.current?.click()}
               className={`border-2 border-dashed rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all ${u.file ? "border-emerald-400 bg-emerald-50" : u.err ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 hover:border-blue-300"}`}>
               <input ref={u.ref} type="file" accept={u.accept} className="hidden"
@@ -176,7 +176,7 @@ export default function Apply() {
                 {u.file ? <CheckCircle size={20} className="text-emerald-600" /> : <Camera size={20} className="text-gray-400" />}
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-700">{u.file ? u.file.name : `Upload ${u.label}`}</p>
+                <p className="text-sm font-medium text-gray-700">{u.file ? u.file.name : `Upload ${u.label}`}</p>
                 <p className="text-xs text-gray-400">{u.file ? `${(u.file.size / 1024).toFixed(0)} KB` : "JPG, PNG ya PDF"}</p>
               </div>
             </div>
@@ -187,7 +187,7 @@ export default function Apply() {
 
       <div className="mt-6">
         {submitting && submitStep && (
-          <div className="flex items-center justify-center gap-2 text-xs text-blue-800 mb-2 font-bold">
+          <div className="flex items-center justify-center gap-2 text-xs text-blue-800 mb-2 font-medium">
             <Loader2 size={14} className="animate-spin" /> {submitStep}
           </div>
         )}
@@ -195,7 +195,7 @@ export default function Apply() {
           By submitting, you authorise {selectedBank?.bankName} to perform a hard CIBIL inquiry
         </p>
         <button onClick={handleSubmit} disabled={submitting}
-          className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2 active:scale-95 transition-all">
+          className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2 active:scale-95 transition-all">
           {submitting ? "Submitting..." : (<>Submit to {selectedBank?.bankName ?? "Bank"} <ChevronRight size={22} /></>)}
         </button>
       </div>

@@ -17,7 +17,7 @@ const GRADE_CONFIG: Record<RiskGrade, { label: string; bg: string; text: string;
 function RiskGradeBadge({ grade }: { grade: RiskGrade }) {
   const cfg = GRADE_CONFIG[grade];
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-black px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
+    <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.text}`}>
       <ShieldCheck size={10} /> {cfg.label}
     </span>
   );
@@ -42,9 +42,9 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
         <div className="flex items-center gap-3">
           <BankLogo logoUrl={offer.logoUrl} logo={offer.logo} color={offer.color} size={44} />
           <div>
-            <p className="font-black text-gray-900">{offer.bankName}</p>
+            <p className="font-semibold text-gray-900">{offer.bankName}</p>
             <div className="flex items-center gap-1.5 flex-wrap">
-              <div className="flex items-center gap-1 text-xs text-emerald-600 font-bold">
+              <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
                 <CheckCircle size={11} /> Pre-Approved
               </div>
               {offer.riskGrade && <RiskGradeBadge grade={offer.riskGrade} />}
@@ -52,7 +52,7 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
           </div>
         </div>
         {isTop && (
-          <div className="flex items-center gap-1 bg-amber-400 text-white text-xs font-black px-2.5 py-1 rounded-full">
+          <div className="flex items-center gap-1 bg-amber-400 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
             <Award size={11} /> Best Rate
           </div>
         )}
@@ -62,8 +62,8 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
       {offer.approvalProbability !== undefined && (
         <div className="px-4 py-2 bg-white border-t border-gray-50">
           <div className="flex justify-between text-xs mb-1.5">
-            <span className="font-bold text-gray-500">Approval Probability</span>
-            <span className={`font-black ${offer.approvalProbability >= 70 ? "text-emerald-600" : offer.approvalProbability >= 40 ? "text-amber-600" : "text-red-500"}`}>
+            <span className="font-medium text-gray-500">Approval Probability</span>
+            <span className={`font-semibold ${offer.approvalProbability >= 70 ? "text-emerald-600" : offer.approvalProbability >= 40 ? "text-amber-600" : "text-red-500"}`}>
               {offer.approvalProbability}%
             </span>
           </div>
@@ -85,13 +85,13 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
         <div className="flex justify-between mb-3">
           <div>
             <p className="text-xs text-gray-400 mb-0.5">Approved Amount</p>
-            <p className="text-2xl font-black text-gray-900">₹{offer.approvedAmount.toLocaleString("en-IN")}</p>
+            <p className="text-2xl font-semibold text-gray-900">₹{offer.approvedAmount.toLocaleString("en-IN")}</p>
           </div>
           <div className="text-right">
             <p className="text-xs text-gray-400 mb-0.5">Interest Rate</p>
             <div className="flex items-center gap-1 justify-end">
               <TrendingDown size={14} className="text-emerald-500" />
-              <p className="text-2xl font-black text-emerald-600">{offer.interestRate}%</p>
+              <p className="text-2xl font-semibold text-emerald-600">{offer.interestRate}%</p>
             </div>
           </div>
         </div>
@@ -99,20 +99,20 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
         <div className="grid grid-cols-3 gap-2 mb-4">
           <div className="bg-blue-50 rounded-xl p-2.5 text-center">
             <p className="text-xs text-blue-400 mb-0.5">EMI/Month</p>
-            <p className="text-sm font-black text-blue-900">₹{offer.emi.toLocaleString("en-IN")}</p>
+            <p className="text-sm font-semibold text-blue-900">₹{offer.emi.toLocaleString("en-IN")}</p>
           </div>
           <div className="bg-blue-50 rounded-xl p-2.5 text-center">
             <p className="text-xs text-blue-400 mb-0.5">Tenure</p>
-            <p className="text-sm font-black text-blue-700">{offer.tenure >= 12 ? `${Math.round(offer.tenure / 12)} yr` : `${offer.tenure}m`}</p>
+            <p className="text-sm font-semibold text-blue-700">{offer.tenure >= 12 ? `${Math.round(offer.tenure / 12)} yr` : `${offer.tenure}m`}</p>
           </div>
           <div className="bg-amber-50 rounded-xl p-2.5 text-center">
             <p className="text-xs text-amber-400 mb-0.5">Proc. Fee</p>
-            <p className="text-sm font-black text-amber-700">₹{offer.processingFee.toLocaleString("en-IN")}</p>
+            <p className="text-sm font-semibold text-amber-700">₹{offer.processingFee.toLocaleString("en-IN")}</p>
           </div>
         </div>
 
         <button onClick={onApply}
-          className={`w-full font-black py-3 rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 ${isTop ? "btn-gradient text-white" : "bg-gray-900 text-white"}`}>
+          className={`w-full font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-1.5 transition-all active:scale-95 ${isTop ? "btn-gradient text-white" : "bg-gray-900 text-white"}`}>
           {offer.bankName} {applyLabel} <ChevronRight size={16} />
         </button>
       </div>
@@ -154,9 +154,9 @@ function ResultsInner() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 text-center py-6 bg-white">
         <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl">😔</div>
-        <h2 className="text-xl font-black text-gray-900 mb-2">No Eligible Banks Found</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-2">No Eligible Banks Found</h2>
         <p className="text-gray-500 text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
-        <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg">Try Again</button>
+        <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg">Try Again</button>
       </div>
     );
   }
@@ -169,26 +169,26 @@ function ResultsInner() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <Sparkles size={18} className="text-yellow-400" />
-              <h2 className="text-2xl font-black">{t(lang, "resultHeading")}</h2>
+              <h2 className="text-2xl font-semibold">{t(lang, "resultHeading")}</h2>
             </div>
             <p className="text-white/70 text-sm">{bankOffers.length} {t(lang, "resultSub")}</p>
           </div>
-          <button onClick={shareWA} className="flex items-center gap-1.5 bg-green-500 text-white text-xs font-black px-3 py-2 rounded-xl">
+          <button onClick={shareWA} className="flex items-center gap-1.5 bg-green-500 text-white text-xs font-semibold px-3 py-2 rounded-xl">
             <Share2 size={13} /> Share
           </button>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div className="glass rounded-xl p-2.5 text-center">
             <p className="text-xs text-white/60 mb-0.5">Income</p>
-            <p className="text-sm font-black">₹{(income / 1000).toFixed(0)}K/mo</p>
+            <p className="text-sm font-semibold">₹{(income / 1000).toFixed(0)}K/mo</p>
           </div>
           <div className="glass rounded-xl p-2.5 text-center">
             <p className="text-xs text-white/60 mb-0.5">FOIR</p>
-            <p className="text-sm font-black">{Math.round(foir * 100)}%</p>
+            <p className="text-sm font-semibold">{Math.round(foir * 100)}%</p>
           </div>
           <div className="glass rounded-xl p-2.5 text-center">
             <p className="text-xs text-white/60 mb-0.5">Banks</p>
-            <p className="text-sm font-black">{bankOffers.length} Match</p>
+            <p className="text-sm font-semibold">{bankOffers.length} Match</p>
           </div>
         </div>
       </div>
@@ -208,7 +208,7 @@ function ResultsInner() {
 
 export default function Results() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-blue-800 font-bold">Loading results...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-blue-800 font-medium">Loading results...</div></div>}>
       <ResultsInner />
     </Suspense>
   );

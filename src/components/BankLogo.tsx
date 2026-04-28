@@ -32,7 +32,7 @@ export default function BankLogo({ logoUrl, logo, color, size = 44, className = 
 
   return (
     <div
-      className={`rounded-xl flex items-center justify-center text-white font-black flex-shrink-0 ${className}`}
+      className={`rounded-xl flex items-center justify-center text-white font-semibold flex-shrink-0 ${className}`}
       style={{ width: wh, height: wh, minWidth: wh, backgroundColor: color, fontSize: size * 0.22 }}
     >
       {logo}

@@ -114,7 +114,7 @@ export default function Payment() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-black text-gray-900">{t(lang, "payTitle")}</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "payTitle")}</h2>
         <p className="text-gray-500 text-sm mt-1">{t(lang, "paySub")}</p>
       </div>
 
@@ -122,11 +122,11 @@ export default function Payment() {
       <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "#0F2554" }}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
         <div className="relative p-5 text-white text-center">
-          <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-bold px-3 py-1 rounded-full mb-2">
+          <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-medium px-3 py-1 rounded-full mb-2">
             <Sparkles size={12} /> AI Eligibility Report
           </div>
           <div className="flex items-end justify-center gap-2 mb-1">
-            <span className="text-5xl font-black">₹99</span>
+            <span className="text-5xl font-semibold">₹99</span>
             <span className="text-white/50 text-xl line-through mb-1">₹499</span>
           </div>
           <p className="text-white/70 text-xs">One-time · Non-refundable · Instant delivery</p>
@@ -141,7 +141,7 @@ export default function Payment() {
           { key: "bank",     label: "Bank Transfer", icon: Building2 },
         ] as { key: typeof tab; label: string; icon: typeof CreditCard }[]).map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === t.key ? "bg-white shadow text-blue-900" : "text-gray-500"}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-all ${tab === t.key ? "bg-white shadow text-blue-900" : "text-gray-500"}`}>
             <t.icon size={13} /> {t.label}
           </button>
         ))}
@@ -151,7 +151,7 @@ export default function Payment() {
       {tab === "razorpay" && (
         <div className="flex-1 flex flex-col">
           <div className="bg-slate-50 rounded-2xl p-4 mb-5">
-            <p className="text-sm font-black text-gray-800 mb-3">What you get for ₹99</p>
+            <p className="text-sm font-semibold text-gray-800 mb-3">What you get for ₹99</p>
             <div className="space-y-2">
               {BENEFITS.map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5">
@@ -169,7 +169,7 @@ export default function Payment() {
             ))}
           </div>
           <button onClick={handlePay} disabled={loading}
-            className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2">
+            className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2">
             {loading ? t(lang, "loading") : (<>₹99 {t(lang, "applyBtn")} <ChevronRight size={22} /></>)}
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-3">
@@ -183,7 +183,7 @@ export default function Payment() {
       {tab === "upi" && (
         <div className="flex-1 flex flex-col">
           <div className="bg-white border-2 border-gray-100 rounded-2xl p-5 mb-4 text-center">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">Scan QR Code</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan QR Code</p>
             {/* QR code via API */}
             <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100">
               <img
@@ -197,8 +197,8 @@ export default function Payment() {
             {/* UPI ID copy */}
             <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between border border-gray-100 mb-3">
               <div className="text-left">
-                <p className="text-xs text-gray-400 font-bold mb-0.5">UPI ID</p>
-                <p className="font-black text-gray-900 text-sm">{UPI_ID}</p>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">UPI ID</p>
+                <p className="font-semibold text-gray-900 text-sm">{UPI_ID}</p>
               </div>
               <button onClick={() => copy(UPI_ID, setCopiedUpi)}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedUpi ? "bg-emerald-100" : "bg-white border border-gray-200"}`}>
@@ -207,19 +207,19 @@ export default function Payment() {
             </div>
 
             <button onClick={openUpiApp}
-              className="w-full border-2 border-blue-200 text-blue-900 font-black py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+              className="w-full border-2 border-blue-200 text-blue-900 font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
               <Smartphone size={16} /> Open UPI App
             </button>
           </div>
 
           {/* After payment - enter UTR */}
           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-black text-amber-800 mb-2">Enter UTR after payment</p>
+            <p className="text-sm font-semibold text-amber-800 mb-2">Enter UTR after payment</p>
             <input type="text" placeholder="UTR / Transaction ID (12 digits)" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
-              className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full btn-gradient text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
               {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>
@@ -233,31 +233,31 @@ export default function Payment() {
           <div className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden mb-4">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
               <Building2 size={15} className="text-blue-800" />
-              <p className="text-sm font-black text-gray-800">Bank Transfer Details</p>
+              <p className="text-sm font-semibold text-gray-800">Bank Transfer Details</p>
             </div>
 
             {/* Bank name */}
             <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-              <p className="text-xs text-gray-400 font-bold">BANK</p>
+              <p className="text-xs text-gray-400 font-medium">BANK</p>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-md overflow-hidden bg-red-700 flex items-center justify-center">
-                  <span className="text-white text-xs font-black">IF</span>
+                  <span className="text-white text-xs font-semibold">IF</span>
                 </div>
-                <p className="font-black text-gray-900 text-sm">{BANK_DETAILS.bank}</p>
+                <p className="font-semibold text-gray-900 text-sm">{BANK_DETAILS.bank}</p>
               </div>
             </div>
 
             {/* A/C Holder */}
             <div className="px-5 py-3.5 border-b border-gray-50">
-              <p className="text-xs text-gray-400 font-bold mb-0.5">A/C HOLDER</p>
-              <p className="font-black text-gray-900">{BANK_DETAILS.holder}</p>
+              <p className="text-xs text-gray-400 font-medium mb-0.5">A/C HOLDER</p>
+              <p className="font-semibold text-gray-900">{BANK_DETAILS.holder}</p>
             </div>
 
             {/* A/C Number */}
             <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400 font-bold mb-0.5">A/C NUMBER</p>
-                <p className="font-black text-gray-900 tracking-wider">{BANK_DETAILS.account}</p>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">A/C NUMBER</p>
+                <p className="font-semibold text-gray-900 tracking-wider">{BANK_DETAILS.account}</p>
               </div>
               <button onClick={() => copy(BANK_DETAILS.account, setCopiedAcc)}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedAcc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
@@ -268,8 +268,8 @@ export default function Payment() {
             {/* IFSC */}
             <div className="px-5 py-3.5 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400 font-bold mb-0.5">IFSC</p>
-                <p className="font-black text-gray-900 tracking-wider">{BANK_DETAILS.ifsc}</p>
+                <p className="text-xs text-gray-400 font-medium mb-0.5">IFSC</p>
+                <p className="font-semibold text-gray-900 tracking-wider">{BANK_DETAILS.ifsc}</p>
               </div>
               <button onClick={() => copy(BANK_DETAILS.ifsc, setCopiedIfsc)}
                 className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedIfsc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
@@ -280,18 +280,18 @@ export default function Payment() {
 
           {/* Amount reminder */}
           <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
-            <p className="text-sm font-bold text-blue-900">Transfer Amount</p>
-            <p className="text-2xl font-black text-blue-900">₹99</p>
+            <p className="text-sm font-medium text-blue-900">Transfer Amount</p>
+            <p className="text-2xl font-semibold text-blue-900">₹99</p>
           </div>
 
           {/* UTR entry */}
           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-black text-amber-800 mb-2">Enter UTR / Reference after transfer</p>
+            <p className="text-sm font-semibold text-amber-800 mb-2">Enter UTR / Reference after transfer</p>
             <input type="text" placeholder="UTR / Transaction Reference" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
-              className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
+              className="w-full btn-gradient text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
               {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>

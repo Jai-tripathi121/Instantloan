@@ -40,17 +40,17 @@ export default function StatusPage() {
         <button onClick={() => router.push("/")} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
-        <h2 className="text-xl font-black text-gray-900">Track Application</h2>
+        <h2 className="text-xl font-semibold text-gray-900">Track Application</h2>
       </div>
 
       <div className="mb-6">
-        <label className="block text-sm font-bold text-gray-700 mb-1.5">Reference Number</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1.5">Reference Number</label>
         <div className="flex gap-2">
           <input type="text" placeholder="e.g. HDFCBANK12345678" value={ref}
             onChange={(e) => setRef(e.target.value.toUpperCase())}
-            className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 uppercase tracking-wider font-bold" />
+            className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 uppercase tracking-wider font-medium" />
           <button onClick={handleSearch} disabled={loading || !ref.trim()}
-            className="px-4 py-2 btn-gradient text-white rounded-xl font-bold disabled:opacity-60 flex items-center gap-1.5">
+            className="px-4 py-2 btn-gradient text-white rounded-xl font-medium disabled:opacity-60 flex items-center gap-1.5">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
             {!loading && "Track"}
           </button>
@@ -68,14 +68,14 @@ export default function StatusPage() {
               <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Icon size={28} className="text-white" />
               </div>
-              <p className="text-xl font-black">{cfg.label}</p>
+              <p className="text-xl font-semibold">{cfg.label}</p>
               <p className="text-white/70 text-xs mt-1">Ref: {app.referenceNo}</p>
             </div>
 
             {/* Progress */}
             {app.status !== "rejected" && (
               <div className="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-                <p className="text-sm font-black text-gray-700 mb-4">Application Progress</p>
+                <p className="text-sm font-semibold text-gray-700 mb-4">Application Progress</p>
                 <div className="relative">
                   {/* Vertical line */}
                   <div className="absolute left-4 top-4 bottom-4 w-0.5 bg-gray-100" />
@@ -92,9 +92,9 @@ export default function StatusPage() {
                               : <SIcon size={14} className={active ? "text-white" : "text-gray-400"} />}
                           </div>
                           <div className="flex-1">
-                            <p className={`text-sm font-bold ${done || active ? "text-gray-900" : "text-gray-400"}`}>{sCfg.label}</p>
+                            <p className={`text-sm font-medium ${done || active ? "text-gray-900" : "text-gray-400"}`}>{sCfg.label}</p>
                           </div>
-                          {active && <span className="text-xs font-black px-2 py-0.5 rounded-full text-white bg-blue-800">Current</span>}
+                          {active && <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white bg-blue-800">Current</span>}
                         </div>
                       );
                     })}
@@ -105,13 +105,13 @@ export default function StatusPage() {
 
             {/* Details */}
             <div className="bg-slate-50 rounded-2xl p-4">
-              <p className="text-xs font-black text-gray-500 uppercase tracking-wide mb-3">Application Details</p>
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Application Details</p>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-gray-400">Applicant</span><span className="font-bold">{app.name}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Bank</span><span className="font-bold">{app.bankName}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Amount</span><span className="font-black text-emerald-600">₹{app.approvedAmount.toLocaleString("en-IN")}</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">Rate</span><span className="font-bold">{app.interestRate}% p.a.</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">EMI</span><span className="font-black text-blue-800">₹{app.emi.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Applicant</span><span className="font-medium">{app.name}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Bank</span><span className="font-medium">{app.bankName}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Amount</span><span className="font-semibold text-emerald-600">₹{app.approvedAmount.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">Rate</span><span className="font-medium">{app.interestRate}% p.a.</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">EMI</span><span className="font-semibold text-blue-800">₹{app.emi.toLocaleString("en-IN")}</span></div>
               </div>
             </div>
           </div>

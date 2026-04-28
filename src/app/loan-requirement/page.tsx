@@ -122,7 +122,7 @@ export default function LoanRequirement() {
       </div>
 
       <div className="mb-4">
-        <h2 className="text-2xl font-black text-gray-900">{t(lang, "loanTitle")}</h2>
+        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "loanTitle")}</h2>
         <p className="text-gray-500 text-sm mt-1">{t(lang, "loanSub")}</p>
       </div>
 
@@ -132,7 +132,7 @@ export default function LoanRequirement() {
             <CheckCircle size={20} className="text-emerald-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-black text-emerald-800">
+            <p className="text-sm font-semibold text-emerald-800">
               Pre-Approved Profile ✦ {preApproval.count} banks eligible
             </p>
             <p className="text-xs text-emerald-600 mt-0.5">
@@ -142,7 +142,7 @@ export default function LoanRequirement() {
               } · from {preApproval.bestRate}% p.a.
             </p>
           </div>
-          <span className={`flex items-center gap-1 text-xs font-black px-2 py-1 rounded-full flex-shrink-0 ${GRADE_COLORS[preApproval.grade]}`}>
+          <span className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ${GRADE_COLORS[preApproval.grade]}`}>
             <ShieldCheck size={10} /> {preApproval.grade}
           </span>
         </div>
@@ -151,7 +151,7 @@ export default function LoanRequirement() {
       <div className="space-y-6 flex-1">
         {/* Loan Type */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">{t(lang, "labelLoanType")}</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t(lang, "labelLoanType")}</label>
           <div className="grid grid-cols-2 gap-2.5">
             {LOAN_TYPES.map((lt, idx) => {
               const active = loanType === lt.type;
@@ -164,7 +164,7 @@ export default function LoanRequirement() {
                     <lt.icon size={16} className={active ? "text-white" : lt.color} />
                   </div>
                   <div>
-                    <p className={`text-sm font-black leading-tight ${active ? "text-blue-900" : "text-gray-800"}`}>{lt.label}</p>
+                    <p className={`text-sm font-semibold leading-tight ${active ? "text-blue-900" : "text-gray-800"}`}>{lt.label}</p>
                     <p className={`text-xs mt-0.5 ${active ? "text-blue-500" : "text-gray-400"}`}>{lt.sub}</p>
                   </div>
                 </button>
@@ -176,10 +176,10 @@ export default function LoanRequirement() {
         {/* Amount */}
         <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
           <div className="flex justify-between items-center mb-4">
-            <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
+            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
               <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelAmount")}
             </label>
-            <span className="text-2xl font-black text-blue-800">{fmt(clampedAmount)}</span>
+            <span className="text-2xl font-semibold text-blue-800">{fmt(clampedAmount)}</span>
           </div>
           <input type="range" min={range.min} max={range.max} step={range.step}
             value={clampedAmount} onChange={(e) => setAmount(Number(e.target.value))}
@@ -191,13 +191,13 @@ export default function LoanRequirement() {
 
         {/* Tenure */}
         <div>
-          <label className="block text-sm font-bold text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             {t(lang, "labelTenure")}: <span className="text-blue-800">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {TENURES.map((t) => (
               <button key={t} onClick={() => setTenure(t)}
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold border-2 transition-all ${tenure === t ? "border-blue-500 bg-blue-50 text-blue-900" : "border-gray-100 text-gray-600"}`}>
+                className={`px-3.5 py-2 rounded-xl text-sm font-medium border-2 transition-all ${tenure === t ? "border-blue-500 bg-blue-50 text-blue-900" : "border-gray-100 text-gray-600"}`}>
                 {t < 12 ? `${t}m` : `${Math.round(t / 12)}yr`}
               </button>
             ))}
@@ -206,20 +206,20 @@ export default function LoanRequirement() {
 
         {/* Promo */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
+          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
             <Tag size={14} className="text-pink-500" /> Promo Code <span className="text-gray-400 font-normal">(optional)</span>
           </label>
           {!promoApplied ? (
             <div className="flex gap-2">
               <input type="text" placeholder="Code daalo" value={promo}
                 onChange={(e) => { setPromo(e.target.value.toUpperCase()); setPromoError(""); }}
-                className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-pink-400 uppercase font-bold" />
-              <button onClick={applyPromo} className="px-4 py-2 bg-pink-500 text-white rounded-xl text-sm font-bold">Apply</button>
+                className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-pink-400 uppercase font-medium" />
+              <button onClick={applyPromo} className="px-4 py-2 bg-pink-500 text-white rounded-xl text-sm font-medium">Apply</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-200 rounded-xl px-4 py-3">
               <CheckCircle size={16} className="text-emerald-500" />
-              <span className="text-sm text-emerald-700 font-bold">{promo} — Only ₹{price}!</span>
+              <span className="text-sm text-emerald-700 font-medium">{promo} — Only ₹{price}!</span>
               <button onClick={() => { setPromoApplied(false); setPrice(99); setPromo(""); }} className="ml-auto text-xs text-gray-400">Hatao</button>
             </div>
           )}
@@ -228,17 +228,17 @@ export default function LoanRequirement() {
 
         {/* Price */}
         <div className={`rounded-2xl p-4 border-2 text-center ${promoApplied ? "bg-emerald-50 border-emerald-200" : "bg-blue-50 border-blue-100"}`}>
-          <p className="text-sm font-bold text-gray-600">AI Report Price</p>
+          <p className="text-sm font-medium text-gray-600">AI Report Price</p>
           <div className="flex items-center justify-center gap-2 mt-1">
             {promoApplied && <span className="text-xl text-gray-400 line-through">₹99</span>}
-            <span className={`text-4xl font-black ${promoApplied ? "text-emerald-600" : "text-blue-800"}`}>₹{price}</span>
+            <span className={`text-4xl font-semibold ${promoApplied ? "text-emerald-600" : "text-blue-800"}`}>₹{price}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">One-time · Non-refundable</p>
         </div>
       </div>
 
       <button onClick={handleNext}
-        className="mt-6 w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
+        className="mt-6 w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2">
         {t(lang, "btnNext")} <ChevronRight size={22} />
       </button>
     </div>

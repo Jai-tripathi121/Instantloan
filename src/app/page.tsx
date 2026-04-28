@@ -47,17 +47,17 @@ export default function Landing() {
           {/* Nav */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg"
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-semibold text-lg shadow-lg"
                 style={{ background: "#0F2554" }}>₹</div>
               <div>
-                <p className="text-white font-black text-lg leading-none">InstantLoan</p>
+                <p className="text-white font-semibold text-lg leading-none">InstantLoan</p>
                 <p className="text-white/50 text-xs">Loan Eligibility Checker</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <LanguageSwitcher />
               <Link href="/status"
-                className="flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl text-white/90 border border-white/20"
+                className="flex items-center gap-1.5 text-xs font-medium px-3.5 py-2 rounded-xl text-white/90 border border-white/20"
                 style={{ background: "rgba(255,255,255,0.1)" }}>
                 <Search size={13} /> Track
               </Link>
@@ -69,7 +69,7 @@ export default function Landing() {
             <div className="mb-6 rounded-2xl p-4 border border-white/20" style={{ background: "rgba(255,255,255,0.1)" }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-black">{t(lang, "welcomeBack")}, {userDetails.name?.split(" ")[0] || "User"}! 👋</p>
+                  <p className="text-sm font-semibold">{t(lang, "welcomeBack")}, {userDetails.name?.split(" ")[0] || "User"}! 👋</p>
                   <p className="text-xs text-white/60 mt-0.5">
                     {loanRequirement.loanType ? `${loanRequirement.loanType} loan check in progress` : "Your session is saved"}
                   </p>
@@ -79,7 +79,7 @@ export default function Landing() {
                 </button>
               </div>
               <button onClick={() => router.push(resumeRoute)}
-                className="mt-3 w-full bg-white text-blue-900 font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5">
+                className="mt-3 w-full bg-white text-blue-900 font-semibold py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5">
                 <ChevronRight size={15} /> {t(lang, "ctaResume")}
               </button>
             </div>
@@ -93,7 +93,7 @@ export default function Landing() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-[2.6rem] font-black leading-[1.1] mb-3">
+          <h1 className="text-[2.6rem] font-semibold leading-[1.1] mb-3">
             {t(lang, "heroHeading").split("\n")[0]}<br />
             <span className="gradient-text">{t(lang, "heroHeading").split("\n")[1] ?? ""}</span>
           </h1>
@@ -114,7 +114,7 @@ export default function Landing() {
                   }} />
               </div>
             ))}
-            <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-white/50 text-xs font-bold border border-white/20"
+            <div className="flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center text-white/50 text-xs font-medium border border-white/20"
               style={{ background: "rgba(255,255,255,0.08)" }}>+21</div>
           </div>
 
@@ -124,12 +124,12 @@ export default function Landing() {
               <div>
                 <p className="text-white/60 text-xs font-medium mb-1">{t(lang, "priceLabel")}</p>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-black">₹99</span>
+                  <span className="text-4xl font-semibold">₹99</span>
                   <span className="text-white/35 text-base line-through">₹499</span>
                 </div>
               </div>
               <div className="text-right">
-                <div className="bg-emerald-400 text-emerald-900 text-xs font-black px-2.5 py-1 rounded-full mb-1">{t(lang, "priceOff")}</div>
+                <div className="bg-emerald-400 text-emerald-900 text-xs font-semibold px-2.5 py-1 rounded-full mb-1">{t(lang, "priceOff")}</div>
                 <p className="text-white/50 text-xs">{t(lang, "nonRefundable")}</p>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function Landing() {
 
           {/* CTA */}
           <button onClick={() => router.push("/details")}
-            className="btn-gradient w-full text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-4">
+            className="btn-gradient w-full text-white font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-4">
             {t(lang, "ctaCheck")} <ChevronRight size={22} />
           </button>
 
@@ -152,14 +152,14 @@ export default function Landing() {
 
       {/* ── FEATURES ───────────────────────────── */}
       <div className="max-w-md mx-auto px-5 py-8">
-        <p className="text-xs font-black text-gray-400 uppercase tracking-widest text-center mb-5">{t(lang, "whyTitle")}</p>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest text-center mb-5">{t(lang, "whyTitle")}</p>
         <div className="grid grid-cols-2 gap-3">
           {FEATURE_ICONS.map((f) => (
             <div key={f.lk} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
               <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-3 ${f.bg}`}>
                 <f.icon size={20} className="text-white" />
               </div>
-              <p className="font-black text-gray-900 text-sm leading-tight">{t(lang, f.lk)}</p>
+              <p className="font-semibold text-gray-900 text-sm leading-tight">{t(lang, f.lk)}</p>
               <p className="text-xs text-gray-500 mt-1">{t(lang, f.dk)}</p>
             </div>
           ))}
@@ -168,13 +168,13 @@ export default function Landing() {
         {/* 33 Banks */}
         <div className="mt-5 rounded-2xl overflow-hidden shadow-sm">
           <div className="text-white text-center px-5 py-5" style={{ background: "#0F2554" }}>
-            <p className="text-5xl font-black">33</p>
+            <p className="text-5xl font-semibold">33</p>
             <p className="text-blue-200 text-sm font-semibold mt-1">Scheduled Commercial Banks</p>
           </div>
           <div className="bg-white px-5 py-3.5 flex justify-around text-center border border-t-0 border-gray-100 rounded-b-2xl">
             {[["12", "Public Sector", "text-blue-700"], ["21", "Private Sector", "text-blue-900"], ["0", "NBFCs (Clean)", "text-emerald-600"]].map(([n, l, c]) => (
               <div key={l}>
-                <p className={`text-xl font-black ${c}`}>{n}</p>
+                <p className={`text-xl font-semibold ${c}`}>{n}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{l}</p>
               </div>
             ))}
@@ -183,15 +183,15 @@ export default function Landing() {
 
         {/* How it works */}
         <div className="mt-5 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
-          <p className="text-sm font-black text-gray-800 mb-4">{t(lang, "howTitle")}</p>
+          <p className="text-sm font-semibold text-gray-800 mb-4">{t(lang, "howTitle")}</p>
           {([
             ["step1","step1d"], ["step2","step2d"], ["step3","step3d"], ["step4","step4d"],
           ] as const).map(([sk, skd], i) => (
             <div key={sk} className="flex gap-3 mb-3 last:mb-0">
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
+              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-semibold"
                 style={{ background: "#0F2554" }}>{i + 1}</div>
               <div>
-                <p className="text-sm font-bold text-gray-900">{t(lang, sk)}</p>
+                <p className="text-sm font-medium text-gray-900">{t(lang, sk)}</p>
                 <p className="text-xs text-gray-500">{t(lang, skd)}</p>
               </div>
             </div>
