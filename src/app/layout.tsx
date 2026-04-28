@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 
-const jackInput = localFont({
-  src: "../../public/fonts/JackInput.ttf",
-  variable: "--font-jack",
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  variable: "--font-poppins",
   display: "swap",
-  weight: "400",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={jackInput.variable}>
+    <html lang="en" className={poppins.variable}>
       <body className="min-h-screen">{children}</body>
     </html>
   );

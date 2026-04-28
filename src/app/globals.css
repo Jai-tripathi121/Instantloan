@@ -5,11 +5,11 @@
     --brand:    #0F2554;
     --brand-2:  #1E3A8A;
     --brand-3:  #1D4ED8;
-    --font-jack: "Jack Input", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   }
 
   body {
-    font-family: var(--font-jack);
+    font-family: var(--font-poppins);
     background: #f8fafc;
     -webkit-font-smoothing: antialiased;
     color: #0F172A;
