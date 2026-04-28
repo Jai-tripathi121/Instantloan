@@ -22,7 +22,7 @@ export default function Confirmation() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {/* Success icon */}
         <div className="relative mb-6">

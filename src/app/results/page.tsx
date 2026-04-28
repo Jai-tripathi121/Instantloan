@@ -152,7 +152,7 @@ function ResultsInner() {
 
   if (!bankOffers.length) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 text-center py-6 bg-white">
+      <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 text-center py-6 bg-white">
         <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl">😔</div>
         <h2 className="text-xl font-semibold text-gray-900 mb-2">No Eligible Banks Found</h2>
         <p className="text-gray-500 text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
@@ -162,7 +162,7 @@ function ResultsInner() {
   }
 
   return (
-    <div className="min-h-screen bg-white max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-white w-full max-w-md mx-auto px-5 py-6">
       {/* Hero */}
       <div className="hero-bg rounded-2xl p-5 mb-5 text-white">
         <div className="flex items-start justify-between mb-3">
@@ -208,7 +208,7 @@ function ResultsInner() {
 
 export default function Results() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-blue-800 font-medium">Loading results...</div></div>}>
+    <Suspense fallback={<div className="min-h-dvh flex items-center justify-center"><div className="text-blue-800 font-medium">Loading results...</div></div>}>
       <ResultsInner />
     </Suspense>
   );

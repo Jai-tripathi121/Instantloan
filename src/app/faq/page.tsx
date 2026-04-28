@@ -19,7 +19,7 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <div className="min-h-screen max-w-2xl mx-auto px-5 py-8 bg-white">
+    <div className="min-h-dvh max-w-2xl mx-auto px-5 py-8 bg-white">
       <Link href="/" className="text-blue-600 text-sm font-medium mb-6 block">← Back to Home</Link>
       <h1 className="text-2xl font-medium text-gray-900 mb-2">Frequently Asked Questions</h1>
       <p className="text-sm text-gray-400 mb-6">Everything you need to know about InstantLoan</p>

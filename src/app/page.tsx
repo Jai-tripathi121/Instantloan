@@ -38,11 +38,11 @@ export default function Landing() {
   const resumeRoute = lastRoute || RESUME_ROUTES[step] || "/details";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-dvh bg-slate-50">
 
       {/* ── HERO ───────────────────────────────── */}
       <div className="hero-bg text-white px-5 pt-8 pb-10">
-        <div className="max-w-md mx-auto">
+        <div className="w-full max-w-md mx-auto">
 
           {/* Nav */}
           <div className="flex items-center justify-between mb-8">
@@ -151,7 +151,7 @@ export default function Landing() {
       </div>
 
       {/* ── FEATURES ───────────────────────────── */}
-      <div className="max-w-md mx-auto px-5 py-8">
+      <div className="w-full max-w-md mx-auto px-5 py-8">
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest text-center mb-5">{t(lang, "whyTitle")}</p>
         <div className="grid grid-cols-2 gap-3">
           {FEATURE_ICONS.map((f) => (
@@ -200,7 +200,7 @@ export default function Landing() {
       </div>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 px-5 py-5 max-w-md mx-auto">
+      <div className="border-t border-gray-100 px-5 py-5 w-full max-w-md mx-auto">
         <div className="flex justify-center gap-5 flex-wrap text-xs text-gray-400 mb-2">
           {[["About","/about"],["FAQ","/faq"],["Terms","/terms"],["Privacy","/privacy"],["Admin","/admin"]].map(([l,h]) => (
             <Link key={l} href={h} className="hover:text-blue-800 transition-colors">{l}</Link>

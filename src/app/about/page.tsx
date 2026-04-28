@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function About() {
   return (
-    <div className="min-h-screen max-w-2xl mx-auto px-5 py-8 bg-white">
+    <div className="min-h-dvh max-w-2xl mx-auto px-5 py-8 bg-white">
       <Link href="/" className="text-blue-600 text-sm font-medium mb-6 block">← Back to Home</Link>
       <div className="text-center mb-8">
         <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">

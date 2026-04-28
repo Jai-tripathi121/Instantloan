@@ -108,7 +108,7 @@ export default function LoanRequirement() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
       <div className="flex items-center gap-3 mb-6">
         <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />

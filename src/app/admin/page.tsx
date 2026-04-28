@@ -185,7 +185,7 @@ export default function AdminPage() {
   // ─── Login ────────────────────────────────────────────────────
   if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-5" style={{ background: "#0A1628" }}>
+      <div className="min-h-dvh flex items-center justify-center px-5" style={{ background: "#0A1628" }}>
         <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
           <div className="text-center mb-8">
             <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -210,7 +210,7 @@ export default function AdminPage() {
 
   // ─── Dashboard ────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-dvh bg-slate-50">
       {/* Topbar */}
       <div className="bg-white border-b border-gray-100 px-5 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-2.5">

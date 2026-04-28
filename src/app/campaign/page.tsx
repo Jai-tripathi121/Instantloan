@@ -23,7 +23,7 @@ const TESTIMONIALS = [
 
 export default function Campaign() {
   return (
-    <div className="min-h-screen flex flex-col max-w-md mx-auto px-5 py-8 bg-white">
+    <div className="min-h-dvh flex flex-col w-full max-w-md mx-auto px-5 py-8 bg-white">
       <div className="flex items-center gap-2 mb-10">
         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
           <span className="text-white font-medium text-lg">₹</span>
