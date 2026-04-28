@@ -22,12 +22,12 @@ export default function Upload() {
   useEffect(() => { setLastRoute("/upload"); }, []);
 
   function handleFile(f: File) {
-    if (f.type !== "application/pdf") { alert("Sirf PDF file upload karo"); return; }
+    if (f.type !== "application/pdf") { alert("Please upload a PDF file"); return; }
     setFile(f); setParseError("");
   }
 
   async function handleAnalyse() {
-    if (!file) { alert("Bank statement upload karo pehle"); return; }
+    if (!file) { alert("Please upload your bank statement first"); return; }
     setParsing(true); setParseError("");
     try {
       const { parsePDF, mergeWithDeclared: merge } = await import("@/lib/pdf-parser");
@@ -52,7 +52,7 @@ export default function Upload() {
         bounceCount: 0, salaryCredits: 6, transactionCount: 100,
       }, declared);
       setStatementAnalysis(fallback);
-      setParseError("PDF nahi pada — declared income use ho rahi hai.");
+      setParseError("Could not read PDF — using your declared income instead.");
       saveSession(userDetails.mobile ?? "", {
         step: 3, lastRoute: "/payment",
         userDetails: {
@@ -102,18 +102,18 @@ export default function Upload() {
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${dragging ? "border-violet-500 bg-violet-50" : file ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-gray-50 hover:border-violet-300 hover:bg-violet-50"}`}>
+        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${dragging ? "border-blue-500 bg-blue-50" : file ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-blue-50"}`}>
         <input ref={inputRef} type="file" accept=".pdf" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
         {file ? (
           <>
             <CheckCircle size={44} className="text-emerald-500 mx-auto mb-2" />
             <p className="font-bold text-emerald-700">{file.name}</p>
-            <p className="text-xs text-emerald-500 mt-1">{(file.size / 1024).toFixed(0)} KB · Tap karke change karo</p>
+            <p className="text-xs text-emerald-500 mt-1">{(file.size / 1024).toFixed(0)} KB · Tap to change</p>
           </>
         ) : (
           <>
-            <FileText size={44} className="text-violet-300 mx-auto mb-2" />
+            <FileText size={44} className="text-blue-300 mx-auto mb-2" />
             <p className="font-bold text-gray-600">{t(lang, "uploadBtn")}</p>
             <p className="text-xs text-gray-400 mt-1">{t(lang, "uploadDrop")}</p>
           </>
@@ -123,12 +123,12 @@ export default function Upload() {
       {/* Password */}
       <div className="mb-5">
         <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-          <Lock size={14} className="text-violet-500" /> PDF Password <span className="text-gray-400 font-normal">(agar protected hai)</span>
+          <Lock size={14} className="text-blue-700" /> PDF Password <span className="text-gray-400 font-normal">(optional)</span>
         </label>
-        <input type="password" placeholder="Blank chhodo agar password nahi hai" value={password}
+        <input type="password" placeholder="Leave blank if not password protected" value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-violet-400" />
-        <p className="text-xs text-gray-400 mt-1">Zyaadatar banks: DOB (DDMMYYYY) ya mobile ke last 4 digits</p>
+          className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400" />
+        <p className="text-xs text-gray-400 mt-1">Most banks use DOB (DDMMYYYY) or last 4 digits of mobile</p>
       </div>
 
       {/* Bank chips */}
@@ -138,7 +138,7 @@ export default function Upload() {
           {BANKS.map((b) => (
             <span key={b} className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-gray-600 font-semibold">{b}</span>
           ))}
-          <span className="text-xs bg-violet-50 border border-violet-200 rounded-lg px-2.5 py-1 text-violet-600 font-semibold">+20 more</span>
+          <span className="text-xs bg-blue-50 border border-blue-200 rounded-lg px-2.5 py-1 text-blue-800 font-semibold">+20 more</span>
         </div>
       </div>
 

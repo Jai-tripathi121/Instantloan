@@ -18,10 +18,10 @@ const BANKS_SCROLL = [
 ];
 
 const FEATURE_ICONS = [
-  { icon: Shield, grad: "from-violet-500 to-violet-600", lk: "feat1" as const, dk: "feat1d" as const },
-  { icon: Zap,    grad: "from-amber-400 to-orange-500",  lk: "feat2" as const, dk: "feat2d" as const },
-  { icon: Smartphone, grad: "from-emerald-500 to-teal-500", lk: "feat3" as const, dk: "feat3d" as const },
-  { icon: Lock,   grad: "from-pink-500 to-rose-500",     lk: "feat4" as const, dk: "feat4d" as const },
+  { icon: Shield,     grad: "from-blue-900 to-blue-700",    lk: "feat1" as const, dk: "feat1d" as const },
+  { icon: Zap,        grad: "from-amber-400 to-orange-500", lk: "feat2" as const, dk: "feat2d" as const },
+  { icon: Smartphone, grad: "from-emerald-600 to-teal-600", lk: "feat3" as const, dk: "feat3d" as const },
+  { icon: Lock,       grad: "from-blue-800 to-blue-900",    lk: "feat4" as const, dk: "feat4d" as const },
 ];
 
 const RESUME_ROUTES: Record<number, string> = {
@@ -48,7 +48,7 @@ export default function Landing() {
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-2.5">
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black text-lg shadow-lg"
-                style={{ background: "linear-gradient(135deg, #a855f7, #6d28d9)" }}>₹</div>
+                style={{ background: "linear-gradient(135deg, #1E40AF, #0F2554)" }}>₹</div>
               <div>
                 <p className="text-white font-black text-lg leading-none">InstantLoan</p>
                 <p className="text-white/50 text-xs">Loan Eligibility Checker</p>
@@ -71,7 +71,7 @@ export default function Landing() {
                 <div>
                   <p className="text-sm font-black">{t(lang, "welcomeBack")}, {userDetails.name?.split(" ")[0] || "User"}! 👋</p>
                   <p className="text-xs text-white/60 mt-0.5">
-                    {loanRequirement.loanType ? `${loanRequirement.loanType} loan check adhoori hai` : "Aapka session saved hai"}
+                    {loanRequirement.loanType ? `${loanRequirement.loanType} loan check in progress` : "Your session is saved"}
                   </p>
                 </div>
                 <button onClick={resetSession} className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "rgba(255,255,255,0.15)" }}>
@@ -79,7 +79,7 @@ export default function Landing() {
                 </button>
               </div>
               <button onClick={() => router.push(resumeRoute)}
-                className="mt-3 w-full bg-white text-violet-700 font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5">
+                className="mt-3 w-full bg-white text-blue-900 font-black py-2.5 rounded-xl text-sm flex items-center justify-center gap-1.5">
                 <ChevronRight size={15} /> {t(lang, "ctaResume")}
               </button>
             </div>
@@ -145,7 +145,7 @@ export default function Landing() {
           <div className="flex items-center justify-center gap-5 text-xs text-white/50">
             <span className="flex items-center gap-1"><BadgeCheck size={12} className="text-emerald-400" /> {t(lang, "trustSecure")}</span>
             <span className="flex items-center gap-1"><Clock3 size={12} className="text-blue-300" /> {t(lang, "trustSpeed")}</span>
-            <span className="flex items-center gap-1"><Smartphone size={12} className="text-violet-300" /> {t(lang, "trustNoApp")}</span>
+            <span className="flex items-center gap-1"><Smartphone size={12} className="text-blue-300" /> {t(lang, "trustNoApp")}</span>
           </div>
         </div>
       </div>
@@ -167,12 +167,12 @@ export default function Landing() {
 
         {/* 33 Banks */}
         <div className="mt-5 rounded-2xl overflow-hidden shadow-sm">
-          <div className="text-white text-center px-5 py-5" style={{ background: "linear-gradient(135deg, #6d28d9, #4338ca)" }}>
+          <div className="text-white text-center px-5 py-5" style={{ background: "linear-gradient(135deg, #0F2554, #1E3A8A)" }}>
             <p className="text-5xl font-black">33</p>
-            <p className="text-violet-200 text-sm font-semibold mt-1">Scheduled Commercial Banks</p>
+            <p className="text-blue-200 text-sm font-semibold mt-1">Scheduled Commercial Banks</p>
           </div>
           <div className="bg-white px-5 py-3.5 flex justify-around text-center border border-t-0 border-gray-100 rounded-b-2xl">
-            {[["12", "Public Sector", "text-blue-700"], ["21", "Private Sector", "text-violet-700"], ["0", "NBFCs (Clean)", "text-emerald-600"]].map(([n, l, c]) => (
+            {[["12", "Public Sector", "text-blue-700"], ["21", "Private Sector", "text-blue-900"], ["0", "NBFCs (Clean)", "text-emerald-600"]].map(([n, l, c]) => (
               <div key={l}>
                 <p className={`text-xl font-black ${c}`}>{n}</p>
                 <p className="text-xs text-gray-500 mt-0.5">{l}</p>
@@ -189,7 +189,7 @@ export default function Landing() {
           ] as const).map(([sk, skd], i) => (
             <div key={sk} className="flex gap-3 mb-3 last:mb-0">
               <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-white text-xs font-black"
-                style={{ background: "linear-gradient(135deg, #7c3aed, #4338ca)" }}>{i + 1}</div>
+                style={{ background: "linear-gradient(135deg, #0F2554, #1E40AF)" }}>{i + 1}</div>
               <div>
                 <p className="text-sm font-bold text-gray-900">{t(lang, sk)}</p>
                 <p className="text-xs text-gray-500">{t(lang, skd)}</p>
@@ -203,7 +203,7 @@ export default function Landing() {
       <div className="border-t border-gray-100 px-5 py-5 max-w-md mx-auto">
         <div className="flex justify-center gap-5 flex-wrap text-xs text-gray-400 mb-2">
           {[["About","/about"],["FAQ","/faq"],["Terms","/terms"],["Privacy","/privacy"],["Admin","/admin"]].map(([l,h]) => (
-            <Link key={l} href={h} className="hover:text-violet-600 transition-colors">{l}</Link>
+            <Link key={l} href={h} className="hover:text-blue-800 transition-colors">{l}</Link>
           ))}
         </div>
         <p className="text-center text-xs text-gray-300">Only RBI Regulated Scheduled Commercial Banks · No NBFCs</p>

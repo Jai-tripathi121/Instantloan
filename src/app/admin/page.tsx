@@ -15,7 +15,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   under_review: { label: "Under Review", color: "text-amber-700",  bg: "bg-amber-100",  dot: "bg-amber-500" },
   approved:     { label: "Approved",     color: "text-emerald-700",bg: "bg-emerald-100",dot: "bg-emerald-500" },
   rejected:     { label: "Rejected",     color: "text-red-700",    bg: "bg-red-100",    dot: "bg-red-500" },
-  disbursed:    { label: "Disbursed",    color: "text-purple-700", bg: "bg-purple-100", dot: "bg-purple-500" },
+  disbursed:    { label: "Disbursed",    color: "text-blue-900", bg: "bg-blue-100", dot: "bg-blue-700" },
 };
 
 const STATUS_ICONS: Record<string, typeof CheckCircle> = {
@@ -90,7 +90,7 @@ export default function AdminPage() {
 
   function handleLogin() {
     if (password === ADMIN_PASS) { setAuthed(true); load(); loadBankConfigs(); loadGlobalSettings(); }
-    else { setPassword(""); alert("Galat password"); }
+    else { setPassword(""); alert("Incorrect password"); }
   }
 
   async function handleStatusChange(id: string, status: LoanApplication["status"]) {
@@ -197,7 +197,7 @@ export default function AdminPage() {
           <div className="relative mb-4">
             <input type={showPass ? "text" : "password"} placeholder="Admin password" value={password}
               onChange={(e) => setPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()}
-              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-violet-400 pr-12" />
+              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 pr-12" />
             <button onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"><Eye size={18} /></button>
           </div>
           <button onClick={handleLogin} className="w-full btn-gradient text-white font-black py-3.5 rounded-xl flex items-center justify-center gap-2">
@@ -227,7 +227,7 @@ export default function AdminPage() {
             <Download size={13} /> Export
           </button>
           <button onClick={() => { load(); loadBankConfigs(); loadGlobalSettings(); }} disabled={loading}
-            className="flex items-center gap-1.5 text-xs text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition-all">
+            className="flex items-center gap-1.5 text-xs text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-bold transition-all">
             <RefreshCw size={13} className={loading ? "animate-spin" : ""} /> Refresh
           </button>
         </div>
@@ -236,7 +236,7 @@ export default function AdminPage() {
       {!firebaseReady && (
         <div className="bg-amber-50 border-b border-amber-200 px-5 py-2 flex items-center gap-2">
           <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
-          <p className="text-xs text-amber-800 font-bold">Firebase connected nahi — env vars add karo live data dekhne ke liye</p>
+          <p className="text-xs text-amber-800 font-bold">Firebase not connected — add env vars to see live data</p>
         </div>
       )}
 
@@ -258,9 +258,9 @@ export default function AdminPage() {
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
           {[
-            { icon: Users, label: "Total Applications", val: stats.total, color: "from-blue-500 to-indigo-500" },
+            { icon: Users, label: "Total Applications", val: stats.total, color: "from-blue-500 to-blue-500" },
             { icon: IndianRupee, label: "Revenue Earned", val: `₹${stats.revenue.toLocaleString("en-IN")}`, color: "from-emerald-500 to-teal-500" },
-            { icon: CheckCircle, label: "Approved", val: stats.approved, color: "from-violet-600 to-purple-600" },
+            { icon: CheckCircle, label: "Approved", val: stats.approved, color: "from-blue-800 to-blue-800" },
             { icon: Banknote, label: "Disbursed", val: `₹${(stats.totalDisbursed / 100000).toFixed(1)}L`, color: "from-amber-500 to-orange-500" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -278,7 +278,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp size={16} className="text-violet-600" />
+                <TrendingUp size={16} className="text-blue-800" />
                 <h3 className="font-black text-gray-900 text-sm">Status Breakdown</h3>
               </div>
               <div className="space-y-3">
@@ -299,11 +299,11 @@ export default function AdminPage() {
             </div>
             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart2 size={16} className="text-indigo-600" />
+                <BarChart2 size={16} className="text-blue-800" />
                 <h3 className="font-black text-gray-900 text-sm">Bank-wise Applications</h3>
               </div>
               {Object.keys(stats.byBank).length === 0 ? (
-                <p className="text-xs text-gray-400 text-center py-8">Koi data nahi</p>
+                <p className="text-xs text-gray-400 text-center py-8">No data available</p>
               ) : (
                 <div className="space-y-3">
                   {Object.entries(stats.byBank).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([bank, count]) => {
@@ -314,7 +314,7 @@ export default function AdminPage() {
                           <span className="font-bold text-gray-700">{bank}</span>
                           <span className="text-gray-500">{count} ({pct}%)</span>
                         </div>
-                        <MiniBar pct={pct} color="bg-violet-500" />
+                        <MiniBar pct={pct} color="bg-blue-500" />
                       </div>
                     );
                   })}
@@ -331,7 +331,7 @@ export default function AdminPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm mb-4 overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-violet-600" />
+                <Sparkles size={16} className="text-blue-800" />
                 <h3 className="font-black text-gray-900">Global Eligibility Settings</h3>
                 {globalSettings.platformActive === false && (
                   <span className="text-xs bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">Platform Off</span>
@@ -339,7 +339,7 @@ export default function AdminPage() {
               </div>
               {!editingGlobal ? (
                 <button onClick={() => { setGlobalEdit({ ...globalSettings }); setEditingGlobal(true); }}
-                  className="flex items-center gap-1.5 text-xs text-violet-600 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg font-bold transition-all">
+                  className="flex items-center gap-1.5 text-xs text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-bold transition-all">
                   <Edit3 size={12} /> Edit
                 </button>
               ) : (
@@ -384,14 +384,14 @@ export default function AdminPage() {
                     <div key={label}>
                       <label className="text-xs text-gray-500 font-bold block mb-0.5">{label}</label>
                       <input type="number" step="0.01" value={val as number} onChange={(e) => onChange(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                        className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-400" />
                     </div>
                   ))}
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer w-fit">
                   <input type="checkbox" checked={globalEdit.platformActive !== false}
                     onChange={(e) => setGlobalEdit((p) => ({ ...p, platformActive: e.target.checked }))}
-                    className="w-4 h-4 accent-violet-600" />
+                    className="w-4 h-4 accent-blue-800" />
                   <span className="text-sm font-bold text-gray-700">Platform Active (uncheck to disable new applications)</span>
                 </label>
               </div>
@@ -401,14 +401,14 @@ export default function AdminPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Building2 size={16} className="text-violet-600" />
+                <Building2 size={16} className="text-blue-800" />
                 <h3 className="font-black text-gray-900">Bank Management</h3>
                 <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">{activeCount} Active</span>
               </div>
               <div className="relative">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="text" placeholder="Bank search..." value={bankSearch} onChange={(e) => setBankSearch(e.target.value)}
-                  className="border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-violet-400 w-44" />
+                  className="border border-gray-200 rounded-xl pl-8 pr-3 py-2 text-xs focus:outline-none focus:border-blue-400 w-44" />
               </div>
             </div>
 
@@ -428,7 +428,7 @@ export default function AdminPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="font-black text-gray-900 text-sm truncate">{bank.bankName}</p>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${bank.sector === "public" ? "bg-blue-100 text-blue-700" : "bg-purple-100 text-purple-700"}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${bank.sector === "public" ? "bg-blue-100 text-blue-700" : "bg-blue-100 text-blue-900"}`}>
                             {bank.sector === "public" ? "Govt" : "Pvt"}
                           </span>
                         </div>
@@ -443,7 +443,7 @@ export default function AdminPage() {
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {!isEditing && (
                           <button onClick={() => { setEditingBank(bank.id); setEditValues({ minIncome: eff.minIncome, maxFoir: eff.maxFoir, processingFeePercent: eff.processingFeePercent, minCibilSalaried: (eff as BankCriteria & { minCibilSalaried?: number }).minCibilSalaried ?? bank.minCibil, minCibilSelfEmployed: (eff as BankCriteria & { minCibilSelfEmployed?: number }).minCibilSelfEmployed ?? bank.minCibil, minCibilBusiness: (eff as BankCriteria & { minCibilBusiness?: number }).minCibilBusiness ?? bank.minCibil, allowedEmploymentTypes: (eff as BankCriteria & { allowedEmploymentTypes?: string[] }).allowedEmploymentTypes ?? bank.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"], interestRate: { personal: eff.interestRate.personal, home: eff.interestRate.home, auto: eff.interestRate.auto, business: eff.interestRate.business, gold: eff.interestRate.gold, education: eff.interestRate.education, lap: eff.interestRate.lap } }); }}
-                            className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-violet-100 transition-all">
+                            className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-blue-100 transition-all">
                             <Edit3 size={13} className="text-gray-500" />
                           </button>
                         )}
@@ -458,8 +458,8 @@ export default function AdminPage() {
 
                     {/* Edit panel */}
                     {isEditing && (
-                      <div className="mt-3 bg-violet-50 rounded-xl p-3 border border-violet-100">
-                        <p className="text-xs font-black text-violet-700 mb-2 flex items-center gap-1">
+                      <div className="mt-3 bg-blue-50 rounded-xl p-3 border border-blue-100">
+                        <p className="text-xs font-black text-blue-900 mb-2 flex items-center gap-1">
                           <Sparkles size={12} /> Edit {bank.bankName} Config
                         </p>
                         <div className="grid grid-cols-2 gap-2 mb-2">
@@ -471,12 +471,12 @@ export default function AdminPage() {
                             <div key={label}>
                               <label className="text-xs text-gray-500 font-bold block mb-0.5">{label}</label>
                               <input type="number" step={step} value={val as number} onChange={(e) => onChange(e.target.value)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-400" />
                             </div>
                           ))}
                         </div>
                         {/* Employment Types */}
-                        <p className="text-xs font-black text-violet-600 mb-1.5 mt-1">Allowed Employment Types</p>
+                        <p className="text-xs font-black text-blue-800 mb-1.5 mt-1">Allowed Employment Types</p>
                         <div className="flex gap-4 mb-2">
                           {(["salaried", "self-employed", "business"] as const).map((emp) => (
                             <label key={emp} className="flex items-center gap-1.5 cursor-pointer">
@@ -486,14 +486,14 @@ export default function AdminPage() {
                                   const cur = editValues.allowedEmploymentTypes ?? ["salaried", "self-employed", "business"];
                                   setEditValues((p) => ({ ...p, allowedEmploymentTypes: e.target.checked ? [...cur, emp] : cur.filter((x) => x !== emp) }));
                                 }}
-                                className="w-3.5 h-3.5 accent-violet-600" />
+                                className="w-3.5 h-3.5 accent-blue-800" />
                               <span className="text-xs font-bold text-gray-700 capitalize">{emp}</span>
                             </label>
                           ))}
                         </div>
 
                         {/* Per-employment CIBIL */}
-                        <p className="text-xs font-black text-violet-600 mb-1.5">Min CIBIL by Employment</p>
+                        <p className="text-xs font-black text-blue-800 mb-1.5">Min CIBIL by Employment</p>
                         <div className="grid grid-cols-3 gap-2 mb-2">
                           {([
                             { label: "Salaried", key: "minCibilSalaried" as const },
@@ -505,12 +505,12 @@ export default function AdminPage() {
                               <input type="number" step="1" value={editValues[key] ?? ""}
                                 onChange={(e) => setEditValues((p) => ({ ...p, [key]: e.target.value ? Number(e.target.value) : undefined }))}
                                 placeholder={String(bank.minCibil ?? 650)}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-400" />
                             </div>
                           ))}
                         </div>
 
-                        <p className="text-xs font-black text-violet-600 mb-1.5 mt-1">Interest Rates (% p.a.)</p>
+                        <p className="text-xs font-black text-blue-800 mb-1.5 mt-1">Interest Rates (% p.a.)</p>
                         <div className="grid grid-cols-2 gap-2 mb-2">
                           {(["personal", "home", "auto", "business", "gold", "education", "lap"] as const).map((key) => (
                             <div key={key}>
@@ -518,14 +518,14 @@ export default function AdminPage() {
                               <input type="number" step="0.01"
                                 value={(editValues.interestRate as Record<string, number> | undefined)?.[key] ?? ""}
                                 onChange={(e) => setEditValues((v) => ({ ...v, interestRate: { ...(v.interestRate ?? eff.interestRate), [key]: Number(e.target.value) } }))}
-                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-violet-400" />
+                                className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-blue-400" />
                             </div>
                           ))}
                         </div>
                         <div className="flex gap-2">
                           <button onClick={() => saveEdit(bank.id)} disabled={bankSaving}
                             className="flex-1 btn-gradient text-white font-black py-2 rounded-lg text-xs flex items-center justify-center gap-1">
-                            <Save size={12} /> {bankSaving ? "Saving..." : "Save Karo"}
+                            <Save size={12} /> {bankSaving ? "Saving..." : "Save Changes"}
                           </button>
                           <button onClick={() => { setEditingBank(null); setEditValues({}); }}
                             className="px-3 py-2 bg-gray-200 rounded-lg text-xs font-bold text-gray-600">
@@ -550,8 +550,8 @@ export default function AdminPage() {
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input type="text" placeholder="Naam, mobile, ref no ya bank..." value={search} onChange={(e) => setSearch(e.target.value)}
-                    className="w-full border-2 border-gray-100 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-violet-400" />
+                  <input type="text" placeholder="Name, mobile, ref no or bank..." value={search} onChange={(e) => setSearch(e.target.value)}
+                    className="w-full border-2 border-gray-100 rounded-xl pl-9 pr-4 py-2.5 text-sm focus:outline-none focus:border-blue-400" />
                 </div>
                 <div className="flex gap-1.5 flex-wrap">
                   {["all", ...Object.keys(STATUS_CONFIG)].map((f) => (
@@ -571,7 +571,7 @@ export default function AdminPage() {
                 <table className="w-full text-sm">
                   <thead className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-100">
                     <tr>
-                      {["Ref No.", "Naam", "Mobile", "Bank", "Amount", "Rate", "EMI", "Status", "Action"].map((h) => (
+                      {["Ref No.", "Name", "Mobile", "Bank", "Amount", "Rate", "EMI", "Status", "Action"].map((h) => (
                         <th key={h} className="text-left px-4 py-3 text-xs font-black text-gray-500 uppercase tracking-wide whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
@@ -580,11 +580,11 @@ export default function AdminPage() {
                     {loading ? (
                       <tr><td colSpan={9} className="text-center py-12 text-gray-400 text-sm">Applications load ho rahi hain...</td></tr>
                     ) : filtered.length === 0 ? (
-                      <tr><td colSpan={9} className="text-center py-12 text-gray-400 text-sm">Koi application nahi mili</td></tr>
+                      <tr><td colSpan={9} className="text-center py-12 text-gray-400 text-sm">No applications found</td></tr>
                     ) : filtered.map((a) => (
                       <tr key={a.id} onClick={() => setSelected(selected?.id === a.id ? null : a)}
-                        className={`hover:bg-slate-50 cursor-pointer transition-colors ${selected?.id === a.id ? "bg-violet-50" : ""}`}>
-                        <td className="px-4 py-3 font-mono text-xs text-violet-600 font-black">{a.referenceNo}</td>
+                        className={`hover:bg-slate-50 cursor-pointer transition-colors ${selected?.id === a.id ? "bg-blue-50" : ""}`}>
+                        <td className="px-4 py-3 font-mono text-xs text-blue-800 font-black">{a.referenceNo}</td>
                         <td className="px-4 py-3 font-bold text-gray-900 whitespace-nowrap">{a.name}</td>
                         <td className="px-4 py-3 text-gray-500 text-xs">{a.mobile}</td>
                         <td className="px-4 py-3 font-bold whitespace-nowrap text-xs">{a.bankName}</td>
@@ -595,7 +595,7 @@ export default function AdminPage() {
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <div className="relative">
                             <select value={a.status} onChange={(e) => handleStatusChange(a.id!, e.target.value as LoanApplication["status"])}
-                              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-violet-500 bg-white appearance-none pr-6 cursor-pointer font-bold">
+                              className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white appearance-none pr-6 cursor-pointer font-bold">
                               {Object.entries(STATUS_CONFIG).map(([k, v]) => (<option key={k} value={k}>{v.label}</option>))}
                             </select>
                             <ChevronDown size={11} className="absolute right-1.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
@@ -611,11 +611,11 @@ export default function AdminPage() {
             {/* Detail panel */}
             {selected && (
               <div className="mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-indigo-50">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-50">
                   <div className="flex items-center gap-2">
-                    <Eye size={16} className="text-violet-600" />
+                    <Eye size={16} className="text-blue-800" />
                     <h3 className="font-black text-gray-900">Application Detail</h3>
-                    <span className="text-xs font-black text-violet-600 bg-violet-100 px-2 py-0.5 rounded-lg">{selected.referenceNo}</span>
+                    <span className="text-xs font-black text-blue-800 bg-blue-100 px-2 py-0.5 rounded-lg">{selected.referenceNo}</span>
                   </div>
                   <button onClick={() => setSelected(null)} className="w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center hover:bg-gray-200">
                     <X size={14} className="text-gray-500" />
@@ -624,7 +624,7 @@ export default function AdminPage() {
                 <div className="p-5">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm mb-4">
                     {[
-                      ["Naam", selected.name], ["Mobile", selected.mobile], ["PAN", selected.pan], ["DOB", selected.dob],
+                      ["Name", selected.name], ["Mobile", selected.mobile], ["PAN", selected.pan], ["DOB", selected.dob],
                       ["Employment", selected.employmentType], ["Income", `₹${selected.monthlyIncome.toLocaleString("en-IN")}/mo`],
                       ["Loan Type", selected.loanType], ["Requested", `₹${selected.requestedAmount.toLocaleString("en-IN")}`],
                       ["Approved", `₹${selected.approvedAmount.toLocaleString("en-IN")}`], ["Bank", selected.bankName],

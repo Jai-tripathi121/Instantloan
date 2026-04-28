@@ -7,12 +7,12 @@ import { getAllBankConfigs, getGlobalSettings } from "@/lib/firestore";
 import { CheckCircle } from "lucide-react";
 
 const STEPS = [
-  { label: "Bank statement padh raha hai...", duration: 1600 },
-  { label: "Income aur salary credits detect ho rahe hain...", duration: 1400 },
-  { label: "Monthly obligations aur FOIR calculate ho raha hai...", duration: 1300 },
-  { label: "Bounce history check ho rahi hai...", duration: 1100 },
-  { label: "33 banks mein eligibility match ho rahi hai...", duration: 2000 },
-  { label: "Aapke personalized offers taiyar ho rahe hain...", duration: 1100 },
+  { label: "Reading bank statement...", duration: 1600 },
+  { label: "Detecting income & salary credits...", duration: 1400 },
+  { label: "Calculating monthly obligations & FOIR...", duration: 1300 },
+  { label: "Checking bounce history...", duration: 1100 },
+  { label: "Matching eligibility across 33 banks...", duration: 2000 },
+  { label: "Preparing your personalised offers...", duration: 1100 },
 ];
 
 export default function Processing() {
@@ -71,7 +71,7 @@ export default function Processing() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 py-6" style={{ background: "linear-gradient(135deg, #f8f7ff 0%, #eef2ff 100%)" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 py-6" style={{ background: "linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)" }}>
       {/* Circle progress */}
       <div className="relative w-40 h-40 mb-8">
         <svg className="w-40 h-40 -rotate-90" viewBox="0 0 160 160">
@@ -83,30 +83,30 @@ export default function Processing() {
             className="transition-all duration-100" />
           <defs>
             <linearGradient id="pg" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#7c3aed" />
-              <stop offset="100%" stopColor="#ec4899" />
+              <stop offset="0%" stopColor="#0F2554" />
+              <stop offset="100%" stopColor="#1D4ED8" />
             </linearGradient>
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-black text-violet-600">{Math.round(progress)}%</span>
-          <span className="text-xs text-gray-400 font-medium">analyse ho raha</span>
+          <span className="text-3xl font-black text-blue-800">{Math.round(progress)}%</span>
+          <span className="text-xs text-gray-400 font-medium">analysing</span>
         </div>
       </div>
 
-      <h2 className="text-xl font-black text-gray-900 mb-2 text-center">AI Analyse Kar Raha Hai</h2>
-      <p className="text-gray-400 text-sm text-center mb-8">Poora aapke device pe — koi data server pe nahi jaata</p>
+      <h2 className="text-xl font-black text-gray-900 mb-2 text-center">AI is Analysing</h2>
+      <p className="text-gray-400 text-sm text-center mb-8">Everything on your device — no data leaves your phone</p>
 
       <div className="w-full space-y-3">
         {STEPS.map((s, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < currentStep ? "bg-emerald-500" : i === currentStep ? "bg-violet-600" : "bg-gray-100"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < currentStep ? "bg-emerald-500" : i === currentStep ? "bg-blue-800" : "bg-gray-100"}`}>
               {i < currentStep
                 ? <CheckCircle size={16} className="text-white" />
                 : <span className={`text-xs font-black ${i === currentStep ? "text-white" : "text-gray-400"}`}>{i + 1}</span>
               }
             </div>
-            <p className={`text-sm transition-all font-medium ${i === currentStep ? "text-violet-700 font-bold" : i < currentStep ? "text-emerald-600" : "text-gray-400"}`}>
+            <p className={`text-sm transition-all font-medium ${i === currentStep ? "text-blue-900 font-bold" : i < currentStep ? "text-emerald-600" : "text-gray-400"}`}>
               {s.label}
             </p>
           </div>

@@ -7,11 +7,11 @@ import { ArrowLeft, Search, CheckCircle, Clock, FileText, IndianRupee, XCircle, 
 
 const STATUS_STEPS = ["submitted", "under_review", "approved", "disbursed"];
 const STATUS_CONFIG: Record<string, { label: string; icon: typeof CheckCircle; grad: string; text: string }> = {
-  submitted:    { label: "Application Submit Hui", icon: FileText,     grad: "from-blue-500 to-indigo-500",   text: "text-blue-600" },
-  under_review: { label: "Bank Review Mein",        icon: Clock,        grad: "from-amber-400 to-orange-500", text: "text-amber-600" },
-  approved:     { label: "Loan Approved",            icon: CheckCircle,  grad: "from-emerald-500 to-teal-500", text: "text-emerald-600" },
-  rejected:     { label: "Application Rejected",    icon: XCircle,      grad: "from-red-500 to-rose-500",     text: "text-red-600" },
-  disbursed:    { label: "Amount Disbursed",         icon: IndianRupee,  grad: "from-violet-600 to-purple-600","text": "text-violet-600" },
+  submitted:    { label: "Application Submitted",  icon: FileText,     grad: "from-blue-700 to-blue-900",   text: "text-blue-600" },
+  under_review: { label: "Under Bank Review",       icon: Clock,        grad: "from-amber-400 to-orange-500", text: "text-amber-600" },
+  approved:     { label: "Loan Approved",           icon: CheckCircle,  grad: "from-emerald-500 to-teal-500", text: "text-emerald-600" },
+  rejected:     { label: "Application Rejected",   icon: XCircle,      grad: "from-red-500 to-rose-500",     text: "text-red-600" },
+  disbursed:    { label: "Amount Disbursed",        icon: IndianRupee,  grad: "from-blue-800 to-blue-800","text": "text-blue-800" },
 };
 
 export default function StatusPage() {
@@ -26,9 +26,9 @@ export default function StatusPage() {
     setLoading(true); setError(""); setApp(null);
     try {
       const r = await getApplicationByRef(ref.trim().toUpperCase());
-      if (!r) setError("Is reference number se koi application nahi mili.");
+      if (!r) setError("No application found for this reference number.");
       else setApp(r);
-    } catch { setError("Fetch nahi hua. Connection check karo."); }
+    } catch { setError("Could not fetch. Please check your connection and try again."); }
     finally { setLoading(false); }
   }
 
@@ -40,15 +40,15 @@ export default function StatusPage() {
         <button onClick={() => router.push("/")} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
-        <h2 className="text-xl font-black text-gray-900">Application Track Karo</h2>
+        <h2 className="text-xl font-black text-gray-900">Track Application</h2>
       </div>
 
       <div className="mb-6">
         <label className="block text-sm font-bold text-gray-700 mb-1.5">Reference Number</label>
         <div className="flex gap-2">
-          <input type="text" placeholder="jaise HDFCBANK12345678" value={ref}
+          <input type="text" placeholder="e.g. HDFCBANK12345678" value={ref}
             onChange={(e) => setRef(e.target.value.toUpperCase())}
-            className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-violet-400 uppercase tracking-wider font-bold" />
+            className="flex-1 border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 uppercase tracking-wider font-bold" />
           <button onClick={handleSearch} disabled={loading || !ref.trim()}
             className="px-4 py-2 btn-gradient text-white rounded-xl font-bold disabled:opacity-60 flex items-center gap-1.5">
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Search size={16} />}
@@ -94,7 +94,7 @@ export default function StatusPage() {
                           <div className="flex-1">
                             <p className={`text-sm font-bold ${done || active ? "text-gray-900" : "text-gray-400"}`}>{sCfg.label}</p>
                           </div>
-                          {active && <span className="text-xs font-black px-2 py-0.5 rounded-full text-white" style={{ background: "linear-gradient(135deg, #7c3aed, #4f46e5)" }}>Current</span>}
+                          {active && <span className="text-xs font-black px-2 py-0.5 rounded-full text-white" style={{ background: "linear-gradient(135deg, #0F2554, #1E40AF)" }}>Current</span>}
                         </div>
                       );
                     })}
@@ -111,7 +111,7 @@ export default function StatusPage() {
                 <div className="flex justify-between"><span className="text-gray-400">Bank</span><span className="font-bold">{app.bankName}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Amount</span><span className="font-black text-emerald-600">₹{app.approvedAmount.toLocaleString("en-IN")}</span></div>
                 <div className="flex justify-between"><span className="text-gray-400">Rate</span><span className="font-bold">{app.interestRate}% p.a.</span></div>
-                <div className="flex justify-between"><span className="text-gray-400">EMI</span><span className="font-black text-violet-600">₹{app.emi.toLocaleString("en-IN")}</span></div>
+                <div className="flex justify-between"><span className="text-gray-400">EMI</span><span className="font-black text-blue-800">₹{app.emi.toLocaleString("en-IN")}</span></div>
               </div>
             </div>
           </div>
@@ -120,10 +120,10 @@ export default function StatusPage() {
 
       {!app && !loading && (
         <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="w-20 h-20 bg-violet-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
-            <Search size={36} className="text-violet-300" />
+          <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            <Search size={36} className="text-blue-300" />
           </div>
-          <p className="text-gray-400 text-sm">Reference number dalo aur apni loan application ka status track karo</p>
+          <p className="text-gray-400 text-sm">Enter your reference number to track your loan application status</p>
         </div>
       )}
     </div>

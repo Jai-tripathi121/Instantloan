@@ -15,13 +15,13 @@ const GRADE_COLORS: Record<string, string> = {
 };
 
 const LOAN_TYPES: { type: LoanType; label: string; sub: string; icon: typeof Wallet; color: string; bg: string }[] = [
-  { type: "personal",  label: "Personal",   sub: "Bina collateral",      icon: Wallet,       color: "text-violet-600", bg: "bg-violet-100" },
-  { type: "home",      label: "Home",        sub: "Ghar kharidne ke liye", icon: Home,         color: "text-emerald-600", bg: "bg-emerald-100" },
-  { type: "auto",      label: "Vehicle",     sub: "Car / bike loan",       icon: Car,          color: "text-amber-600", bg: "bg-amber-100" },
-  { type: "business",  label: "Business",    sub: "Business ke liye",      icon: Building2,    color: "text-pink-600", bg: "bg-pink-100" },
-  { type: "gold",      label: "Gold Loan",   sub: "Sone ke badle loan",    icon: Coins,        color: "text-yellow-600", bg: "bg-yellow-100" },
-  { type: "education", label: "Education",   sub: "Padhai ke liye",        icon: GraduationCap,color: "text-blue-600", bg: "bg-blue-100" },
-  { type: "lap",       label: "LAP",         sub: "Property pe loan",      icon: Landmark,     color: "text-teal-600", bg: "bg-teal-100" },
+  { type: "personal",  label: "Personal",   sub: "No collateral needed",   icon: Wallet,       color: "text-blue-800", bg: "bg-blue-100" },
+  { type: "home",      label: "Home",        sub: "Buy or construct home",  icon: Home,         color: "text-emerald-600", bg: "bg-emerald-100" },
+  { type: "auto",      label: "Vehicle",     sub: "Car or bike loan",       icon: Car,          color: "text-amber-600", bg: "bg-amber-100" },
+  { type: "business",  label: "Business",    sub: "Business expansion",     icon: Building2,    color: "text-pink-600", bg: "bg-pink-100" },
+  { type: "gold",      label: "Gold Loan",   sub: "Loan against gold",      icon: Coins,        color: "text-yellow-600", bg: "bg-yellow-100" },
+  { type: "education", label: "Education",   sub: "Fund your studies",      icon: GraduationCap,color: "text-blue-600", bg: "bg-blue-100" },
+  { type: "lap",       label: "LAP",         sub: "Loan against property",  icon: Landmark,     color: "text-teal-600", bg: "bg-teal-100" },
 ];
 
 const LOAN_RANGES: Record<LoanType, { min: number; max: number; step: number }> = {
@@ -82,7 +82,7 @@ export default function LoanRequirement() {
   function applyPromo() {
     const c = promo.trim().toUpperCase();
     if (PROMOS[c]) { setPrice(PROMOS[c]); setPromoApplied(true); setPromoError(""); }
-    else setPromoError("Galat promo code");
+    else setPromoError("Invalid promo code");
   }
 
   function handleNext() {
@@ -159,13 +159,13 @@ export default function LoanRequirement() {
               return (
                 <button key={lt.type}
                   onClick={() => { setLoanType(lt.type); setAmount(LOAN_RANGES[lt.type].min); }}
-                  className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${active ? "border-violet-500 bg-violet-50" : "border-gray-100 hover:border-gray-200"} ${isLastOdd ? "col-span-2" : ""}`}>
-                  <div className={`w-9 h-9 ${active ? "bg-violet-500" : lt.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
+                  className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${active ? "border-blue-500 bg-blue-50" : "border-gray-100 hover:border-gray-200"} ${isLastOdd ? "col-span-2" : ""}`}>
+                  <div className={`w-9 h-9 ${active ? "bg-blue-500" : lt.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
                     <lt.icon size={16} className={active ? "text-white" : lt.color} />
                   </div>
                   <div>
-                    <p className={`text-sm font-black leading-tight ${active ? "text-violet-700" : "text-gray-800"}`}>{lt.label}</p>
-                    <p className={`text-xs mt-0.5 ${active ? "text-violet-500" : "text-gray-400"}`}>{lt.sub}</p>
+                    <p className={`text-sm font-black leading-tight ${active ? "text-blue-900" : "text-gray-800"}`}>{lt.label}</p>
+                    <p className={`text-xs mt-0.5 ${active ? "text-blue-500" : "text-gray-400"}`}>{lt.sub}</p>
                   </div>
                 </button>
               );
@@ -174,12 +174,12 @@ export default function LoanRequirement() {
         </div>
 
         {/* Amount */}
-        <div className="bg-gradient-to-r from-violet-50 to-indigo-50 rounded-2xl p-4 border border-violet-100">
+        <div className="bg-gradient-to-r from-blue-50 to-blue-50 rounded-2xl p-4 border border-blue-100">
           <div className="flex justify-between items-center mb-4">
             <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700">
-              <IndianRupee size={14} className="text-violet-500" /> {t(lang, "labelAmount")}
+              <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelAmount")}
             </label>
-            <span className="text-2xl font-black text-violet-600">{fmt(clampedAmount)}</span>
+            <span className="text-2xl font-black text-blue-800">{fmt(clampedAmount)}</span>
           </div>
           <input type="range" min={range.min} max={range.max} step={range.step}
             value={clampedAmount} onChange={(e) => setAmount(Number(e.target.value))}
@@ -192,12 +192,12 @@ export default function LoanRequirement() {
         {/* Tenure */}
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-2">
-            {t(lang, "labelTenure")}: <span className="text-violet-600">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
+            {t(lang, "labelTenure")}: <span className="text-blue-800">{tenure >= 12 ? `${Math.round(tenure / 12)} Saal` : `${tenure} Mahine`}</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {TENURES.map((t) => (
               <button key={t} onClick={() => setTenure(t)}
-                className={`px-3.5 py-2 rounded-xl text-sm font-bold border-2 transition-all ${tenure === t ? "border-violet-500 bg-violet-50 text-violet-700" : "border-gray-100 text-gray-600"}`}>
+                className={`px-3.5 py-2 rounded-xl text-sm font-bold border-2 transition-all ${tenure === t ? "border-blue-500 bg-blue-50 text-blue-900" : "border-gray-100 text-gray-600"}`}>
                 {t < 12 ? `${t}m` : `${Math.round(t / 12)}yr`}
               </button>
             ))}
@@ -219,7 +219,7 @@ export default function LoanRequirement() {
           ) : (
             <div className="flex items-center gap-2 bg-emerald-50 border-2 border-emerald-200 rounded-xl px-4 py-3">
               <CheckCircle size={16} className="text-emerald-500" />
-              <span className="text-sm text-emerald-700 font-bold">{promo} — Sirf ₹{price}!</span>
+              <span className="text-sm text-emerald-700 font-bold">{promo} — Only ₹{price}!</span>
               <button onClick={() => { setPromoApplied(false); setPrice(99); setPromo(""); }} className="ml-auto text-xs text-gray-400">Hatao</button>
             </div>
           )}
@@ -227,11 +227,11 @@ export default function LoanRequirement() {
         </div>
 
         {/* Price */}
-        <div className={`rounded-2xl p-4 border-2 text-center ${promoApplied ? "bg-emerald-50 border-emerald-200" : "bg-gradient-to-r from-violet-50 to-indigo-50 border-violet-100"}`}>
+        <div className={`rounded-2xl p-4 border-2 text-center ${promoApplied ? "bg-emerald-50 border-emerald-200" : "bg-gradient-to-r from-blue-50 to-blue-50 border-blue-100"}`}>
           <p className="text-sm font-bold text-gray-600">AI Report Price</p>
           <div className="flex items-center justify-center gap-2 mt-1">
             {promoApplied && <span className="text-xl text-gray-400 line-through">₹99</span>}
-            <span className={`text-4xl font-black ${promoApplied ? "text-emerald-600" : "text-violet-600"}`}>₹{price}</span>
+            <span className={`text-4xl font-black ${promoApplied ? "text-emerald-600" : "text-blue-800"}`}>₹{price}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">One-time · Non-refundable</p>
         </div>

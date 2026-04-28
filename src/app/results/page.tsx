@@ -36,7 +36,7 @@ const DEMO_OFFERS: BankOffer[] = [
 function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank: number; onApply: () => void; applyLabel: string }) {
   const isTop = rank === 0;
   return (
-    <div className={`rounded-2xl overflow-hidden border-2 transition-all card-hover ${isTop ? "border-violet-200 shadow-lg shadow-violet-100" : "border-gray-100"}`}>
+    <div className={`rounded-2xl overflow-hidden border-2 transition-all card-hover ${isTop ? "border-blue-200 shadow-lg shadow-blue-100" : "border-gray-100"}`}>
       {/* Bank header */}
       <div className="flex items-center justify-between p-4 pb-3" style={{ background: `${offer.color}15` }}>
         <div className="flex items-center gap-3">
@@ -97,9 +97,9 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-violet-50 rounded-xl p-2.5 text-center">
-            <p className="text-xs text-violet-400 mb-0.5">EMI/Month</p>
-            <p className="text-sm font-black text-violet-700">₹{offer.emi.toLocaleString("en-IN")}</p>
+          <div className="bg-blue-50 rounded-xl p-2.5 text-center">
+            <p className="text-xs text-blue-400 mb-0.5">EMI/Month</p>
+            <p className="text-sm font-black text-blue-900">₹{offer.emi.toLocaleString("en-IN")}</p>
           </div>
           <div className="bg-blue-50 rounded-xl p-2.5 text-center">
             <p className="text-xs text-blue-400 mb-0.5">Tenure</p>
@@ -146,7 +146,7 @@ function ResultsInner() {
   function shareWA() {
     const best = bankOffers[0];
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://instantloan-ten.vercel.app";
-    const text = `Maine InstantLoan pe loan eligibility check ki!\n\n${best?.bankName} se ₹${best?.approvedAmount.toLocaleString("en-IN")} pre-approved @ ${best?.interestRate}% p.a.\n\nApni check karo — Zero CIBIL impact: ${appUrl}`;
+    const text = `I checked my loan eligibility on InstantLoan!\n\n${best?.bankName} pre-approved ₹${best?.approvedAmount.toLocaleString("en-IN")} @ ${best?.interestRate}% p.a.\n\nCheck yours — Zero CIBIL impact: ${appUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
@@ -154,9 +154,9 @@ function ResultsInner() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center max-w-md mx-auto px-5 text-center py-6 bg-white">
         <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl">😔</div>
-        <h2 className="text-xl font-black text-gray-900 mb-2">Koi Eligible Bank Nahi Mila</h2>
-        <p className="text-gray-500 text-sm mb-6">Income badhao ya existing EMIs kam karo, phir try karo.</p>
-        <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg">Dobara Try Karo</button>
+        <h2 className="text-xl font-black text-gray-900 mb-2">No Eligible Banks Found</h2>
+        <p className="text-gray-500 text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
+        <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg">Try Again</button>
       </div>
     );
   }
@@ -200,7 +200,7 @@ function ResultsInner() {
       </div>
 
       <p className="text-center text-xs text-gray-400 mt-5 pb-4">
-        Hard CIBIL inquiry sirf tab hogi jab aap bank ko application submit karo
+        Hard CIBIL inquiry only occurs when you formally submit an application to a bank
       </p>
     </div>
   );
@@ -208,7 +208,7 @@ function ResultsInner() {
 
 export default function Results() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-violet-600 font-bold">Results load ho rahe hain...</div></div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-blue-800 font-bold">Loading results...</div></div>}>
       <ResultsInner />
     </Suspense>
   );

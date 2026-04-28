@@ -27,10 +27,10 @@ export default function Apply() {
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!address.trim()) e.address = "Address chahiye";
-    if (!/^\d{6}$/.test(pincode)) e.pincode = "Valid 6-digit pincode daalo";
-    if (!aadhaar) e.aadhaar = "Aadhaar upload karo";
-    if (!panCard) e.pan = "PAN card upload karo";
+    if (!address.trim()) e.address = "Current address is required";
+    if (!/^\d{6}$/.test(pincode)) e.pincode = "Enter a valid 6-digit pincode";
+    if (!aadhaar) e.aadhaar = "Please upload Aadhaar card";
+    if (!panCard) e.pan = "Please upload PAN card";
     return e;
   }
 
@@ -42,12 +42,12 @@ export default function Apply() {
       const ref = `${selectedBank?.bankName?.replace(/\s/g, "").toUpperCase()}${Date.now().toString().slice(-8)}`;
 
       // Document upload — best-effort with 6s timeout, never blocks submission
-      setSubmitStep("Documents save ho rahe hain (max 6 sec)...");
+      setSubmitStep("Uploading documents (up to 6 sec)...");
       let docUrls: { aadhaarUrl?: string; panCardUrl?: string; photoUrl?: string } = {};
       try { docUrls = await uploadApplicationDocs(ref, aadhaar, panCard, photo); } catch { /* proceed without doc URLs */ }
 
       // Save application to Firestore
-      setSubmitStep("Application save ho rahi hai...");
+      setSubmitStep("Saving your application...");
       await saveApplication({
         name: userDetails.name ?? "", mobile: userDetails.mobile ?? "",
         pan: userDetails.pan ?? "", dob: userDetails.dob ?? "",
@@ -69,7 +69,7 @@ export default function Apply() {
       });
 
       // Notify (best-effort)
-      setSubmitStep("Confirmation SMS bheja ja raha hai...");
+      setSubmitStep("Sending confirmation SMS...");
       try {
         await fetch("/api/notify", {
           method: "POST", headers: { "Content-Type": "application/json" },
@@ -90,7 +90,7 @@ export default function Apply() {
       console.error("Submit error:", err);
       setSubmitting(false);
       setSubmitStep("");
-      alert("Application save nahi hui. Internet check karo aur dobara try karo.");
+      alert("Application could not be saved. Please check your internet connection and try again.");
     }
   }
 
@@ -125,11 +125,11 @@ export default function Apply() {
         {/* Pre-filled */}
         <div className="bg-slate-50 rounded-2xl p-4">
           <div className="flex items-center gap-1.5 mb-3">
-            <User size={14} className="text-violet-500" />
+            <User size={14} className="text-blue-500" />
             <p className="text-xs font-black text-gray-500 uppercase tracking-wide">Pre-filled Details</p>
           </div>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
-            <span className="text-gray-400">Naam</span><span className="font-bold">{userDetails.name}</span>
+            <span className="text-gray-400">Name</span><span className="font-bold">{userDetails.name}</span>
             <span className="text-gray-400">PAN</span><span className="font-bold">{userDetails.pan}</span>
             <span className="text-gray-400">Mobile</span><span className="font-bold">{userDetails.mobile}</span>
             <span className="text-gray-400">Employment</span><span className="font-bold capitalize">{userDetails.employmentType}</span>
@@ -141,22 +141,22 @@ export default function Apply() {
         {/* Address */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <MapPin size={14} className="text-violet-500" /> Current Address
+            <MapPin size={14} className="text-blue-500" /> Current Address
           </label>
           <textarea rows={3} placeholder="House/Flat No., Street, Area, City" value={address}
             onChange={(e) => { setAddress(e.target.value); setErrors((er) => ({ ...er, address: "" })); }}
-            className={`w-full border-2 rounded-xl px-4 py-3 text-base focus:outline-none resize-none transition-all ${errors.address ? "border-red-400" : "border-gray-100 focus:border-violet-400"}`} />
+            className={`w-full border-2 rounded-xl px-4 py-3 text-base focus:outline-none resize-none transition-all ${errors.address ? "border-red-400" : "border-gray-100 focus:border-blue-400"}`} />
           {errors.address && <p className="text-xs text-red-500 mt-1">{errors.address}</p>}
         </div>
 
         {/* Pincode */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <Hash size={14} className="text-violet-500" /> Pincode
+            <Hash size={14} className="text-blue-500" /> Pincode
           </label>
           <input type="number" inputMode="numeric" placeholder="6-digit pincode" value={pincode}
             onChange={(e) => { setPincode(e.target.value); setErrors((er) => ({ ...er, pincode: "" })); }}
-            className={`w-full border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all ${errors.pincode ? "border-red-400" : "border-gray-100 focus:border-violet-400"}`} />
+            className={`w-full border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all ${errors.pincode ? "border-red-400" : "border-gray-100 focus:border-blue-400"}`} />
           {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode}</p>}
         </div>
 
@@ -169,14 +169,14 @@ export default function Apply() {
           <div key={u.label}>
             <label className="block text-sm font-bold text-gray-700 mb-1.5">{u.label}</label>
             <div onClick={() => u.ref.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all ${u.file ? "border-emerald-400 bg-emerald-50" : u.err ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 hover:border-violet-300"}`}>
+              className={`border-2 border-dashed rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all ${u.file ? "border-emerald-400 bg-emerald-50" : u.err ? "border-red-400 bg-red-50" : "border-gray-200 bg-gray-50 hover:border-blue-300"}`}>
               <input ref={u.ref} type="file" accept={u.accept} className="hidden"
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) u.onFile(f); }} />
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${u.file ? "bg-emerald-100" : "bg-gray-200"}`}>
                 {u.file ? <CheckCircle size={20} className="text-emerald-600" /> : <Camera size={20} className="text-gray-400" />}
               </div>
               <div>
-                <p className="text-sm font-bold text-gray-700">{u.file ? u.file.name : `${u.label} Upload Karo`}</p>
+                <p className="text-sm font-bold text-gray-700">{u.file ? u.file.name : `Upload ${u.label}`}</p>
                 <p className="text-xs text-gray-400">{u.file ? `${(u.file.size / 1024).toFixed(0)} KB` : "JPG, PNG ya PDF"}</p>
               </div>
             </div>
@@ -187,16 +187,16 @@ export default function Apply() {
 
       <div className="mt-6">
         {submitting && submitStep && (
-          <div className="flex items-center justify-center gap-2 text-xs text-violet-600 mb-2 font-bold">
+          <div className="flex items-center justify-center gap-2 text-xs text-blue-800 mb-2 font-bold">
             <Loader2 size={14} className="animate-spin" /> {submitStep}
           </div>
         )}
         <p className="text-xs text-gray-400 text-center mb-3">
-          Submit karne par aap {selectedBank?.bankName} ko CIBIL hard inquiry ki permission dete ho
+          By submitting, you authorise {selectedBank?.bankName} to perform a hard CIBIL inquiry
         </p>
         <button onClick={handleSubmit} disabled={submitting}
           className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg disabled:opacity-60 flex items-center justify-center gap-2 active:scale-95 transition-all">
-          {submitting ? "Submit ho rahi hai..." : (<>{selectedBank?.bankName ?? "Bank"} ko Submit Karo <ChevronRight size={22} /></>)}
+          {submitting ? "Submitting..." : (<>Submit to {selectedBank?.bankName ?? "Bank"} <ChevronRight size={22} /></>)}
         </button>
       </div>
     </div>

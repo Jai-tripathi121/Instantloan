@@ -124,7 +124,7 @@ const initialState = {
   applicationRef: "",
   otpVerified: false,
   lastRoute: "",
-  lang: "hi" as LangCode,
+  lang: "en" as LangCode,
 };
 
 export const useAppStore = create<AppState>()(

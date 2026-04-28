@@ -19,11 +19,11 @@ const BANK_DETAILS = {
 };
 
 const BENEFITS = [
-  "AI se aapka bank statement analyse hoga",
-  "33 scheduled banks mein eligibility match",
-  "Exact loan amount jo aap qualify karte ho",
-  "Sabhi banks ka interest rate comparison",
-  "Har bank ke liye EMI calculator",
+  "AI analyses your bank statement locally",
+  "Eligibility matched across 33 scheduled banks",
+  "Exact loan amount you qualify for",
+  "Interest rate comparison across all banks",
+  "EMI calculator for each bank offer",
   "Zero CIBIL impact guaranteed",
   "Instant eligibility report",
 ];
@@ -52,13 +52,13 @@ export default function Payment() {
   async function handlePay() {
     setLoading(true);
     const ok = await loadRazorpay();
-    if (!ok) { alert("Payment load nahi hua."); setLoading(false); return; }
+    if (!ok) { alert("Payment gateway could not load. Please try again."); setLoading(false); return; }
     const rzp = new window.Razorpay({
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "rzp_test_placeholder",
       amount: 9900, currency: "INR", name: "InstantLoan",
       description: "AI Eligibility Report",
       prefill: { name: userDetails.name ?? "", contact: userDetails.mobile ?? "" },
-      theme: { color: "#7c3aed" },
+      theme: { color: "#0F2554" },
       handler: () => {
         setPaymentDone(true);
         saveSession(userDetails.mobile ?? "", {
@@ -86,7 +86,7 @@ export default function Payment() {
   }
 
   async function handleManualConfirm() {
-    if (!manualRef.trim()) { alert("UTR / Transaction ID daalo"); return; }
+    if (!manualRef.trim()) { alert("Please enter your UTR / Transaction ID"); return; }
     setManualSubmitting(true);
     setPaymentDone(true);
     saveSession(userDetails.mobile ?? "", {
@@ -119,7 +119,7 @@ export default function Payment() {
       </div>
 
       {/* Price hero */}
-      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "linear-gradient(135deg, #6d28d9 0%, #4f46e5 50%, #2563eb 100%)" }}>
+      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "linear-gradient(135deg, #040C1E 0%, #0F2554 50%, #1E40AF 100%)" }}>
         <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
         <div className="relative p-5 text-white text-center">
           <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-bold px-3 py-1 rounded-full mb-2">
@@ -141,7 +141,7 @@ export default function Payment() {
           { key: "bank",     label: "Bank Transfer", icon: Building2 },
         ] as { key: typeof tab; label: string; icon: typeof CreditCard }[]).map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === t.key ? "bg-white shadow text-violet-700" : "text-gray-500"}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-bold transition-all ${tab === t.key ? "bg-white shadow text-blue-900" : "text-gray-500"}`}>
             <t.icon size={13} /> {t.label}
           </button>
         ))}
@@ -151,12 +151,12 @@ export default function Payment() {
       {tab === "razorpay" && (
         <div className="flex-1 flex flex-col">
           <div className="bg-slate-50 rounded-2xl p-4 mb-5">
-            <p className="text-sm font-black text-gray-800 mb-3">₹99 mein kya milega</p>
+            <p className="text-sm font-black text-gray-800 mb-3">What you get for ₹99</p>
             <div className="space-y-2">
               {BENEFITS.map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 bg-violet-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle size={13} className="text-violet-600" />
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle size={13} className="text-blue-800" />
                   </div>
                   <p className="text-sm text-gray-700">{item}</p>
                 </div>
@@ -174,7 +174,7 @@ export default function Payment() {
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-3">
             <Lock size={12} className="text-gray-400" />
-            <p className="text-xs text-gray-400">Razorpay se secured · PCI-DSS compliant</p>
+            <p className="text-xs text-gray-400">Secured by Razorpay · PCI-DSS compliant</p>
           </div>
         </div>
       )}
@@ -183,7 +183,7 @@ export default function Payment() {
       {tab === "upi" && (
         <div className="flex-1 flex flex-col">
           <div className="bg-white border-2 border-gray-100 rounded-2xl p-5 mb-4 text-center">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">QR Code Scan Karo</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">Scan QR Code</p>
             {/* QR code via API */}
             <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100">
               <img
@@ -207,23 +207,23 @@ export default function Payment() {
             </div>
 
             <button onClick={openUpiApp}
-              className="w-full border-2 border-violet-200 text-violet-700 font-black py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-violet-50 transition-all">
+              className="w-full border-2 border-blue-200 text-blue-900 font-black py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
               <Smartphone size={16} /> Open UPI App
             </button>
           </div>
 
           {/* After payment - enter UTR */}
           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-black text-amber-800 mb-2">Payment ke baad UTR daalo</p>
+            <p className="text-sm font-black text-amber-800 mb-2">Enter UTR after payment</p>
             <input type="text" placeholder="UTR / Transaction ID (12 digits)" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
               className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
               className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-              {manualSubmitting ? "Verify ho raha hai..." : (<><CheckCircle size={16} /> Payment Done — Aage Badho</>)}
+              {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>
-          <p className="text-xs text-center text-gray-400">UTR aapke payment app mein milega. Admin 1-2 ghante mein verify karega.</p>
+          <p className="text-xs text-center text-gray-400">Find UTR in your payment app. Admin verifies within 1–2 hours.</p>
         </div>
       )}
 
@@ -232,7 +232,7 @@ export default function Payment() {
         <div className="flex-1 flex flex-col">
           <div className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden mb-4">
             <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-              <Building2 size={15} className="text-violet-600" />
+              <Building2 size={15} className="text-blue-800" />
               <p className="text-sm font-black text-gray-800">Bank Transfer Details</p>
             </div>
 
@@ -279,23 +279,23 @@ export default function Payment() {
           </div>
 
           {/* Amount reminder */}
-          <div className="bg-violet-50 border border-violet-100 rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
-            <p className="text-sm font-bold text-violet-700">Transfer Amount</p>
-            <p className="text-2xl font-black text-violet-700">₹99</p>
+          <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
+            <p className="text-sm font-bold text-blue-900">Transfer Amount</p>
+            <p className="text-2xl font-black text-blue-900">₹99</p>
           </div>
 
           {/* UTR entry */}
           <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 mb-4">
-            <p className="text-sm font-black text-amber-800 mb-2">Transfer ke baad UTR / Ref daalo</p>
+            <p className="text-sm font-black text-amber-800 mb-2">Enter UTR / Reference after transfer</p>
             <input type="text" placeholder="UTR / Transaction Reference" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
               className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
               className="w-full btn-gradient text-white font-black py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
-              {manualSubmitting ? "Verify ho raha hai..." : (<><CheckCircle size={16} /> Payment Done — Aage Badho</>)}
+              {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>
-          <p className="text-xs text-center text-gray-400">NEFT/IMPS/UPI transfer karo. UTR bank app ya SMS mein milega.</p>
+          <p className="text-xs text-center text-gray-400">Transfer via NEFT/IMPS/UPI. Find UTR in your bank app or SMS.</p>
         </div>
       )}
     </div>

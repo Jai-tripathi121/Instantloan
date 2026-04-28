@@ -79,7 +79,7 @@ export default function Details() {
   }
 
   async function sendOtp() {
-    if (!/^[6-9]\d{9}$/.test(mobile)) { setMobileError("Valid 10-digit mobile daalo"); return; }
+    if (!/^[6-9]\d{9}$/.test(mobile)) { setMobileError("Enter a valid 10-digit mobile number"); return; }
     setMobileError(""); setOtpLoading(true); setOtpError("");
     const res = await fetch("/api/send-otp", {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -88,7 +88,7 @@ export default function Details() {
     const data = await res.json();
     setOtpLoading(false);
     if (res.ok) { setOtpSent(true); if (data.otp) setOtp(data.otp); }
-    else setOtpError("OTP nahi aaya. Dobara try karo.");
+    else setOtpError("Could not send OTP. Please try again.");
   }
 
   async function verifyOtp() {
@@ -105,7 +105,7 @@ export default function Details() {
       setPhase("checking");
       checkSession(mobile);
     } else {
-      setOtpError("Galat ya expired OTP");
+      setOtpError("Incorrect or expired OTP. Please try again.");
     }
   }
 
@@ -145,10 +145,10 @@ export default function Details() {
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!name.trim()) e.name = "Naam chahiye";
-    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan.toUpperCase())) e.pan = "Valid PAN daalo";
-    if (!dob) e.dob = "Date of birth chahiye";
-    if (!monthlyIncome || Number(monthlyIncome) < 10000) e.monthlyIncome = "Min income ₹10,000";
+    if (!name.trim()) e.name = "Full name is required";
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan.toUpperCase())) e.pan = "Enter a valid PAN (e.g. ABCDE1234F)";
+    if (!dob) e.dob = "Date of birth is required";
+    if (!monthlyIncome || Number(monthlyIncome) < 10000) e.monthlyIncome = "Minimum income ₹10,000";
     return e;
   }
 
@@ -176,7 +176,7 @@ export default function Details() {
 
   const inp = (field: string) =>
     `w-full border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all bg-white ${
-      errors[field] ? "border-red-400 focus:border-red-400" : "border-gray-100 focus:border-violet-400"
+      errors[field] ? "border-red-400 focus:border-red-400" : "border-gray-100 focus:border-blue-400"
     }`;
 
   // ── PHASE: LOGIN / CHECKING ───────────────────────────────────
@@ -192,18 +192,18 @@ export default function Details() {
 
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* App logo */}
-          <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-violet-200">
+          <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-200">
             <span className="text-white font-black text-2xl">₹</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-1.5">Loan Check Karo</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-1.5">Check Your Eligibility</h1>
           <p className="text-gray-500 text-sm mb-8 leading-relaxed">
-            Mobile se login karo — agar pehle se apply kiya hai toh wahan se continue karenge
+            Log in with your mobile — if you've applied before, we'll resume right where you left off
           </p>
 
           {/* Mobile input */}
           <div className="mb-3">
             <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-              <Phone size={14} className="text-violet-500" /> Mobile Number
+              <Phone size={14} className="text-blue-500" /> Mobile Number
             </label>
             <div className="flex gap-2">
               <div className="flex items-center justify-center border-2 border-gray-100 rounded-xl px-3.5 bg-slate-50 min-w-[52px]">
@@ -217,7 +217,7 @@ export default function Details() {
                   setOtpSent(false); setVerified(false); setMobileError("");
                 }}
                 className={`flex-1 border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all ${
-                  mobileError ? "border-red-400" : "border-gray-100 focus:border-violet-400"
+                  mobileError ? "border-red-400" : "border-gray-100 focus:border-blue-400"
                 }`}
               />
             </div>
@@ -228,18 +228,18 @@ export default function Details() {
             <button onClick={sendOtp} disabled={otpLoading || mobile.length !== 10}
               className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-base mb-4 disabled:opacity-60 flex items-center justify-center gap-2">
               <Send size={16} />
-              {otpLoading ? "Bhej rahe hain..." : otpSent ? "OTP Resend Karo" : t(lang, "btnSendOtp")}
+              {otpLoading ? "Sending..." : otpSent ? "Resend OTP" : t(lang, "btnSendOtp")}
             </button>
           )}
 
           {otpSent && !verified && (
-            <div className="bg-violet-50 rounded-2xl p-4 border border-violet-100">
-              <p className="text-xs text-violet-600 font-bold mb-3">OTP bheja +91 {mobile} pe</p>
+            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
+              <p className="text-xs text-blue-800 font-bold mb-3">OTP sent to +91 {mobile}</p>
               <div className="flex gap-2 mb-1">
                 <input
                   type="number" inputMode="numeric" placeholder="6-digit OTP"
                   value={otp} onChange={(e) => setOtp(e.target.value)}
-                  className="flex-1 border-2 border-violet-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-violet-500 bg-white font-black tracking-[0.3em] text-center"
+                  className="flex-1 border-2 border-blue-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 bg-white font-black tracking-[0.3em] text-center"
                 />
                 <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
                   className="px-5 bg-emerald-500 text-white rounded-xl font-black disabled:opacity-60 flex items-center gap-1.5 text-sm">
@@ -254,8 +254,8 @@ export default function Details() {
           )}
 
           {phase === "checking" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-violet-600 font-bold mt-5 bg-violet-50 rounded-2xl py-4">
-              <Loader2 size={16} className="animate-spin" /> Aapka progress check ho raha hai...
+            <div className="flex items-center justify-center gap-2 text-sm text-blue-800 font-bold mt-5 bg-blue-50 rounded-2xl py-4">
+              <Loader2 size={16} className="animate-spin" /> Checking your saved progress...
             </div>
           )}
         </div>
@@ -283,22 +283,22 @@ export default function Details() {
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* Welcome back */}
           <div className="text-center mb-7">
-            <div className="w-20 h-20 bg-gradient-to-br from-violet-100 to-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
               👋
             </div>
-            <h2 className="text-2xl font-black text-gray-900">Wapas aagaye!</h2>
+            <h2 className="text-2xl font-black text-gray-900">Welcome back!</h2>
             <p className="text-gray-400 text-sm mt-1">+91 {mobile} · {t(lang, "verified")}</p>
           </div>
 
           {/* Progress card */}
-          <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border-2 border-violet-100 rounded-3xl p-5 mb-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-50 border-2 border-blue-100 rounded-3xl p-5 mb-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-violet-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
                 <MapPin size={18} className="text-white" />
               </div>
               <div>
-                <p className="text-xs text-violet-500 font-bold uppercase tracking-wide">
-                  Aap yahan the — {routeInfo.step}
+                <p className="text-xs text-blue-500 font-bold uppercase tracking-wide">
+                  You were here — {routeInfo.step}
                 </p>
                 <p className="font-black text-gray-900 text-base">{routeInfo.label}</p>
               </div>
@@ -308,7 +308,7 @@ export default function Details() {
             <div className="bg-white rounded-2xl p-3.5 space-y-2">
               {ud.name && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Naam</span>
+                  <span className="text-gray-400 font-medium">Name</span>
                   <span className="font-bold text-gray-900">{ud.name}</span>
                 </div>
               )}
@@ -350,12 +350,12 @@ export default function Details() {
 
           <button onClick={handleResume}
             className="w-full btn-gradient text-white font-black py-4 rounded-2xl text-lg flex items-center justify-center gap-2 mb-3">
-            <ChevronRight size={20} /> {routeInfo.label} se Continue Karo
+            <ChevronRight size={20} /> Continue from {routeInfo.label}
           </button>
 
           <button onClick={handleStartFresh}
             className="w-full flex items-center justify-center gap-2 text-gray-500 font-bold py-3.5 rounded-2xl border-2 border-gray-100 hover:border-gray-200 transition-all">
-            <RotateCcw size={15} /> Naye sir se shuru karo
+            <RotateCcw size={15} /> Start Fresh
           </button>
         </div>
       </div>
@@ -396,9 +396,9 @@ export default function Details() {
         {/* Name */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <User size={14} className="text-violet-500" /> {t(lang, "labelName")}
+            <User size={14} className="text-blue-500" /> {t(lang, "labelName")}
           </label>
-          <input type="text" placeholder="PAN card ke anusaar" value={name}
+          <input type="text" placeholder="As per PAN card" value={name}
             onChange={(e) => { setName(e.target.value); setErrors((er) => ({ ...er, name: "" })); }}
             className={inp("name")} />
           {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
@@ -407,7 +407,7 @@ export default function Details() {
         {/* PAN */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <CreditCard size={14} className="text-violet-500" /> {t(lang, "labelPan")}
+            <CreditCard size={14} className="text-blue-500" /> {t(lang, "labelPan")}
           </label>
           <input type="text" placeholder="ABCDE1234F" value={pan}
             onChange={(e) => { setPan(e.target.value.toUpperCase()); setErrors((er) => ({ ...er, pan: "" })); }}
@@ -418,7 +418,7 @@ export default function Details() {
         {/* DOB */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <Calendar size={14} className="text-violet-500" /> {t(lang, "labelDob")}
+            <Calendar size={14} className="text-blue-500" /> {t(lang, "labelDob")}
           </label>
           <input type="date" value={dob}
             onChange={(e) => { setDob(e.target.value); setErrors((er) => ({ ...er, dob: "" })); }}
@@ -429,14 +429,14 @@ export default function Details() {
         {/* Employment */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-2">
-            <Briefcase size={14} className="text-violet-500" /> {t(lang, "labelEmpType")}
+            <Briefcase size={14} className="text-blue-500" /> {t(lang, "labelEmpType")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {(["salaried", "self-employed", "business"] as const).map((et) => (
               <button key={et} onClick={() => setEmploymentType(et)}
                 className={`py-3 rounded-xl text-sm font-bold border-2 transition-all ${
                   employmentType === et
-                    ? "border-violet-500 bg-violet-50 text-violet-700"
+                    ? "border-blue-500 bg-blue-50 text-blue-900"
                     : "border-gray-100 text-gray-600"
                 }`}>
                 {et === "salaried" ? "Salaried" : et === "self-employed" ? "Self Emp." : "Business"}
@@ -448,7 +448,7 @@ export default function Details() {
         {/* Income */}
         <div>
           <label className="flex items-center gap-1.5 text-sm font-bold text-gray-700 mb-1.5">
-            <IndianRupee size={14} className="text-violet-500" /> {t(lang, "labelIncome")}
+            <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelIncome")}
           </label>
           <input type="number" inputMode="numeric" placeholder="jaise 50000" value={monthlyIncome}
             onChange={(e) => { setMonthlyIncome(e.target.value); setErrors((er) => ({ ...er, monthlyIncome: "" })); }}
@@ -463,8 +463,8 @@ export default function Details() {
           </label>
           <input type="number" inputMode="numeric" placeholder="300–900, jaise 750"
             value={cibilScore} onChange={(e) => setCibilScore(e.target.value)}
-            className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-violet-400 bg-white" />
-          <p className="text-xs text-gray-400 mt-1">mycibil.com pe free check karo</p>
+            className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 bg-white" />
+          <p className="text-xs text-gray-400 mt-1">Check free at mycibil.com</p>
         </div>
       </div>
 
