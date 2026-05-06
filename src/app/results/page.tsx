@@ -1,9 +1,9 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { useAppStore, BankOffer } from "@/lib/store";
 import { t } from "@/lib/i18n";
-import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck } from "lucide-react";
+import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck, FileDown, Loader2 } from "lucide-react";
 import type { RiskGrade } from "@/lib/store";
 import { saveSession } from "@/lib/firestore";
 
@@ -123,7 +123,8 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
 function ResultsInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const { bankOffers, statementAnalysis, userDetails, loanRequirement, setSelectedBank, setBankOffers, setLastRoute, lang } = useAppStore();
+  const { bankOffers, statementAnalysis, userDetails, loanRequirement, decisionAudit, setSelectedBank, setBankOffers, setLastRoute, lang } = useAppStore();
+  const [downloading, setDownloading] = useState(false);
 
   useEffect(() => {
     setLastRoute("/results");
@@ -132,6 +133,51 @@ function ResultsInner() {
 
   const income = statementAnalysis?.avgMonthlyIncome ?? userDetails.monthlyIncome ?? 50000;
   const foir = statementAnalysis?.foir ?? 0.2;
+
+  async function downloadReport() {
+    setDownloading(true);
+    try {
+      const payload = {
+        user: {
+          name: userDetails.name ?? "",
+          mobile: userDetails.mobile ?? "",
+          pan: userDetails.pan ?? "",
+          employmentType: userDetails.employmentType ?? "salaried",
+          dob: userDetails.dob ?? "",
+        },
+        loan: {
+          loanType: loanRequirement.loanType ?? "personal",
+          amount: loanRequirement.amount ?? 0,
+          tenure: loanRequirement.tenure ?? 36,
+        },
+        statement: statementAnalysis ?? {
+          avgMonthlyIncome: userDetails.monthlyIncome ?? 0,
+          avgMonthlyBalance: (userDetails.monthlyIncome ?? 0) * 1.8,
+          totalObligations: (userDetails.monthlyIncome ?? 0) * 0.2,
+          foir: 0.2, bounceCount: 0, salaryCredits: 6, transactionCount: 0,
+        },
+        offers: bankOffers,
+        audit: decisionAudit,
+      };
+      const res = await fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `InstantLoan_Report_${userDetails.name?.replace(/\s+/g, "_") || "Report"}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert("Could not generate report. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   function handleApply(offer: BankOffer) {
     setSelectedBank(offer);
@@ -173,9 +219,16 @@ function ResultsInner() {
             </div>
             <p className="text-white/70 text-sm">{bankOffers.length} {t(lang, "resultSub")}</p>
           </div>
-          <button onClick={shareWA} className="flex items-center gap-1.5 bg-green-500 text-white text-xs font-semibold px-3 py-2 rounded-xl">
-            <Share2 size={13} /> Share
-          </button>
+          <div className="flex flex-col gap-1.5">
+            <button onClick={shareWA} className="flex items-center gap-1.5 bg-green-500 text-white text-xs font-semibold px-3 py-2 rounded-xl">
+              <Share2 size={13} /> Share
+            </button>
+            <button onClick={downloadReport} disabled={downloading}
+              className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60">
+              {downloading ? <Loader2 size={13} className="animate-spin" /> : <FileDown size={13} />}
+              {downloading ? "Generating…" : "AI Report"}
+            </button>
+          </div>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <div className="glass rounded-xl p-2.5 text-center">
