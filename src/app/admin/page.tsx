@@ -192,7 +192,7 @@ export default function AdminPage() {
               <Shield size={30} className="text-white" />
             </div>
             <h1 className="text-2xl font-semibold text-[var(--ink)]">Admin Login</h1>
-            <p className="text-sm text-[var(--ink-muted)] mt-1">PostMoney Dashboard</p>
+            <p className="text-sm text-[var(--ink-muted)] mt-1">postmoney Dashboard</p>
           </div>
           <div className="relative mb-4">
             <input type={showPass ? "text" : "password"} placeholder="Admin password" value={password}
@@ -218,7 +218,7 @@ export default function AdminPage() {
             <span className="text-white font-semibold text-sm">₹</span>
           </div>
           <div>
-            <span className="font-semibold text-[var(--ink)] text-sm">PostMoney Admin</span>
+            <span className="font-semibold text-[var(--ink)] text-sm">postmoney Admin</span>
             <span className="text-xs text-[var(--ink-muted)] ml-2">{apps.length} applications</span>
           </div>
         </div>

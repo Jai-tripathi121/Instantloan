@@ -169,7 +169,7 @@ function ResultsInner() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `PostMoney_Report_${userDetails.name?.replace(/\s+/g, "_") || "Report"}.pdf`;
+      a.download = `postmoney_Report_${userDetails.name?.replace(/\s+/g, "_") || "Report"}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -192,7 +192,7 @@ function ResultsInner() {
   function shareWA() {
     const best = bankOffers[0];
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://postmoney-ten.vercel.app";
-    const text = `I checked my loan eligibility on PostMoney!\n\n${best?.bankName} pre-approved ₹${best?.approvedAmount.toLocaleString("en-IN")} @ ${best?.interestRate}% p.a.\n\nCheck yours — Zero CIBIL impact: ${appUrl}`;
+    const text = `I checked my loan eligibility on postmoney!\n\n${best?.bankName} pre-approved ₹${best?.approvedAmount.toLocaleString("en-IN")} @ ${best?.interestRate}% p.a.\n\nCheck yours — Zero CIBIL impact: ${appUrl}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 

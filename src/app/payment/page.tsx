@@ -55,7 +55,7 @@ export default function Payment() {
     if (!ok) { alert("Payment gateway could not load. Please try again."); setLoading(false); return; }
     const rzp = new window.Razorpay({
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ?? "rzp_test_placeholder",
-      amount: 9900, currency: "INR", name: "PostMoney",
+      amount: 9900, currency: "INR", name: "postmoney",
       description: "AI Eligibility Report",
       prefill: { name: userDetails.name ?? "", contact: userDetails.mobile ?? "" },
       theme: { color: "#0a3d2e" },
@@ -82,7 +82,7 @@ export default function Payment() {
   }
 
   function openUpiApp() {
-    window.location.href = `upi://pay?pa=${UPI_ID}&pn=PostMoney&am=99&cu=INR&tn=AI+Eligibility+Report`;
+    window.location.href = `upi://pay?pa=${UPI_ID}&pn=postmoney&am=99&cu=INR&tn=AI+Eligibility+Report`;
   }
 
   async function handleManualConfirm() {
@@ -187,7 +187,7 @@ export default function Payment() {
             {/* QR code via API */}
             <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-[var(--bg-deep)] flex items-center justify-center border border-[var(--line-soft)]">
               <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=PostMoney&am=99&cu=INR&tn=AI+Eligibility+Report`)}`}
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=postmoney&am=99&cu=INR&tn=AI+Eligibility+Report`)}`}
                 alt="UPI QR Code"
                 className="w-full h-full object-contain"
               />

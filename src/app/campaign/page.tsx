@@ -11,12 +11,12 @@ const FEATURES = [
 const TESTIMONIALS = [
   {
     name: "Rahul S., Mumbai",
-    text: "Applied to HDFC on the first try after using PostMoney. ₹4 lakh personal loan approved in 2 days!",
+    text: "Applied to HDFC on the first try after using postmoney. ₹4 lakh personal loan approved in 2 days!",
     stars: 5,
   },
   {
     name: "Priya M., Bangalore",
-    text: "As a freelancer I thought no bank would approve me. PostMoney showed PNB would — and it did!",
+    text: "As a freelancer I thought no bank would approve me. postmoney showed PNB would — and it did!",
     stars: 5,
   },
 ];
@@ -28,7 +28,7 @@ export default function Campaign() {
         <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center">
           <span className="text-white font-medium text-lg">₹</span>
         </div>
-        <span className="text-xl font-medium text-gray-900">PostMoney</span>
+        <span className="text-xl font-medium text-gray-900">postmoney</span>
       </div>
 
       <div className="text-center mb-8">

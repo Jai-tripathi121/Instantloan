@@ -37,7 +37,7 @@ export default function Refund() {
 
       <div className="space-y-5 text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
         {[
-          ["1. Service Provider", "This Cancellation & Refund Policy applies to payments made to POSTMAC VENTURES PRIVATE LIMITED (CIN: U66190HR2025PTC129138, GSTIN: 06AAPCP5039G1Z7) for the PostMoney AI Eligibility Report service."],
+          ["1. Service Provider", "This Cancellation & Refund Policy applies to payments made to POSTMAC VENTURES PRIVATE LIMITED (CIN: U66190HR2025PTC129138, GSTIN: 06AAPCP5039G1Z7) for the postmoney AI Eligibility Report service."],
           ["2. Nature of the Charge", "The ₹99 fee (inclusive of applicable GST) is a one-time charge for AI-based bank statement analysis, profile matching against 33+ bank eligibility criteria, and delivery of a personalised loan eligibility report. This is a digital service delivered instantly upon payment."],
           ["3. Cancellation Policy", "No cancellation is possible once the payment is initiated and the report generation process begins. As this is an instantly delivered digital product, the right to cancellation under the Consumer Protection (E-Commerce) Rules 2020 does not apply once the service has been rendered."],
           ["4. Non-Refundable Cases", "Refunds will NOT be issued for: (a) report delivered successfully but loan application rejected by a bank; (b) user dissatisfied with loan offers; (c) user provided incorrect details leading to inaccurate results; (d) user changes their mind after report delivery; (e) user is ineligible for any bank — the report itself is the service, not a guaranteed offer."],

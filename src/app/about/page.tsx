@@ -23,7 +23,7 @@ export default function About() {
         <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--brand)" }}>
           <span className="text-white font-semibold text-2xl">₹</span>
         </div>
-        <h1 className="text-2xl font-semibold mb-1">About PostMoney</h1>
+        <h1 className="text-2xl font-semibold mb-1">About postmoney</h1>
         <p className="text-sm" style={{ color: "var(--ink-muted)" }}>by {COMPANY.name}</p>
       </div>
 
@@ -41,7 +41,7 @@ export default function About() {
           <p>Every time you apply for a loan at a bank, they perform a hard CIBIL inquiry. Apply at 5 banks and your score drops 25–50 points before you even get a rupee. We fix this with a soft-check system.</p>
         </div>
         <div>
-          <h2 className="font-semibold mb-2" style={{ color: "var(--ink)" }}>How PostMoney Works</h2>
+          <h2 className="font-semibold mb-2" style={{ color: "var(--ink)" }}>How postmoney Works</h2>
           <div className="space-y-2">
             {[
               ["🛡️", "Bank statement analysed on our secure servers — encrypted in transit, never stored permanently"],

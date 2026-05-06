@@ -14,10 +14,10 @@ export default function Confirmation() {
   }
 
   function download() {
-    const c = `PostMoney Confirmation\n\nRef: ${applicationRef}\nBank: ${selectedBank?.bankName}\nAmount: ₹${selectedBank?.approvedAmount.toLocaleString("en-IN")}\nRate: ${selectedBank?.interestRate}% p.a.\nEMI: ₹${selectedBank?.emi.toLocaleString("en-IN")}/month`;
+    const c = `postmoney Confirmation\n\nRef: ${applicationRef}\nBank: ${selectedBank?.bankName}\nAmount: ₹${selectedBank?.approvedAmount.toLocaleString("en-IN")}\nRate: ${selectedBank?.interestRate}% p.a.\nEMI: ₹${selectedBank?.emi.toLocaleString("en-IN")}/month`;
     const blob = new Blob([c], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `PostMoney_${applicationRef}.txt`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `postmoney_${applicationRef}.txt`; a.click();
     URL.revokeObjectURL(url);
   }
 

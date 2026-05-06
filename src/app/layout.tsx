@@ -10,7 +10,7 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "PostMoney — Loan Eligibility, Zero CIBIL Impact",
+  title: "postmoney — Loan Eligibility, Zero CIBIL Impact",
   description: "Check loan eligibility across 33 banks in 60 seconds. Zero CIBIL impact. Data stays on your device. ₹99 AI report.",
 };
 
