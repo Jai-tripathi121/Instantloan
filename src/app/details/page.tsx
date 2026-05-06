@@ -175,17 +175,17 @@ export default function Details() {
   }
 
   const inp = (field: string) =>
-    `w-full border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all bg-white ${
-      errors[field] ? "border-red-400 focus:border-red-400" : "border-gray-100 focus:border-blue-400"
+    `w-full border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all bg-[var(--surface)] ${
+      errors[field] ? "border-red-400 focus:border-red-400" : "border-[var(--line-soft)] focus:border-[var(--brand)]"
     }`;
 
   // ── PHASE: LOGIN / CHECKING ───────────────────────────────────
   if (phase === "login" || phase === "checking") {
     return (
-      <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+      <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => router.back()}
-            className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+            className="w-9 h-9 bg-[var(--bg-deep)] rounded-xl flex items-center justify-center">
             <ArrowLeft size={18} className="text-gray-600" />
           </button>
         </div>
@@ -195,19 +195,19 @@ export default function Details() {
           <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-200">
             <span className="text-white font-semibold text-2xl">₹</span>
           </div>
-          <h1 className="text-3xl font-semibold text-gray-900 mb-1.5">Check Your Eligibility</h1>
-          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+          <h1 className="text-3xl font-semibold text-[var(--ink)] mb-1.5">Check Your Eligibility</h1>
+          <p className="text-[var(--ink-muted)] text-sm mb-8 leading-relaxed">
             Log in with your mobile — if you've applied before, we'll resume right where you left off
           </p>
 
           {/* Mobile input */}
           <div className="mb-3">
-            <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-              <Phone size={14} className="text-blue-500" /> Mobile Number
+            <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+              <Phone size={14} className="text-[var(--brand-3)]" /> Mobile Number
             </label>
             <div className="flex gap-2">
-              <div className="flex items-center justify-center border-2 border-gray-100 rounded-xl px-3.5 bg-slate-50 min-w-[52px]">
-                <span className="text-sm font-medium text-gray-500">+91</span>
+              <div className="flex items-center justify-center border-2 border-[var(--line-soft)] rounded-xl px-3.5 bg-[var(--bg)] min-w-[52px]">
+                <span className="text-sm font-medium text-[var(--ink-muted)]">+91</span>
               </div>
               <input
                 type="tel" inputMode="numeric" placeholder="10-digit mobile"
@@ -217,7 +217,7 @@ export default function Details() {
                   setOtpSent(false); setVerified(false); setMobileError("");
                 }}
                 className={`flex-1 border-2 rounded-xl px-4 py-3.5 text-base focus:outline-none transition-all ${
-                  mobileError ? "border-red-400" : "border-gray-100 focus:border-blue-400"
+                  mobileError ? "border-red-400" : "border-[var(--line-soft)] focus:border-[var(--brand)]"
                 }`}
               />
             </div>
@@ -233,13 +233,13 @@ export default function Details() {
           )}
 
           {otpSent && !verified && (
-            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-100">
-              <p className="text-xs text-blue-800 font-medium mb-3">OTP sent to +91 {mobile}</p>
+            <div className="bg-[var(--brand-soft)] rounded-2xl p-4 border border-[var(--brand-soft)]">
+              <p className="text-xs text-[var(--brand)] font-medium mb-3">OTP sent to +91 {mobile}</p>
               <div className="flex gap-2 mb-1">
                 <input
                   type="number" inputMode="numeric" placeholder="6-digit OTP"
                   value={otp} onChange={(e) => setOtp(e.target.value)}
-                  className="flex-1 border-2 border-blue-200 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500 bg-white font-semibold tracking-[0.3em] text-center"
+                  className="flex-1 border-2 border-[var(--brand-soft)] rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)] font-semibold tracking-[0.3em] text-center"
                 />
                 <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
                   className="px-5 bg-emerald-500 text-white rounded-xl font-semibold disabled:opacity-60 flex items-center gap-1.5 text-sm">
@@ -254,7 +254,7 @@ export default function Details() {
           )}
 
           {phase === "checking" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-blue-800 font-medium mt-5 bg-blue-50 rounded-2xl py-4">
+            <div className="flex items-center justify-center gap-2 text-sm text-[var(--brand)] font-medium mt-5 bg-[var(--brand-soft)] rounded-2xl py-4">
               <Loader2 size={16} className="animate-spin" /> Checking your saved progress...
             </div>
           )}
@@ -272,10 +272,10 @@ export default function Details() {
     const lr = existingSession.loanRequirement;
 
     return (
-      <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+      <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
         <div className="flex items-center gap-3 mb-4">
           <button onClick={() => setPhase("login")}
-            className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+            className="w-9 h-9 bg-[var(--bg-deep)] rounded-xl flex items-center justify-center">
             <ArrowLeft size={18} className="text-gray-600" />
           </button>
         </div>
@@ -283,65 +283,65 @@ export default function Details() {
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* Welcome back */}
           <div className="text-center mb-7">
-            <div className="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
+            <div className="w-20 h-20 bg-[var(--brand-soft)] rounded-3xl flex items-center justify-center mx-auto mb-4 text-4xl shadow-sm">
               👋
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Welcome back!</h2>
-            <p className="text-gray-400 text-sm mt-1">+91 {mobile} · {t(lang, "verified")}</p>
+            <h2 className="text-2xl font-semibold text-[var(--ink)]">Welcome back!</h2>
+            <p className="text-[var(--ink-muted)] text-sm mt-1">+91 {mobile} · {t(lang, "verified")}</p>
           </div>
 
           {/* Progress card */}
-          <div className="bg-blue-50 border-2 border-blue-100 rounded-3xl p-5 mb-4">
+          <div className="bg-[var(--brand-soft)] border-2 border-[var(--brand-soft)] rounded-3xl p-5 mb-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 bg-[var(--brand-soft)]0 rounded-xl flex items-center justify-center flex-shrink-0">
                 <MapPin size={18} className="text-white" />
               </div>
               <div>
-                <p className="text-xs text-blue-500 font-medium uppercase tracking-wide">
+                <p className="text-xs text-[var(--brand-3)] font-medium uppercase tracking-wide">
                   You were here — {routeInfo.step}
                 </p>
-                <p className="font-semibold text-gray-900 text-base">{routeInfo.label}</p>
+                <p className="font-semibold text-[var(--ink)] text-base">{routeInfo.label}</p>
               </div>
             </div>
 
             {/* Snapshot of saved data */}
-            <div className="bg-white rounded-2xl p-3.5 space-y-2">
+            <div className="bg-[var(--surface)] rounded-2xl p-3.5 space-y-2">
               {ud.name && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Name</span>
-                  <span className="font-medium text-gray-900">{ud.name}</span>
+                  <span className="text-[var(--ink-muted)] font-medium">Name</span>
+                  <span className="font-medium text-[var(--ink)]">{ud.name}</span>
                 </div>
               )}
               {ud.employmentType && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Employment</span>
-                  <span className="font-medium text-gray-900 capitalize">{ud.employmentType}</span>
+                  <span className="text-[var(--ink-muted)] font-medium">Employment</span>
+                  <span className="font-medium text-[var(--ink)] capitalize">{ud.employmentType}</span>
                 </div>
               )}
               {ud.monthlyIncome && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Income</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-[var(--ink-muted)] font-medium">Income</span>
+                  <span className="font-medium text-[var(--ink)]">
                     ₹{ud.monthlyIncome.toLocaleString("en-IN")}/mo
                   </span>
                 </div>
               )}
               {lr?.loanType && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Loan Type</span>
-                  <span className="font-medium text-gray-900 capitalize">{lr.loanType}</span>
+                  <span className="text-[var(--ink-muted)] font-medium">Loan Type</span>
+                  <span className="font-medium text-[var(--ink)] capitalize">{lr.loanType}</span>
                 </div>
               )}
               {lr?.amount && (
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400 font-medium">Amount</span>
-                  <span className="font-medium text-gray-900">
+                  <span className="text-[var(--ink-muted)] font-medium">Amount</span>
+                  <span className="font-medium text-[var(--ink)]">
                     ₹{lr.amount.toLocaleString("en-IN")}
                   </span>
                 </div>
               )}
               {existingSession.paymentDone && (
-                <div className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium pt-1 border-t border-gray-100">
+                <div className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium pt-1 border-t border-[var(--line-soft)]">
                   <CheckCircle size={13} /> Payment complete
                 </div>
               )}
@@ -354,7 +354,7 @@ export default function Details() {
           </button>
 
           <button onClick={handleStartFresh}
-            className="w-full flex items-center justify-center gap-2 text-gray-500 font-medium py-3.5 rounded-2xl border-2 border-gray-100 hover:border-gray-200 transition-all">
+            className="w-full flex items-center justify-center gap-2 text-[var(--ink-muted)] font-medium py-3.5 rounded-2xl border-2 border-[var(--line-soft)] hover:border-[var(--line)] transition-all">
             <RotateCcw size={15} /> Start Fresh
           </button>
         </div>
@@ -364,18 +364,18 @@ export default function Details() {
 
   // ── PHASE: FORM ───────────────────────────────────────────────
   return (
-    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-5">
         <button onClick={() => setPhase("login")}
-          className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+          className="w-9 h-9 bg-[var(--bg-deep)] rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+          <div className="flex justify-between text-xs text-[var(--ink-muted)] mb-1.5">
             <span>Step 1 of 4</span><span>{t(lang, "detailsTitle")}</span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-2 bg-[var(--bg-deep)] rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-1/4 transition-all" />
           </div>
         </div>
@@ -388,15 +388,15 @@ export default function Details() {
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "detailsTitle")}</h2>
-        <p className="text-gray-500 text-sm mt-1">{t(lang, "detailsSub")}</p>
+        <h2 className="text-2xl font-semibold text-[var(--ink)]">{t(lang, "detailsTitle")}</h2>
+        <p className="text-[var(--ink-muted)] text-sm mt-1">{t(lang, "detailsSub")}</p>
       </div>
 
       <div className="space-y-4 flex-1">
         {/* Name */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-            <User size={14} className="text-blue-500" /> {t(lang, "labelName")}
+          <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+            <User size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelName")}
           </label>
           <input type="text" placeholder="As per PAN card" value={name}
             onChange={(e) => { setName(e.target.value); setErrors((er) => ({ ...er, name: "" })); }}
@@ -406,8 +406,8 @@ export default function Details() {
 
         {/* PAN */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-            <CreditCard size={14} className="text-blue-500" /> {t(lang, "labelPan")}
+          <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+            <CreditCard size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelPan")}
           </label>
           <input type="text" placeholder="ABCDE1234F" value={pan}
             onChange={(e) => { setPan(e.target.value.toUpperCase()); setErrors((er) => ({ ...er, pan: "" })); }}
@@ -417,8 +417,8 @@ export default function Details() {
 
         {/* DOB */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-            <Calendar size={14} className="text-blue-500" /> {t(lang, "labelDob")}
+          <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+            <Calendar size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelDob")}
           </label>
           <input type="date" value={dob}
             onChange={(e) => { setDob(e.target.value); setErrors((er) => ({ ...er, dob: "" })); }}
@@ -428,16 +428,16 @@ export default function Details() {
 
         {/* Employment */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-2">
-            <Briefcase size={14} className="text-blue-500" /> {t(lang, "labelEmpType")}
+          <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-2">
+            <Briefcase size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelEmpType")}
           </label>
           <div className="grid grid-cols-3 gap-2">
             {(["salaried", "self-employed", "business"] as const).map((et) => (
               <button key={et} onClick={() => setEmploymentType(et)}
                 className={`py-3 rounded-xl text-sm font-medium border-2 transition-all ${
                   employmentType === et
-                    ? "border-blue-500 bg-blue-50 text-blue-900"
-                    : "border-gray-100 text-gray-600"
+                    ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
+                    : "border-[var(--line-soft)] text-gray-600"
                 }`}>
                 {et === "salaried" ? "Salaried" : et === "self-employed" ? "Self Emp." : "Business"}
               </button>
@@ -447,8 +447,8 @@ export default function Details() {
 
         {/* Income */}
         <div>
-          <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-            <IndianRupee size={14} className="text-blue-500" /> {t(lang, "labelIncome")}
+          <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+            <IndianRupee size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelIncome")}
           </label>
           <input type="number" inputMode="numeric" placeholder="jaise 50000" value={monthlyIncome}
             onChange={(e) => { setMonthlyIncome(e.target.value); setErrors((er) => ({ ...er, monthlyIncome: "" })); }}
@@ -458,13 +458,13 @@ export default function Details() {
 
         {/* CIBIL */}
         <div>
-          <label className="text-sm font-medium text-gray-700 mb-1.5 block">
-            {t(lang, "labelCibil")} <span className="text-gray-400 font-normal">(optional)</span>
+          <label className="text-sm font-medium text-[var(--ink-soft)] mb-1.5 block">
+            {t(lang, "labelCibil")} <span className="text-[var(--ink-muted)] font-normal">(optional)</span>
           </label>
           <input type="number" inputMode="numeric" placeholder="300–900, jaise 750"
             value={cibilScore} onChange={(e) => setCibilScore(e.target.value)}
-            className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400 bg-white" />
-          <p className="text-xs text-gray-400 mt-1">Check free at mycibil.com</p>
+            className="w-full border-2 border-[var(--line-soft)] rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)]" />
+          <p className="text-xs text-[var(--ink-muted)] mt-1">Check free at mycibil.com</p>
         </div>
       </div>
 

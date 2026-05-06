@@ -71,7 +71,7 @@ export default function Processing() {
   }, []);
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 py-6" style={{ background: "#EFF6FF" }}>
+    <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 py-6" style={{ background: "var(--bg)" }}>
       {/* Circle progress */}
       <div className="relative w-40 h-40 mb-8">
         <svg className="w-40 h-40 -rotate-90" viewBox="0 0 160 160">
@@ -89,24 +89,24 @@ export default function Processing() {
           </defs>
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-semibold text-blue-800">{Math.round(progress)}%</span>
-          <span className="text-xs text-gray-400 font-medium">analysing</span>
+          <span className="text-3xl font-semibold text-[var(--brand)]">{Math.round(progress)}%</span>
+          <span className="text-xs text-[var(--ink-muted)] font-medium">analysing</span>
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold text-gray-900 mb-2 text-center">AI is Analysing</h2>
-      <p className="text-gray-400 text-sm text-center mb-8">Everything on your device — no data leaves your phone</p>
+      <h2 className="text-xl font-semibold text-[var(--ink)] mb-2 text-center">AI is Analysing</h2>
+      <p className="text-[var(--ink-muted)] text-sm text-center mb-8">Everything on your device — no data leaves your phone</p>
 
       <div className="w-full space-y-3">
         {STEPS.map((s, i) => (
           <div key={i} className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < currentStep ? "bg-emerald-500" : i === currentStep ? "bg-blue-800" : "bg-gray-100"}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${i < currentStep ? "bg-emerald-500" : i === currentStep ? "bg-[var(--brand)]" : "bg-[var(--bg-deep)]"}`}>
               {i < currentStep
                 ? <CheckCircle size={16} className="text-white" />
-                : <span className={`text-xs font-semibold ${i === currentStep ? "text-white" : "text-gray-400"}`}>{i + 1}</span>
+                : <span className={`text-xs font-semibold ${i === currentStep ? "text-white" : "text-[var(--ink-muted)]"}`}>{i + 1}</span>
               }
             </div>
-            <p className={`text-sm transition-all font-medium ${i === currentStep ? "text-blue-900 font-medium" : i < currentStep ? "text-emerald-600" : "text-gray-400"}`}>
+            <p className={`text-sm transition-all font-medium ${i === currentStep ? "text-[var(--brand)] font-medium" : i < currentStep ? "text-emerald-600" : "text-[var(--ink-muted)]"}`}>
               {s.label}
             </p>
           </div>

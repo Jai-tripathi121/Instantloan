@@ -9,7 +9,7 @@ import { saveSession } from "@/lib/firestore";
 
 const GRADE_CONFIG: Record<RiskGrade, { label: string; bg: string; text: string; bar: string }> = {
   A: { label: "Grade A", bg: "bg-emerald-100", text: "text-emerald-700", bar: "bg-emerald-500" },
-  B: { label: "Grade B", bg: "bg-blue-100",    text: "text-blue-700",    bar: "bg-blue-500" },
+  B: { label: "Grade B", bg: "bg-[var(--brand-soft)]",    text: "text-[var(--brand-2)]",    bar: "bg-[var(--brand-soft)]0" },
   C: { label: "Grade C", bg: "bg-amber-100",   text: "text-amber-700",   bar: "bg-amber-400" },
   D: { label: "Grade D", bg: "bg-red-100",     text: "text-red-700",     bar: "bg-red-400" },
 };
@@ -36,13 +36,13 @@ const DEMO_OFFERS: BankOffer[] = [
 function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank: number; onApply: () => void; applyLabel: string }) {
   const isTop = rank === 0;
   return (
-    <div className={`rounded-2xl overflow-hidden border-2 transition-all card-hover ${isTop ? "border-blue-200 shadow-lg shadow-blue-100" : "border-gray-100"}`}>
+    <div className={`rounded-2xl overflow-hidden border-2 transition-all card-hover ${isTop ? "border-[var(--brand-soft)] shadow-lg shadow-blue-100" : "border-[var(--line-soft)]"}`}>
       {/* Bank header */}
       <div className="flex items-center justify-between p-4 pb-3" style={{ background: `${offer.color}15` }}>
         <div className="flex items-center gap-3">
           <BankLogo logoUrl={offer.logoUrl} logo={offer.logo} color={offer.color} size={44} />
           <div>
-            <p className="font-semibold text-gray-900">{offer.bankName}</p>
+            <p className="font-semibold text-[var(--ink)]">{offer.bankName}</p>
             <div className="flex items-center gap-1.5 flex-wrap">
               <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
                 <CheckCircle size={11} /> Pre-Approved
@@ -60,14 +60,14 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
 
       {/* Approval probability bar */}
       {offer.approvalProbability !== undefined && (
-        <div className="px-4 py-2 bg-white border-t border-gray-50">
+        <div className="px-4 py-2 bg-[var(--surface)] border-t border-gray-50">
           <div className="flex justify-between text-xs mb-1.5">
-            <span className="font-medium text-gray-500">Approval Probability</span>
+            <span className="font-medium text-[var(--ink-muted)]">Approval Probability</span>
             <span className={`font-semibold ${offer.approvalProbability >= 70 ? "text-emerald-600" : offer.approvalProbability >= 40 ? "text-amber-600" : "text-red-500"}`}>
               {offer.approvalProbability}%
             </span>
           </div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="h-2 bg-[var(--bg-deep)] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-700 ${
                 offer.approvalProbability >= 70 ? GRADE_CONFIG.A.bar :
@@ -81,14 +81,14 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
       )}
 
       {/* Details */}
-      <div className="p-4 pt-3 bg-white">
+      <div className="p-4 pt-3 bg-[var(--surface)]">
         <div className="flex justify-between mb-3">
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">Approved Amount</p>
-            <p className="text-2xl font-semibold text-gray-900">₹{offer.approvedAmount.toLocaleString("en-IN")}</p>
+            <p className="text-xs text-[var(--ink-muted)] mb-0.5">Approved Amount</p>
+            <p className="text-2xl font-semibold text-[var(--ink)]">₹{offer.approvedAmount.toLocaleString("en-IN")}</p>
           </div>
           <div className="text-right">
-            <p className="text-xs text-gray-400 mb-0.5">Interest Rate</p>
+            <p className="text-xs text-[var(--ink-muted)] mb-0.5">Interest Rate</p>
             <div className="flex items-center gap-1 justify-end">
               <TrendingDown size={14} className="text-emerald-500" />
               <p className="text-2xl font-semibold text-emerald-600">{offer.interestRate}%</p>
@@ -97,13 +97,13 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
         </div>
 
         <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="bg-blue-50 rounded-xl p-2.5 text-center">
+          <div className="bg-[var(--brand-soft)] rounded-xl p-2.5 text-center">
             <p className="text-xs text-blue-400 mb-0.5">EMI/Month</p>
-            <p className="text-sm font-semibold text-blue-900">₹{offer.emi.toLocaleString("en-IN")}</p>
+            <p className="text-sm font-semibold text-[var(--brand)]">₹{offer.emi.toLocaleString("en-IN")}</p>
           </div>
-          <div className="bg-blue-50 rounded-xl p-2.5 text-center">
+          <div className="bg-[var(--brand-soft)] rounded-xl p-2.5 text-center">
             <p className="text-xs text-blue-400 mb-0.5">Tenure</p>
-            <p className="text-sm font-semibold text-blue-700">{offer.tenure >= 12 ? `${Math.round(offer.tenure / 12)} yr` : `${offer.tenure}m`}</p>
+            <p className="text-sm font-semibold text-[var(--brand-2)]">{offer.tenure >= 12 ? `${Math.round(offer.tenure / 12)} yr` : `${offer.tenure}m`}</p>
           </div>
           <div className="bg-amber-50 rounded-xl p-2.5 text-center">
             <p className="text-xs text-amber-400 mb-0.5">Proc. Fee</p>
@@ -152,17 +152,17 @@ function ResultsInner() {
 
   if (!bankOffers.length) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 text-center py-6 bg-white">
+      <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 text-center py-6 bg-[var(--surface)]">
         <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl">😔</div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">No Eligible Banks Found</h2>
-        <p className="text-gray-500 text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
+        <h2 className="text-xl font-semibold text-[var(--ink)] mb-2">No Eligible Banks Found</h2>
+        <p className="text-[var(--ink-muted)] text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
         <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg">Try Again</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-white w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-[var(--surface)] w-full max-w-md mx-auto px-5 py-6">
       {/* Hero */}
       <div className="hero-bg rounded-2xl p-5 mb-5 text-white">
         <div className="flex items-start justify-between mb-3">
@@ -199,7 +199,7 @@ function ResultsInner() {
         ))}
       </div>
 
-      <p className="text-center text-xs text-gray-400 mt-5 pb-4">
+      <p className="text-center text-xs text-[var(--ink-muted)] mt-5 pb-4">
         Hard CIBIL inquiry only occurs when you formally submit an application to a bank
       </p>
     </div>
@@ -208,7 +208,7 @@ function ResultsInner() {
 
 export default function Results() {
   return (
-    <Suspense fallback={<div className="min-h-dvh flex items-center justify-center"><div className="text-blue-800 font-medium">Loading results...</div></div>}>
+    <Suspense fallback={<div className="min-h-dvh flex items-center justify-center"><div className="text-[var(--brand)] font-medium">Loading results...</div></div>}>
       <ResultsInner />
     </Suspense>
   );

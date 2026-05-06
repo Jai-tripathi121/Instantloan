@@ -67,22 +67,22 @@ export default function Upload() {
   }
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-9 h-9 bg-[var(--bg-deep)] rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 3 of 4</span><span>{t(lang, "uploadTitle")}</span></div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="flex justify-between text-xs text-[var(--ink-muted)] mb-1.5"><span>Step 3 of 4</span><span>{t(lang, "uploadTitle")}</span></div>
+          <div className="h-2 bg-[var(--bg-deep)] rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-3/4 transition-all" />
           </div>
         </div>
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "uploadTitle")}</h2>
-        <p className="text-gray-500 text-sm mt-1">{t(lang, "uploadSub")}</p>
+        <h2 className="text-2xl font-semibold text-[var(--ink)]">{t(lang, "uploadTitle")}</h2>
+        <p className="text-[var(--ink-muted)] text-sm mt-1">{t(lang, "uploadSub")}</p>
       </div>
 
       {/* Privacy notice */}
@@ -102,7 +102,7 @@ export default function Upload() {
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${dragging ? "border-blue-500 bg-blue-50" : file ? "border-emerald-400 bg-emerald-50" : "border-gray-200 bg-gray-50 hover:border-blue-300 hover:bg-blue-50"}`}>
+        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${dragging ? "border-[var(--brand)] bg-[var(--brand-soft)]" : file ? "border-emerald-400 bg-emerald-50" : "border-[var(--line)] bg-[var(--bg-deep)] hover:border-blue-300 hover:bg-[var(--brand-soft)]"}`}>
         <input ref={inputRef} type="file" accept=".pdf" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
         {file ? (
@@ -113,32 +113,32 @@ export default function Upload() {
           </>
         ) : (
           <>
-            <FileText size={44} className="text-blue-300 mx-auto mb-2" />
+            <FileText size={44} className="text-[var(--brand-soft)] mx-auto mb-2" />
             <p className="font-medium text-gray-600">{t(lang, "uploadBtn")}</p>
-            <p className="text-xs text-gray-400 mt-1">{t(lang, "uploadDrop")}</p>
+            <p className="text-xs text-[var(--ink-muted)] mt-1">{t(lang, "uploadDrop")}</p>
           </>
         )}
       </div>
 
       {/* Password */}
       <div className="mb-5">
-        <label className="flex items-center gap-1.5 text-sm font-medium text-gray-700 mb-1.5">
-          <Lock size={14} className="text-blue-700" /> PDF Password <span className="text-gray-400 font-normal">(optional)</span>
+        <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
+          <Lock size={14} className="text-[var(--brand-2)]" /> PDF Password <span className="text-[var(--ink-muted)] font-normal">(optional)</span>
         </label>
         <input type="password" placeholder="Leave blank if not password protected" value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full border-2 border-gray-100 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-blue-400" />
-        <p className="text-xs text-gray-400 mt-1">Most banks use DOB (DDMMYYYY) or last 4 digits of mobile</p>
+          className="w-full border-2 border-[var(--line-soft)] rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[var(--brand)]" />
+        <p className="text-xs text-[var(--ink-muted)] mt-1">Most banks use DOB (DDMMYYYY) or last 4 digits of mobile</p>
       </div>
 
       {/* Bank chips */}
-      <div className="bg-slate-50 rounded-2xl p-4 mb-5">
-        <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">Supported Banks</p>
+      <div className="bg-[var(--bg)] rounded-2xl p-4 mb-5">
+        <p className="text-xs font-medium text-[var(--ink-muted)] mb-2 uppercase tracking-wide">Supported Banks</p>
         <div className="flex flex-wrap gap-2">
           {BANKS.map((b) => (
-            <span key={b} className="text-xs bg-white border border-gray-200 rounded-lg px-2.5 py-1 text-gray-600 font-semibold">{b}</span>
+            <span key={b} className="text-xs bg-[var(--surface)] border border-[var(--line)] rounded-lg px-2.5 py-1 text-gray-600 font-semibold">{b}</span>
           ))}
-          <span className="text-xs bg-blue-50 border border-blue-200 rounded-lg px-2.5 py-1 text-blue-800 font-semibold">+20 more</span>
+          <span className="text-xs bg-[var(--brand-soft)] border border-[var(--brand-soft)] rounded-lg px-2.5 py-1 text-[var(--brand)] font-semibold">+20 more</span>
         </div>
       </div>
 
@@ -149,7 +149,7 @@ export default function Upload() {
       )}
 
       <button onClick={handleAnalyse} disabled={!file || parsing}
-        className={`w-full font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-gray-400"}`}>
+        className={`w-full font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-[var(--ink-muted)]"}`}>
         {parsing ? t(lang, "loading") : (<>{t(lang, "btnAnalyse")} <ChevronRight size={22} /></>)}
       </button>
     </div>

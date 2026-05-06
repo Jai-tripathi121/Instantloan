@@ -58,7 +58,7 @@ export default function Payment() {
       amount: 9900, currency: "INR", name: "InstantLoan",
       description: "AI Eligibility Report",
       prefill: { name: userDetails.name ?? "", contact: userDetails.mobile ?? "" },
-      theme: { color: "#0F2554" },
+      theme: { color: "#0a3d2e" },
       handler: () => {
         setPaymentDone(true);
         saveSession(userDetails.mobile ?? "", {
@@ -99,30 +99,30 @@ export default function Payment() {
   }
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => router.back()} className="w-9 h-9 bg-gray-100 rounded-xl flex items-center justify-center">
+        <button onClick={() => router.back()} className="w-9 h-9 bg-[var(--bg-deep)] rounded-xl flex items-center justify-center">
           <ArrowLeft size={18} className="text-gray-600" />
         </button>
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-gray-400 mb-1.5"><span>Step 4 of 4</span><span>{t(lang, "payTitle")}</span></div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div className="flex justify-between text-xs text-[var(--ink-muted)] mb-1.5"><span>Step 4 of 4</span><span>{t(lang, "payTitle")}</span></div>
+          <div className="h-2 bg-[var(--bg-deep)] rounded-full overflow-hidden">
             <div className="h-full progress-gradient rounded-full w-full transition-all" />
           </div>
         </div>
       </div>
 
       <div className="mb-5">
-        <h2 className="text-2xl font-semibold text-gray-900">{t(lang, "payTitle")}</h2>
-        <p className="text-gray-500 text-sm mt-1">{t(lang, "paySub")}</p>
+        <h2 className="text-2xl font-semibold text-[var(--ink)]">{t(lang, "payTitle")}</h2>
+        <p className="text-[var(--ink-muted)] text-sm mt-1">{t(lang, "paySub")}</p>
       </div>
 
       {/* Price hero */}
-      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "#0F2554" }}>
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
+      <div className="relative overflow-hidden rounded-3xl mb-5" style={{ background: "var(--brand)" }}>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--surface)]/5 rounded-full -translate-y-8 translate-x-8" />
         <div className="relative p-5 text-white text-center">
-          <div className="inline-flex items-center gap-1.5 bg-white/20 text-xs font-medium px-3 py-1 rounded-full mb-2">
+          <div className="inline-flex items-center gap-1.5 bg-[var(--surface)]/20 text-xs font-medium px-3 py-1 rounded-full mb-2">
             <Sparkles size={12} /> AI Eligibility Report
           </div>
           <div className="flex items-end justify-center gap-2 mb-1">
@@ -134,14 +134,14 @@ export default function Payment() {
       </div>
 
       {/* Payment method tabs */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-2xl mb-5">
+      <div className="flex gap-1 bg-[var(--bg-deep)] p-1 rounded-2xl mb-5">
         {([
           { key: "razorpay", label: "Card / UPI", icon: CreditCard },
           { key: "upi",      label: "UPI QR",     icon: Smartphone },
           { key: "bank",     label: "Bank Transfer", icon: Building2 },
         ] as { key: typeof tab; label: string; icon: typeof CreditCard }[]).map((t) => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-all ${tab === t.key ? "bg-white shadow text-blue-900" : "text-gray-500"}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-medium transition-all ${tab === t.key ? "bg-[var(--surface)] shadow text-[var(--brand)]" : "text-[var(--ink-muted)]"}`}>
             <t.icon size={13} /> {t.label}
           </button>
         ))}
@@ -150,22 +150,22 @@ export default function Payment() {
       {/* ── RAZORPAY TAB ── */}
       {tab === "razorpay" && (
         <div className="flex-1 flex flex-col">
-          <div className="bg-slate-50 rounded-2xl p-4 mb-5">
+          <div className="bg-[var(--bg)] rounded-2xl p-4 mb-5">
             <p className="text-sm font-semibold text-gray-800 mb-3">What you get for ₹99</p>
             <div className="space-y-2">
               {BENEFITS.map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5">
-                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                    <CheckCircle size={13} className="text-blue-800" />
+                  <div className="w-5 h-5 bg-[var(--brand-soft)] rounded-full flex items-center justify-center flex-shrink-0">
+                    <CheckCircle size={13} className="text-[var(--brand)]" />
                   </div>
-                  <p className="text-sm text-gray-700">{item}</p>
+                  <p className="text-sm text-[var(--ink-soft)]">{item}</p>
                 </div>
               ))}
             </div>
           </div>
           <div className="flex justify-center gap-2 mb-5 flex-wrap">
             {["UPI", "Credit Card", "Debit Card", "Net Banking"].map((m) => (
-              <span key={m} className="text-xs bg-gray-100 rounded-lg px-2.5 py-1.5 text-gray-500 font-semibold">{m}</span>
+              <span key={m} className="text-xs bg-[var(--bg-deep)] rounded-lg px-2.5 py-1.5 text-[var(--ink-muted)] font-semibold">{m}</span>
             ))}
           </div>
           <button onClick={handlePay} disabled={loading}
@@ -173,8 +173,8 @@ export default function Payment() {
             {loading ? t(lang, "loading") : (<>₹99 {t(lang, "applyBtn")} <ChevronRight size={22} /></>)}
           </button>
           <div className="flex items-center justify-center gap-1.5 mt-3">
-            <Lock size={12} className="text-gray-400" />
-            <p className="text-xs text-gray-400">Secured by Razorpay · PCI-DSS compliant</p>
+            <Lock size={12} className="text-[var(--ink-muted)]" />
+            <p className="text-xs text-[var(--ink-muted)]">Secured by Razorpay · PCI-DSS compliant</p>
           </div>
         </div>
       )}
@@ -182,32 +182,32 @@ export default function Payment() {
       {/* ── UPI QR TAB ── */}
       {tab === "upi" && (
         <div className="flex-1 flex flex-col">
-          <div className="bg-white border-2 border-gray-100 rounded-2xl p-5 mb-4 text-center">
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-4">Scan QR Code</p>
+          <div className="bg-[var(--surface)] border-2 border-[var(--line-soft)] rounded-2xl p-5 mb-4 text-center">
+            <p className="text-xs font-medium text-[var(--ink-muted)] uppercase tracking-wide mb-4">Scan QR Code</p>
             {/* QR code via API */}
-            <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-gray-50 flex items-center justify-center border border-gray-100">
+            <div className="w-52 h-52 mx-auto mb-4 rounded-2xl overflow-hidden bg-[var(--bg-deep)] flex items-center justify-center border border-[var(--line-soft)]">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${UPI_ID}&pn=InstantLoan&am=99&cu=INR&tn=AI+Eligibility+Report`)}`}
                 alt="UPI QR Code"
                 className="w-full h-full object-contain"
               />
             </div>
-            <p className="text-xs text-gray-400 mb-4">Scan with GPay · PhonePe · Paytm</p>
+            <p className="text-xs text-[var(--ink-muted)] mb-4">Scan with GPay · PhonePe · Paytm</p>
 
             {/* UPI ID copy */}
-            <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center justify-between border border-gray-100 mb-3">
+            <div className="bg-[var(--bg-deep)] rounded-xl px-4 py-3 flex items-center justify-between border border-[var(--line-soft)] mb-3">
               <div className="text-left">
-                <p className="text-xs text-gray-400 font-medium mb-0.5">UPI ID</p>
-                <p className="font-semibold text-gray-900 text-sm">{UPI_ID}</p>
+                <p className="text-xs text-[var(--ink-muted)] font-medium mb-0.5">UPI ID</p>
+                <p className="font-semibold text-[var(--ink)] text-sm">{UPI_ID}</p>
               </div>
               <button onClick={() => copy(UPI_ID, setCopiedUpi)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedUpi ? "bg-emerald-100" : "bg-white border border-gray-200"}`}>
-                {copiedUpi ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedUpi ? "bg-emerald-100" : "bg-[var(--surface)] border border-[var(--line)]"}`}>
+                {copiedUpi ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-[var(--ink-muted)]" />}
               </button>
             </div>
 
             <button onClick={openUpiApp}
-              className="w-full border-2 border-blue-200 text-blue-900 font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+              className="w-full border-2 border-[var(--brand-soft)] text-[var(--brand)] font-semibold py-3 rounded-xl text-sm flex items-center justify-center gap-2 hover:bg-[var(--brand-soft)] transition-all">
               <Smartphone size={16} /> Open UPI App
             </button>
           </div>
@@ -217,71 +217,71 @@ export default function Payment() {
             <p className="text-sm font-semibold text-amber-800 mb-2">Enter UTR after payment</p>
             <input type="text" placeholder="UTR / Transaction ID (12 digits)" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-[var(--surface)] tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
               className="w-full btn-gradient text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
               {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>
-          <p className="text-xs text-center text-gray-400">Find UTR in your payment app. Admin verifies within 1–2 hours.</p>
+          <p className="text-xs text-center text-[var(--ink-muted)]">Find UTR in your payment app. Admin verifies within 1–2 hours.</p>
         </div>
       )}
 
       {/* ── BANK TRANSFER TAB ── */}
       {tab === "bank" && (
         <div className="flex-1 flex flex-col">
-          <div className="bg-white border-2 border-gray-100 rounded-2xl overflow-hidden mb-4">
-            <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-              <Building2 size={15} className="text-blue-800" />
+          <div className="bg-[var(--surface)] border-2 border-[var(--line-soft)] rounded-2xl overflow-hidden mb-4">
+            <div className="px-5 py-3 border-b border-[var(--line-soft)] flex items-center gap-2">
+              <Building2 size={15} className="text-[var(--brand)]" />
               <p className="text-sm font-semibold text-gray-800">Bank Transfer Details</p>
             </div>
 
             {/* Bank name */}
             <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
-              <p className="text-xs text-gray-400 font-medium">BANK</p>
+              <p className="text-xs text-[var(--ink-muted)] font-medium">BANK</p>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-6 rounded-md overflow-hidden bg-red-700 flex items-center justify-center">
                   <span className="text-white text-xs font-semibold">IF</span>
                 </div>
-                <p className="font-semibold text-gray-900 text-sm">{BANK_DETAILS.bank}</p>
+                <p className="font-semibold text-[var(--ink)] text-sm">{BANK_DETAILS.bank}</p>
               </div>
             </div>
 
             {/* A/C Holder */}
             <div className="px-5 py-3.5 border-b border-gray-50">
-              <p className="text-xs text-gray-400 font-medium mb-0.5">A/C HOLDER</p>
-              <p className="font-semibold text-gray-900">{BANK_DETAILS.holder}</p>
+              <p className="text-xs text-[var(--ink-muted)] font-medium mb-0.5">A/C HOLDER</p>
+              <p className="font-semibold text-[var(--ink)]">{BANK_DETAILS.holder}</p>
             </div>
 
             {/* A/C Number */}
             <div className="px-5 py-3.5 border-b border-gray-50 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400 font-medium mb-0.5">A/C NUMBER</p>
-                <p className="font-semibold text-gray-900 tracking-wider">{BANK_DETAILS.account}</p>
+                <p className="text-xs text-[var(--ink-muted)] font-medium mb-0.5">A/C NUMBER</p>
+                <p className="font-semibold text-[var(--ink)] tracking-wider">{BANK_DETAILS.account}</p>
               </div>
               <button onClick={() => copy(BANK_DETAILS.account, setCopiedAcc)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedAcc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
-                {copiedAcc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedAcc ? "bg-emerald-100" : "bg-[var(--bg-deep)] border border-[var(--line)]"}`}>
+                {copiedAcc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-[var(--ink-muted)]" />}
               </button>
             </div>
 
             {/* IFSC */}
             <div className="px-5 py-3.5 flex items-center justify-between">
               <div>
-                <p className="text-xs text-gray-400 font-medium mb-0.5">IFSC</p>
-                <p className="font-semibold text-gray-900 tracking-wider">{BANK_DETAILS.ifsc}</p>
+                <p className="text-xs text-[var(--ink-muted)] font-medium mb-0.5">IFSC</p>
+                <p className="font-semibold text-[var(--ink)] tracking-wider">{BANK_DETAILS.ifsc}</p>
               </div>
               <button onClick={() => copy(BANK_DETAILS.ifsc, setCopiedIfsc)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedIfsc ? "bg-emerald-100" : "bg-gray-50 border border-gray-200"}`}>
-                {copiedIfsc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-gray-500" />}
+                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${copiedIfsc ? "bg-emerald-100" : "bg-[var(--bg-deep)] border border-[var(--line)]"}`}>
+                {copiedIfsc ? <Check size={16} className="text-emerald-600" /> : <Copy size={15} className="text-[var(--ink-muted)]" />}
               </button>
             </div>
           </div>
 
           {/* Amount reminder */}
-          <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
-            <p className="text-sm font-medium text-blue-900">Transfer Amount</p>
-            <p className="text-2xl font-semibold text-blue-900">₹99</p>
+          <div className="bg-[var(--brand-soft)] border border-[var(--brand-soft)] rounded-2xl px-5 py-3.5 mb-4 flex items-center justify-between">
+            <p className="text-sm font-medium text-[var(--brand)]">Transfer Amount</p>
+            <p className="text-2xl font-semibold text-[var(--brand)]">₹99</p>
           </div>
 
           {/* UTR entry */}
@@ -289,13 +289,13 @@ export default function Payment() {
             <p className="text-sm font-semibold text-amber-800 mb-2">Enter UTR / Reference after transfer</p>
             <input type="text" placeholder="UTR / Transaction Reference" value={manualRef}
               onChange={(e) => setManualRef(e.target.value.toUpperCase())}
-              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-white tracking-wider mb-2" />
+              className="w-full border-2 border-amber-200 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:border-amber-400 bg-[var(--surface)] tracking-wider mb-2" />
             <button onClick={handleManualConfirm} disabled={manualSubmitting || !manualRef.trim()}
               className="w-full btn-gradient text-white font-semibold py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2">
               {manualSubmitting ? "Verifying..." : (<><CheckCircle size={16} /> Payment Done — Continue</>)}
             </button>
           </div>
-          <p className="text-xs text-center text-gray-400">Transfer via NEFT/IMPS/UPI. Find UTR in your bank app or SMS.</p>
+          <p className="text-xs text-center text-[var(--ink-muted)]">Transfer via NEFT/IMPS/UPI. Find UTR in your bank app or SMS.</p>
         </div>
       )}
     </div>

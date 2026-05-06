@@ -22,40 +22,40 @@ export default function Confirmation() {
   }
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col w-full max-w-md mx-auto px-5 py-6">
+    <div className="min-h-dvh bg-[var(--surface)] flex flex-col w-full max-w-md mx-auto px-5 py-6">
       <div className="flex-1 flex flex-col items-center justify-center text-center">
         {/* Success icon */}
         <div className="relative mb-6">
           <div className="w-28 h-28 rounded-full flex items-center justify-center" style={{ background: "#10b981" }}>
             <CheckCircle size={56} className="text-white" />
           </div>
-          <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+          <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[var(--brand-soft)]0 rounded-full flex items-center justify-center">
             <span className="text-white text-xs font-semibold">✓</span>
           </div>
         </div>
 
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Application Submitted!</h2>
-        <p className="text-gray-500 text-sm mb-6">
+        <h2 className="text-2xl font-semibold text-[var(--ink)] mb-2">Application Submitted!</h2>
+        <p className="text-[var(--ink-muted)] text-sm mb-6">
           Successfully sent to {selectedBank?.bankName}. You will receive a confirmation SMS shortly.
         </p>
 
         {/* Ref number */}
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 w-full mb-5">
-          <p className="text-xs text-blue-500 font-medium mb-1 uppercase tracking-wide">Reference Number</p>
-          <p className="text-xl font-semibold text-blue-900 tracking-wider">{applicationRef}</p>
-          <p className="text-xs text-gray-400 mt-1">Save this to track your application status</p>
+        <div className="bg-[var(--brand-soft)] border border-[var(--brand-soft)] rounded-2xl p-4 w-full mb-5">
+          <p className="text-xs text-[var(--brand-3)] font-medium mb-1 uppercase tracking-wide">Reference Number</p>
+          <p className="text-xl font-semibold text-[var(--brand)] tracking-wider">{applicationRef}</p>
+          <p className="text-xs text-[var(--ink-muted)] mt-1">Save this to track your application status</p>
         </div>
 
         {/* Summary */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-4 w-full mb-5 text-left shadow-sm">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Application Summary</p>
+        <div className="bg-[var(--surface)] border border-[var(--line-soft)] rounded-2xl p-4 w-full mb-5 text-left shadow-sm">
+          <p className="text-xs font-semibold text-[var(--ink-muted)] uppercase tracking-wide mb-3">Application Summary</p>
           <div className="space-y-2 text-sm">
-            <div className="flex justify-between"><span className="text-gray-400">Applicant</span><span className="font-medium">{userDetails.name}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Bank</span><span className="font-medium">{selectedBank?.bankName}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Loan Type</span><span className="font-medium capitalize">{loanRequirement.loanType}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Amount</span><span className="font-semibold text-emerald-600">₹{selectedBank?.approvedAmount.toLocaleString("en-IN")}</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">Rate</span><span className="font-medium">{selectedBank?.interestRate}% p.a.</span></div>
-            <div className="flex justify-between"><span className="text-gray-400">EMI</span><span className="font-semibold text-blue-800">₹{selectedBank?.emi.toLocaleString("en-IN")}/mo</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">Applicant</span><span className="font-medium">{userDetails.name}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">Bank</span><span className="font-medium">{selectedBank?.bankName}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">Loan Type</span><span className="font-medium capitalize">{loanRequirement.loanType}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">Amount</span><span className="font-semibold text-emerald-600">₹{selectedBank?.approvedAmount.toLocaleString("en-IN")}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">Rate</span><span className="font-medium">{selectedBank?.interestRate}% p.a.</span></div>
+            <div className="flex justify-between"><span className="text-[var(--ink-muted)]">EMI</span><span className="font-semibold text-[var(--brand)]">₹{selectedBank?.emi.toLocaleString("en-IN")}/mo</span></div>
           </div>
         </div>
 
@@ -82,10 +82,10 @@ export default function Confirmation() {
         <button onClick={() => router.push("/status")} className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-base flex items-center justify-center gap-2 active:scale-95">
           <Search size={18} /> Track Application
         </button>
-        <button onClick={download} className="w-full bg-gray-100 text-gray-700 font-semibold py-4 rounded-2xl text-base flex items-center justify-center gap-2 active:scale-95">
+        <button onClick={download} className="w-full bg-[var(--bg-deep)] text-[var(--ink-soft)] font-semibold py-4 rounded-2xl text-base flex items-center justify-center gap-2 active:scale-95">
           <Download size={18} /> Download Confirmation
         </button>
-        <button onClick={() => router.push("/")} className="w-full text-gray-400 py-2 text-sm flex items-center justify-center gap-1">
+        <button onClick={() => router.push("/")} className="w-full text-[var(--ink-muted)] py-2 text-sm flex items-center justify-center gap-1">
           <ChevronRight size={14} /> Check Another Loan
         </button>
       </div>
