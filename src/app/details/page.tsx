@@ -235,21 +235,19 @@ export default function Details() {
           {otpSent && !verified && (
             <div className="bg-[var(--brand-soft)] rounded-2xl p-4 border border-[var(--brand-soft)]">
               <p className="text-xs text-[var(--brand)] font-medium mb-3">OTP sent to +91 {mobile}</p>
-              <div className="flex gap-2 mb-1">
-                <input
-                  type="number" inputMode="numeric" placeholder="6-digit OTP"
-                  value={otp} onChange={(e) => setOtp(e.target.value)}
-                  className="flex-1 border-2 border-[var(--brand-soft)] rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)] font-semibold tracking-[0.3em] text-center"
-                />
-                <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
-                  className="px-5 bg-emerald-500 text-white rounded-xl font-semibold disabled:opacity-60 flex items-center gap-1.5 text-sm">
-                  {otpLoading
-                    ? <Loader2 size={16} className="animate-spin" />
-                    : <><CheckCircle size={15} /> {t(lang, "btnVerify")}</>
-                  }
-                </button>
-              </div>
-              {otpError && <p className="text-xs text-red-500 mt-1">{otpError}</p>}
+              <input
+                type="number" inputMode="numeric" placeholder="6-digit OTP"
+                value={otp} onChange={(e) => setOtp(e.target.value)}
+                className="w-full border-2 border-[var(--brand-soft)] rounded-xl px-4 py-3.5 text-lg focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)] font-semibold tracking-[0.3em] text-center mb-3"
+              />
+              <button onClick={verifyOtp} disabled={otpLoading || otp.length !== 6}
+                className="w-full btn-gradient text-white font-semibold py-3.5 rounded-xl disabled:opacity-60 flex items-center justify-center gap-2 text-base">
+                {otpLoading
+                  ? <Loader2 size={16} className="animate-spin" />
+                  : <><CheckCircle size={16} /> {t(lang, "btnVerify")}</>
+                }
+              </button>
+              {otpError && <p className="text-xs text-red-500 mt-2">{otpError}</p>}
             </div>
           )}
 
@@ -450,7 +448,7 @@ export default function Details() {
           <label className="flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] mb-1.5">
             <IndianRupee size={14} className="text-[var(--brand-3)]" /> {t(lang, "labelIncome")}
           </label>
-          <input type="number" inputMode="numeric" placeholder="jaise 50000" value={monthlyIncome}
+          <input type="number" inputMode="numeric" placeholder="e.g. 50000" value={monthlyIncome}
             onChange={(e) => { setMonthlyIncome(e.target.value); setErrors((er) => ({ ...er, monthlyIncome: "" })); }}
             className={inp("monthlyIncome")} />
           {errors.monthlyIncome && <p className="text-xs text-red-500 mt-1">{errors.monthlyIncome}</p>}
@@ -464,7 +462,7 @@ export default function Details() {
           <input type="number" inputMode="numeric" placeholder="300–900, jaise 750"
             value={cibilScore} onChange={(e) => setCibilScore(e.target.value)}
             className="w-full border-2 border-[var(--line-soft)] rounded-xl px-4 py-3.5 text-base focus:outline-none focus:border-[var(--brand)] bg-[var(--surface)]" />
-          <p className="text-xs text-[var(--ink-muted)] mt-1">Check free at mycibil.com</p>
+          <p className="text-xs text-[var(--ink-muted)] mt-1">Check free at mycibil.com · e.g. 750</p>
         </div>
       </div>
 
