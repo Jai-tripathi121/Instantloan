@@ -27,7 +27,6 @@
     --danger:       #a83a26;
 
     --font-poppins: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    --font-serif:   "Instrument Serif", Georgia, serif;
   }
 
   html {
@@ -54,17 +53,10 @@
 
   * { box-sizing: border-box; }
 
-  h1, h2, h3 { letter-spacing: -0.01em; }
+  h1, h2, h3 { letter-spacing: -0.01em; font-family: var(--font-poppins); }
 }
 
 @layer utilities {
-  /* Display serif — Instrument Serif italic for hero headings */
-  .display-serif {
-    font-family: var(--font-serif);
-    font-style: italic;
-    letter-spacing: -0.015em;
-  }
-
   /* Brand token helpers */
   .bg-cream   { background: var(--bg); }
   .bg-cream-deep { background: var(--bg-deep); }

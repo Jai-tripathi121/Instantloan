@@ -89,7 +89,7 @@ export default function Landing() {
         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-4 border" style={{ background: "var(--accent-soft)", borderColor: "var(--accent)", color: "var(--warn)", fontSize: 9, fontWeight: 600, letterSpacing: "0.05em" }}>
           <Zap size={9} /> 90-SECOND CHECK · ZERO CIBIL IMPACT
         </div>
-        <h1 className="display-serif" style={{ fontSize: 36, lineHeight: 1.05, color: "var(--ink)", marginBottom: 8 }}>
+        <h1 style={{ fontSize: 32, lineHeight: 1.1, color: "var(--ink)", marginBottom: 8, fontWeight: 600 }}>
           What are we<br />
           <em style={{ color: "var(--brand)" }}>borrowing for?</em>
         </h1>
@@ -128,7 +128,7 @@ export default function Landing() {
         <div className="rounded-2xl p-4 mb-4 border text-center" style={{ background: "var(--bg-deep)", borderColor: "var(--line)" }}>
           <p style={{ color: "var(--ink-muted)", fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>One-time AI report</p>
           <div className="flex items-baseline justify-center gap-2 mt-1">
-            <span className="display-serif" style={{ fontSize: 40, color: "var(--brand)" }}>₹99</span>
+            <span style={{ fontSize: 36, color: "var(--brand)", fontWeight: 600 }}>₹99</span>
             <span style={{ color: "var(--ink-muted)", fontSize: 14, textDecoration: "line-through" }}>₹499</span>
             <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "var(--accent-soft)", color: "var(--warn)", fontSize: 9 }}>80% OFF</span>
           </div>
