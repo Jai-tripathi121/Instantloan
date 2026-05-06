@@ -172,12 +172,13 @@ export default function Landing() {
 
       {/* Footer */}
       <div className="border-t px-5 py-4" style={{ borderColor: "var(--line)" }}>
-        <div className="flex justify-center gap-4 flex-wrap mb-1" style={{ fontSize: 9, color: "var(--ink-muted)" }}>
-          {[["About", "/about"], ["FAQ", "/faq"], ["Terms", "/terms"], ["Privacy", "/privacy"], ["Admin", "/admin"]].map(([l, h]) => (
+        <div className="flex justify-center gap-3 flex-wrap mb-2" style={{ fontSize: 9, color: "var(--ink-muted)" }}>
+          {[["About", "/about"], ["FAQ", "/faq"], ["Terms", "/terms"], ["Privacy", "/privacy"], ["Refund Policy", "/refund"], ["Contact", "/contact"], ["Admin", "/admin"]].map(([l, h]) => (
             <Link key={l} href={h} className="hover:underline">{l}</Link>
           ))}
         </div>
-        <p className="text-center" style={{ fontSize: 9, color: "var(--ink-muted)" }}>Only RBI Regulated Scheduled Commercial Banks · No NBFCs</p>
+        <p className="text-center mb-1" style={{ fontSize: 9, color: "var(--ink-muted)" }}>Only RBI Regulated Scheduled Commercial Banks · No NBFCs</p>
+        <p className="text-center" style={{ fontSize: 8, color: "var(--ink-muted)" }}>POSTMAC VENTURES PRIVATE LIMITED · CIN U66190HR2025PTC129138 · GSTIN 06AAPCP5039G1Z7</p>
       </div>
     </div>
   );
