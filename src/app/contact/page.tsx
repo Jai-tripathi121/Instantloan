@@ -16,7 +16,7 @@ export default function Contact() {
           <Mail size={18} style={{ color: "var(--brand)", marginTop: 1 }} className="shrink-0" />
           <div>
             <p className="font-semibold text-sm mb-1" style={{ color: "var(--ink)" }}>General Support</p>
-            <a href="mailto:support@instantloan.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>support@instantloan.in</a>
+            <a href="mailto:support@postmoney.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>support@postmoney.in</a>
             <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>Loan queries, technical issues, account help</p>
           </div>
         </div>
@@ -25,7 +25,7 @@ export default function Contact() {
           <ShieldCheck size={18} style={{ color: "var(--brand)", marginTop: 1 }} className="shrink-0" />
           <div>
             <p className="font-semibold text-sm mb-1" style={{ color: "var(--ink)" }}>Privacy & Data Requests</p>
-            <a href="mailto:privacy@instantloan.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>privacy@instantloan.in</a>
+            <a href="mailto:privacy@postmoney.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>privacy@postmoney.in</a>
             <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>Data access, correction, deletion requests under DPDP Act 2023</p>
           </div>
         </div>
@@ -34,7 +34,7 @@ export default function Contact() {
           <Mail size={18} style={{ color: "var(--brand)", marginTop: 1 }} className="shrink-0" />
           <div>
             <p className="font-semibold text-sm mb-1" style={{ color: "var(--ink)" }}>Refunds & Billing</p>
-            <a href="mailto:support@instantloan.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>support@instantloan.in</a>
+            <a href="mailto:support@postmoney.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>support@postmoney.in</a>
             <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>Include your Razorpay payment ID and registered mobile</p>
           </div>
         </div>
@@ -43,7 +43,7 @@ export default function Contact() {
           <Mail size={18} style={{ color: "var(--brand)", marginTop: 1 }} className="shrink-0" />
           <div>
             <p className="font-semibold text-sm mb-1" style={{ color: "var(--ink)" }}>Legal Notices</p>
-            <a href="mailto:legal@instantloan.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>legal@instantloan.in</a>
+            <a href="mailto:legal@postmoney.in" className="text-sm font-medium" style={{ color: "var(--brand)" }}>legal@postmoney.in</a>
             <p className="text-xs mt-0.5" style={{ color: "var(--ink-muted)" }}>Statutory notices, legal correspondence</p>
           </div>
         </div>

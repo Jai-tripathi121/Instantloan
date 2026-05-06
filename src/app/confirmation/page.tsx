@@ -8,16 +8,16 @@ export default function Confirmation() {
   const { selectedBank, applicationRef, userDetails, loanRequirement } = useAppStore();
 
   function shareWA() {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://instantloan-ten.vercel.app";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://postmoney-ten.vercel.app";
     const text = `My loan application has been submitted to ${selectedBank?.bankName}!\n\nRef: ${applicationRef}\nAmount: ₹${selectedBank?.approvedAmount.toLocaleString("en-IN")}\nEMI: ₹${selectedBank?.emi.toLocaleString("en-IN")}/mo\n\nTrack: ${appUrl}/status`;
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
   }
 
   function download() {
-    const c = `InstantLoan Confirmation\n\nRef: ${applicationRef}\nBank: ${selectedBank?.bankName}\nAmount: ₹${selectedBank?.approvedAmount.toLocaleString("en-IN")}\nRate: ${selectedBank?.interestRate}% p.a.\nEMI: ₹${selectedBank?.emi.toLocaleString("en-IN")}/month`;
+    const c = `PostMoney Confirmation\n\nRef: ${applicationRef}\nBank: ${selectedBank?.bankName}\nAmount: ₹${selectedBank?.approvedAmount.toLocaleString("en-IN")}\nRate: ${selectedBank?.interestRate}% p.a.\nEMI: ₹${selectedBank?.emi.toLocaleString("en-IN")}/month`;
     const blob = new Blob([c], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = `InstantLoan_${applicationRef}.txt`; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `PostMoney_${applicationRef}.txt`; a.click();
     URL.revokeObjectURL(url);
   }
 

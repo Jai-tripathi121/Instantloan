@@ -37,14 +37,14 @@ export default function Refund() {
 
       <div className="space-y-5 text-sm leading-relaxed" style={{ color: "var(--ink-soft)" }}>
         {[
-          ["1. Service Provider", "This Cancellation & Refund Policy applies to payments made to POSTMAC VENTURES PRIVATE LIMITED (CIN: U66190HR2025PTC129138, GSTIN: 06AAPCP5039G1Z7) for the InstantLoan AI Eligibility Report service."],
+          ["1. Service Provider", "This Cancellation & Refund Policy applies to payments made to POSTMAC VENTURES PRIVATE LIMITED (CIN: U66190HR2025PTC129138, GSTIN: 06AAPCP5039G1Z7) for the PostMoney AI Eligibility Report service."],
           ["2. Nature of the Charge", "The ₹99 fee (inclusive of applicable GST) is a one-time charge for AI-based bank statement analysis, profile matching against 33+ bank eligibility criteria, and delivery of a personalised loan eligibility report. This is a digital service delivered instantly upon payment."],
           ["3. Cancellation Policy", "No cancellation is possible once the payment is initiated and the report generation process begins. As this is an instantly delivered digital product, the right to cancellation under the Consumer Protection (E-Commerce) Rules 2020 does not apply once the service has been rendered."],
           ["4. Non-Refundable Cases", "Refunds will NOT be issued for: (a) report delivered successfully but loan application rejected by a bank; (b) user dissatisfied with loan offers; (c) user provided incorrect details leading to inaccurate results; (d) user changes their mind after report delivery; (e) user is ineligible for any bank — the report itself is the service, not a guaranteed offer."],
           ["5. Refundable Cases", "A full refund will be issued if: (a) the report fails to generate due to a technical error on our servers; (b) duplicate/double payment is charged for a single transaction; (c) payment is deducted but the session expires before report delivery due to our system fault."],
-          ["6. Refund Process", "To request a refund, email support@instantloan.in with: your registered mobile number, Razorpay payment ID, and a brief description of the issue. We will investigate within 48 hours. Approved refunds are credited to the original payment source within 5–7 business days via Razorpay."],
+          ["6. Refund Process", "To request a refund, email support@postmoney.in with: your registered mobile number, Razorpay payment ID, and a brief description of the issue. We will investigate within 48 hours. Approved refunds are credited to the original payment source within 5–7 business days via Razorpay."],
           ["7. Disputes", "Payment disputes or chargebacks initiated without contacting us first will be contested. Please email us before raising a dispute with your bank or card provider."],
-          ["8. Contact", "Refund queries: support@instantloan.in | POSTMAC VENTURES PRIVATE LIMITED, 3rd Floor, Orchid Center, Golf Course Road, Gurugram, Haryana – 122002."],
+          ["8. Contact", "Refund queries: support@postmoney.in | POSTMAC VENTURES PRIVATE LIMITED, 3rd Floor, Orchid Center, Golf Course Road, Gurugram, Haryana – 122002."],
         ].map(([title, body]) => (
           <div key={String(title)}>
             <h2 className="font-semibold mb-1" style={{ color: "var(--ink)" }}>{String(title)}</h2>

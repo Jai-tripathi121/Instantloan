@@ -46,7 +46,7 @@ export default function Landing() {
             <span className="text-white font-semibold text-sm">₹</span>
           </div>
           <div>
-            <p className="font-semibold leading-none" style={{ color: "var(--ink)", fontSize: 14 }}>InstantLoan</p>
+            <p className="font-semibold leading-none" style={{ color: "var(--ink)", fontSize: 14 }}>PostMoney</p>
             <p style={{ color: "var(--ink-muted)", fontSize: 9 }}>Loans, decoded.</p>
           </div>
         </div>

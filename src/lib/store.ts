@@ -149,7 +149,7 @@ export const useAppStore = create<AppState>()(
       resetSession: () => set({ ...initialState }),
     }),
     {
-      name: "instantloan-v2",
+      name: "postmoney-v2",
       storage: createJSONStorage(() =>
         typeof window !== "undefined" ? localStorage : {
           getItem: () => null,

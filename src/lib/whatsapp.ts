@@ -23,7 +23,7 @@ export async function sendWhatsAppOTP(mobile: string, otp: string): Promise<bool
   const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!token || !phoneNumberId) return false;
 
-  const templateName = process.env.WHATSAPP_OTP_TEMPLATE ?? "instantloan_otp";
+  const templateName = process.env.WHATSAPP_OTP_TEMPLATE ?? "postmoney_otp";
 
   return sendWA(phoneNumberId, token, {
     messaging_product: "whatsapp",

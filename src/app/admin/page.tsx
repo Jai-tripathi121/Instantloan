@@ -66,7 +66,7 @@ export default function AdminPage() {
   const [globalEdit, setGlobalEdit] = useState<GlobalSettings>({});
   const [savingGlobal, setSavingGlobal] = useState(false);
 
-  const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "instantloan@2026";
+  const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "postmoney@2026";
   const firebaseReady = !!(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== "placeholder");
 
   async function load() {
@@ -170,7 +170,7 @@ export default function AdminPage() {
     const rows = apps.map((a) => [a.referenceNo, a.name, a.mobile, a.bankName, a.loanType, a.approvedAmount, a.interestRate, a.emi, a.status].join(","));
     const blob = new Blob([[header, ...rows].join("\n")], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement("a"); link.href = url; link.download = `instantloan_${Date.now()}.csv`; link.click();
+    const link = document.createElement("a"); link.href = url; link.download = `postmoney_${Date.now()}.csv`; link.click();
     URL.revokeObjectURL(url);
   }
 
@@ -192,7 +192,7 @@ export default function AdminPage() {
               <Shield size={30} className="text-white" />
             </div>
             <h1 className="text-2xl font-semibold text-[var(--ink)]">Admin Login</h1>
-            <p className="text-sm text-[var(--ink-muted)] mt-1">InstantLoan Dashboard</p>
+            <p className="text-sm text-[var(--ink-muted)] mt-1">PostMoney Dashboard</p>
           </div>
           <div className="relative mb-4">
             <input type={showPass ? "text" : "password"} placeholder="Admin password" value={password}
@@ -218,7 +218,7 @@ export default function AdminPage() {
             <span className="text-white font-semibold text-sm">₹</span>
           </div>
           <div>
-            <span className="font-semibold text-[var(--ink)] text-sm">InstantLoan Admin</span>
+            <span className="font-semibold text-[var(--ink)] text-sm">PostMoney Admin</span>
             <span className="text-xs text-[var(--ink-muted)] ml-2">{apps.length} applications</span>
           </div>
         </div>

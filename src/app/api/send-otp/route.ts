@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         headers: { authorization: apiKey, "Content-Type": "application/json" },
         body: JSON.stringify({
           route: "q",
-          message: `Your InstantLoan OTP is ${otp}. Valid 5 minutes. Do not share.`,
+          message: `Your PostMoney OTP is ${otp}. Valid 5 minutes. Do not share.`,
           language: "english",
           flash: 0,
           numbers: mobile,
