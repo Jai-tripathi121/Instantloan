@@ -5,7 +5,7 @@ import { ArrowLeft, ChevronDown } from "lucide-react";
 
 const FAQS = [
   { q: "Will checking eligibility affect my CIBIL score?", a: "No. postmoney performs a soft eligibility check using AI analysis of your bank statement. No enquiry is sent to CIBIL or any credit bureau. Your score is completely unaffected until you formally apply to a bank." },
-  { q: "What is the ₹99 charge for?", a: "The ₹99 (inclusive of GST) covers AI processing of your bank statement on our secure servers, matching your profile against 33+ bank eligibility criteria, and generating your personalised loan eligibility report with improvement recommendations." },
+  { q: "What is the ₹99 charge for?", a: "The ₹99 covers AI processing of your bank statement on our secure servers, matching your profile against 33+ bank eligibility criteria, and generating your personalised loan eligibility report with improvement recommendations." },
   { q: "Is my bank statement safe?", a: "Yes. Your bank statement PDF is uploaded to our encrypted servers solely for analysis. It is deleted immediately after processing. It is never shared with any third party, bank, or advertiser." },
   { q: "Which banks are covered?", a: "We cover 33 RBI-regulated scheduled commercial banks including SBI, HDFC Bank, ICICI Bank, Axis Bank, PNB, Bank of Baroda, Kotak Mahindra, Union Bank, Canara Bank, IndusInd Bank, IDFC First, Yes Bank, and Federal Bank. We do not include NBFCs or fintech lenders." },
   { q: "What documents do I need?", a: "For eligibility check: mobile number, PAN card, date of birth, employment type, and 6-months bank statement PDF. For loan application submission: Aadhaar card (photo), PAN card (photo), and passport photograph." },

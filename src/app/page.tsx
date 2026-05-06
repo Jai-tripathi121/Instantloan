@@ -178,7 +178,7 @@ export default function Landing() {
           ))}
         </div>
         <p className="text-center mb-1" style={{ fontSize: 9, color: "var(--ink-muted)" }}>Only RBI Regulated Scheduled Commercial Banks · No NBFCs</p>
-        <p className="text-center" style={{ fontSize: 8, color: "var(--ink-muted)" }}>POSTMAC VENTURES PRIVATE LIMITED · CIN U66190HR2025PTC129138 · GSTIN 06AAPCP5039G1Z7</p>
+        <p className="text-center" style={{ fontSize: 8, color: "var(--ink-muted)" }}>POSTMAC VENTURES PRIVATE LIMITED · CIN U66190HR2025PTC129138</p>
       </div>
     </div>
   );

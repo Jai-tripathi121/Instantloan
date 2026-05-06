@@ -69,7 +69,6 @@ export default function Contact() {
         <div className="mt-3 pt-3 border-t grid grid-cols-2 gap-2 text-xs" style={{ borderColor: "var(--line-soft)", color: "var(--ink-muted)" }}>
           <div><span className="font-medium" style={{ color: "var(--ink)" }}>CIN</span><br />U66190HR2025PTC129138</div>
           <div><span className="font-medium" style={{ color: "var(--ink)" }}>PAN</span><br />AAPCP5039G</div>
-          <div><span className="font-medium" style={{ color: "var(--ink)" }}>GSTIN</span><br />06AAPCP5039G1Z7</div>
           <div><span className="font-medium" style={{ color: "var(--ink)" }}>TAN</span><br />RTKP17505F</div>
         </div>
       </div>

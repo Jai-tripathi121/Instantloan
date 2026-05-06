@@ -5,7 +5,6 @@ const COMPANY = {
   name: "POSTMAC VENTURES PRIVATE LIMITED",
   cin: "U66190HR2025PTC129138",
   pan: "AAPCP5039G",
-  gstin: "06AAPCP5039G1Z7",
   tan: "RTKP17505F",
   incorp: "1st March 2025",
   constitution: "Private Limited Company (limited by shares)",
@@ -68,7 +67,6 @@ export default function About() {
           {[
             ["CIN", COMPANY.cin],
             ["PAN", COMPANY.pan],
-            ["GSTIN", COMPANY.gstin],
             ["TAN", COMPANY.tan],
             ["Incorporation Date", COMPANY.incorp],
             ["Constitution", COMPANY.constitution],
