@@ -66,7 +66,7 @@ export default function AdminPage() {
   const [globalEdit, setGlobalEdit] = useState<GlobalSettings>({});
   const [savingGlobal, setSavingGlobal] = useState(false);
 
-  const ADMIN_PASS = process.env.NEXT_PUBLIC_ADMIN_PASSWORD ?? "postmoney@2026";
+  const ADMIN_PASS = "postmoney@2026";
   const firebaseReady = !!(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID && process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID !== "placeholder");
 
   async function load() {
