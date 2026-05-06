@@ -2,10 +2,9 @@
 import { useRouter } from "next/navigation";
 import { useRef, useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { mergeWithDeclared } from "@/lib/pdf-parser";
 import { saveSession } from "@/lib/firestore";
 import { t } from "@/lib/i18n";
-import { ArrowLeft, Shield, FileText, Lock, ChevronRight, CheckCircle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Shield, FileText, Lock, ChevronRight, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 
 const BANKS = ["SBI", "PNB", "HDFC", "ICICI", "Axis", "BOB", "Kotak", "Union", "Canara", "IndusInd", "IDFC", "Yes", "Federal"];
 
@@ -29,11 +28,34 @@ export default function Upload() {
   async function handleAnalyse() {
     if (!file) { alert("Please upload your bank statement first"); return; }
     setParsing(true); setParseError("");
+
     try {
-      const { parsePDF, mergeWithDeclared: merge } = await import("@/lib/pdf-parser");
-      const parsed = await parsePDF(file);
-      const final = merge(parsed, userDetails.monthlyIncome ?? 0);
-      setStatementAnalysis(final);
+      const form = new FormData();
+      form.append("file", file);
+      form.append("declaredIncome", String(userDetails.monthlyIncome ?? 0));
+      if (password) form.append("password", password);
+
+      const res = await fetch("/api/analyse-statement", { method: "POST", body: form });
+
+      let analysis;
+      if (res.ok) {
+        analysis = await res.json();
+      } else {
+        // Fallback: use declared income
+        const declared = userDetails.monthlyIncome ?? 0;
+        analysis = {
+          avgMonthlyIncome: declared,
+          avgMonthlyBalance: Math.round(declared * 1.8),
+          totalObligations: Math.round(declared * 0.2),
+          foir: 0.2,
+          bounceCount: 0,
+          salaryCredits: 6,
+          transactionCount: 100,
+        };
+        setParseError("Could not read PDF — using your declared income instead.");
+      }
+
+      setStatementAnalysis(analysis);
       saveSession(userDetails.mobile ?? "", {
         step: 3, lastRoute: "/payment",
         userDetails: {
@@ -41,29 +63,18 @@ export default function Upload() {
           employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome,
           cibilScore: userDetails.cibilScore,
         },
-        loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+        loanRequirement: {
+          loanType: loanRequirement.loanType,
+          amount: loanRequirement.amount,
+          tenure: loanRequirement.tenure,
+        },
       });
       router.push("/payment");
     } catch {
-      const declared = userDetails.monthlyIncome ?? 0;
-      const fallback = mergeWithDeclared({
-        avgMonthlyIncome: 0, avgMonthlyBalance: Math.round(declared * 1.8),
-        totalObligations: Math.round(declared * 0.2), foir: 0.2,
-        bounceCount: 0, salaryCredits: 6, transactionCount: 100,
-      }, declared);
-      setStatementAnalysis(fallback);
-      setParseError("Could not read PDF — using your declared income instead.");
-      saveSession(userDetails.mobile ?? "", {
-        step: 3, lastRoute: "/payment",
-        userDetails: {
-          name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob,
-          employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome,
-          cibilScore: userDetails.cibilScore,
-        },
-        loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
-      });
-      router.push("/payment");
-    } finally { setParsing(false); }
+      setParseError("Network error — please try again.");
+    } finally {
+      setParsing(false);
+    }
   }
 
   return (
@@ -92,7 +103,7 @@ export default function Upload() {
         </div>
         <div>
           <p className="text-sm font-medium text-emerald-800">{t(lang, "uploadPrivacy")}</p>
-          <p className="text-xs text-emerald-700 mt-0.5">{t(lang, "uploadPrivacyDesc")}</p>
+          <p className="text-xs text-emerald-700 mt-0.5">Analysed on our secure servers · never stored</p>
         </div>
       </div>
 
@@ -102,7 +113,11 @@ export default function Upload() {
         onDragLeave={() => setDragging(false)}
         onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${dragging ? "border-[var(--brand)] bg-[var(--brand-soft)]" : file ? "border-emerald-400 bg-emerald-50" : "border-[var(--line)] bg-[var(--bg-deep)] hover:border-blue-300 hover:bg-[var(--brand-soft)]"}`}>
+        className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all mb-4 ${
+          dragging ? "border-[var(--brand)] bg-[var(--brand-soft)]"
+          : file ? "border-emerald-400 bg-emerald-50"
+          : "border-[var(--line)] bg-[var(--bg-deep)] hover:border-[var(--brand)] hover:bg-[var(--brand-soft)]"
+        }`}>
         <input ref={inputRef} type="file" accept=".pdf" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
         {file ? (
@@ -113,7 +128,7 @@ export default function Upload() {
           </>
         ) : (
           <>
-            <FileText size={44} className="text-[var(--brand-soft)] mx-auto mb-2" />
+            <FileText size={44} className="text-[var(--ink-muted)] mx-auto mb-2" />
             <p className="font-medium text-gray-600">{t(lang, "uploadBtn")}</p>
             <p className="text-xs text-[var(--ink-muted)] mt-1">{t(lang, "uploadDrop")}</p>
           </>
@@ -149,8 +164,13 @@ export default function Upload() {
       )}
 
       <button onClick={handleAnalyse} disabled={!file || parsing}
-        className={`w-full font-semibold py-4 rounded-2xl text-lg flex items-center justify-center gap-2 transition-all ${file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-[var(--ink-muted)]"}`}>
-        {parsing ? t(lang, "loading") : (<>{t(lang, "btnAnalyse")} <ChevronRight size={22} /></>)}
+        className={`w-full font-semibold py-4 rounded-2xl text-base flex items-center justify-center gap-2 transition-all ${
+          file && !parsing ? "btn-gradient text-white" : "bg-gray-200 text-[var(--ink-muted)]"
+        }`}>
+        {parsing
+          ? <><Loader2 size={18} className="animate-spin" /> Analysing on server…</>
+          : <>{t(lang, "btnAnalyse")} <ChevronRight size={22} /></>
+        }
       </button>
     </div>
   );
