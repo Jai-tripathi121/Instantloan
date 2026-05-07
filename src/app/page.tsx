@@ -42,13 +42,8 @@ export default function Landing() {
       {/* ── NAV ── */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "var(--brand)" }}>
-            <span className="text-white font-semibold text-sm">₹</span>
-          </div>
-          <div>
-            <p className="font-semibold leading-none" style={{ color: "var(--ink)", fontSize: 14 }}>postmoney</p>
-            <p style={{ color: "var(--ink-muted)", fontSize: 9 }}>Loans, decoded.</p>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="postmoney" style={{ height: 32, width: "auto" }} />
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />

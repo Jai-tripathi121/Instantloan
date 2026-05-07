@@ -11,7 +11,15 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   title: "postmoney — Loan Eligibility, Zero CIBIL Impact",
-  description: "Check loan eligibility across 33 banks in 60 seconds. Zero CIBIL impact. Data stays on your device. ₹99 AI report.",
+  description: "Check loan eligibility across 33 banks in 60 seconds. Zero CIBIL impact. ₹99 AI report.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: "/favicon.png",
+    shortcut: "/favicon.ico",
+  },
 };
 
 export const viewport: Viewport = {

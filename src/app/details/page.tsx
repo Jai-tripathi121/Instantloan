@@ -192,9 +192,8 @@ export default function Details() {
 
         <div className="flex-1 flex flex-col justify-center pb-10">
           {/* App logo */}
-          <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mb-5 shadow-lg shadow-blue-200">
-            <span className="text-white font-semibold text-2xl">₹</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="postmoney" style={{ height: 48, width: "auto", marginBottom: 20 }} />
           <h1 className="text-3xl font-semibold text-[var(--ink)] mb-1.5">Check Your Eligibility</h1>
           <p className="text-[var(--ink-muted)] text-sm mb-8 leading-relaxed">
             Log in with your mobile — if you've applied before, we'll resume right where you left off

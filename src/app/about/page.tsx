@@ -19,9 +19,8 @@ export default function About() {
         <ArrowLeft size={14} /> Back to Home
       </Link>
       <div className="text-center mb-8">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--brand)" }}>
-          <span className="text-white font-semibold text-2xl">₹</span>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.png" alt="postmoney" style={{ height: 56, width: "auto", margin: "0 auto 16px" }} />
         <h1 className="text-2xl font-semibold mb-1">About postmoney</h1>
         <p className="text-sm" style={{ color: "var(--ink-muted)" }}>by {COMPANY.name}</p>
       </div>

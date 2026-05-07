@@ -188,9 +188,8 @@ export default function AdminPage() {
       <div className="min-h-dvh flex items-center justify-center px-5" style={{ background: "#0A1628" }}>
         <div className="bg-[var(--surface)] rounded-3xl p-8 w-full max-w-sm shadow-2xl">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 btn-gradient rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Shield size={30} className="text-white" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="postmoney" style={{ height: 48, width: "auto", margin: "0 auto 16px" }} />
             <h1 className="text-2xl font-semibold text-[var(--ink)]">Admin Login</h1>
             <p className="text-sm text-[var(--ink-muted)] mt-1">postmoney Dashboard</p>
           </div>
@@ -214,11 +213,10 @@ export default function AdminPage() {
       {/* Topbar */}
       <div className="bg-[var(--surface)] border-b border-[var(--line-soft)] px-5 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 btn-gradient rounded-lg flex items-center justify-center">
-            <span className="text-white font-semibold text-sm">₹</span>
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="postmoney" style={{ height: 28, width: "auto" }} />
           <div>
-            <span className="font-semibold text-[var(--ink)] text-sm">postmoney Admin</span>
+            <span className="font-semibold text-[var(--ink)] text-sm">Admin</span>
             <span className="text-xs text-[var(--ink-muted)] ml-2">{apps.length} applications</span>
           </div>
         </div>
