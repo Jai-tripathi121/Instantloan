@@ -5,7 +5,7 @@ import { useAppStore, LoanType } from "@/lib/store";
 import { t } from "@/lib/i18n";
 import { matchBanks, getAgeFromDOB, computeRiskGrade, POLICY_VERSION } from "@/lib/bank-data";
 import { saveSession } from "@/lib/firestore";
-import { ArrowLeft, Wallet, Home, Car, Building2, Tag, CheckCircle, ChevronRight, IndianRupee, GraduationCap, Landmark, Coins, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Tag, CheckCircle, ChevronRight, IndianRupee, ShieldCheck } from "lucide-react";
 
 const GRADE_COLORS: Record<string, string> = {
   A: "text-emerald-700 bg-emerald-100",
@@ -14,15 +14,10 @@ const GRADE_COLORS: Record<string, string> = {
   D: "text-red-700 bg-red-100",
 };
 
-const LOAN_TYPES: { type: LoanType; label: string; sub: string; icon: typeof Wallet; color: string; bg: string }[] = [
-  { type: "personal",  label: "Personal",   sub: "No collateral needed",   icon: Wallet,       color: "text-[var(--brand)]", bg: "bg-[var(--brand-soft)]" },
-  { type: "home",      label: "Home",        sub: "Buy or construct home",  icon: Home,         color: "text-emerald-600", bg: "bg-emerald-100" },
-  { type: "auto",      label: "Vehicle",     sub: "Car or bike loan",       icon: Car,          color: "text-amber-600", bg: "bg-amber-100" },
-  { type: "business",  label: "Business",    sub: "Business expansion",     icon: Building2,    color: "text-pink-600", bg: "bg-pink-100" },
-  { type: "gold",      label: "Gold Loan",   sub: "Loan against gold",      icon: Coins,        color: "text-yellow-600", bg: "bg-yellow-100" },
-  { type: "education", label: "Education",   sub: "Fund your studies",      icon: GraduationCap,color: "text-[var(--brand-3)]", bg: "bg-[var(--brand-soft)]" },
-  { type: "lap",       label: "LAP",         sub: "Loan against property",  icon: Landmark,     color: "text-teal-600", bg: "bg-teal-100" },
-];
+const LOAN_TYPE_LABELS: Record<string, string> = {
+  personal: "Personal Loan", home: "Home Loan", auto: "Vehicle Loan",
+  business: "Business Loan", gold: "Gold Loan", education: "Education Loan", lap: "LAP",
+};
 
 const LOAN_RANGES: Record<LoanType, { min: number; max: number; step: number }> = {
   personal:  { min: 50000,   max: 4000000,   step: 50000 },
@@ -41,7 +36,7 @@ export default function LoanRequirement() {
   const router = useRouter();
   const { setLoanRequirement, setLastRoute, loanRequirement, userDetails, lang } = useAppStore();
 
-  const [loanType, setLoanType] = useState<LoanType>(loanRequirement.loanType ?? "personal");
+  const [loanType] = useState<LoanType>(loanRequirement.loanType ?? "personal");
   const [amount, setAmount] = useState(loanRequirement.amount ?? 500000);
   const [tenure, setTenure] = useState(loanRequirement.tenure ?? 36);
   const [promo, setPromo] = useState("");
@@ -149,28 +144,12 @@ export default function LoanRequirement() {
       )}
 
       <div className="space-y-6 flex-1">
-        {/* Loan Type */}
-        <div>
-          <label className="block text-sm font-medium text-[var(--ink-soft)] mb-2">{t(lang, "labelLoanType")}</label>
-          <div className="grid grid-cols-2 gap-2.5">
-            {LOAN_TYPES.map((lt, idx) => {
-              const active = loanType === lt.type;
-              const isLastOdd = idx === LOAN_TYPES.length - 1 && LOAN_TYPES.length % 2 !== 0;
-              return (
-                <button key={lt.type}
-                  onClick={() => { setLoanType(lt.type); setAmount(LOAN_RANGES[lt.type].min); }}
-                  className={`flex items-center gap-3 p-3.5 rounded-2xl border-2 transition-all text-left ${active ? "border-[var(--brand)] bg-[var(--brand-soft)]" : "border-[var(--line-soft)] hover:border-[var(--line)]"} ${isLastOdd ? "col-span-2" : ""}`}>
-                  <div className={`w-9 h-9 ${active ? "bg-[var(--brand-soft)]0" : lt.bg} rounded-xl flex items-center justify-center flex-shrink-0`}>
-                    <lt.icon size={16} className={active ? "text-white" : lt.color} />
-                  </div>
-                  <div>
-                    <p className={`text-sm font-semibold leading-tight ${active ? "text-[var(--brand)]" : "text-gray-800"}`}>{lt.label}</p>
-                    <p className={`text-xs mt-0.5 ${active ? "text-[var(--brand-3)]" : "text-[var(--ink-muted)]"}`}>{lt.sub}</p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+        {/* Loan Type — read-only, set from landing page */}
+        <div className="flex items-center justify-between bg-[var(--brand-soft)] border border-[var(--brand)] rounded-2xl px-4 py-3">
+          <span className="text-sm font-medium text-[var(--ink-soft)]">Loan Type</span>
+          <span className="text-sm font-semibold text-[var(--brand)] capitalize">
+            {LOAN_TYPE_LABELS[loanType] ?? loanType}
+          </span>
         </div>
 
         {/* Amount */}
