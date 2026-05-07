@@ -3,7 +3,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState } from "react";
 import { useAppStore, BankOffer } from "@/lib/store";
 import { t } from "@/lib/i18n";
-import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck, FileDown, Loader2 } from "lucide-react";
+import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck, FileDown, Loader2, XCircle, AlertTriangle, TrendingUp, RefreshCcw, Info } from "lucide-react";
+import type { RejectionReason, RejectedBank } from "@/lib/store";
 import type { RiskGrade } from "@/lib/store";
 import { saveSession } from "@/lib/firestore";
 
@@ -120,6 +121,209 @@ function BankCard({ offer, rank, onApply, applyLabel }: { offer: BankOffer; rank
   );
 }
 
+// ─── Rejection reason helpers ─────────────────────────────────────────────
+const REASON_META: Record<RejectionReason, { label: string; icon: typeof XCircle; color: string; tip: string }> = {
+  income_below_min:             { label: "Income Too Low",                icon: TrendingDown,   color: "text-red-500",    tip: "Increase your declared income or upload a bank statement showing higher average balance." },
+  foir_exceeded:                { label: "Existing EMIs Too High (FOIR)", icon: AlertTriangle,  color: "text-amber-500",  tip: "Pay off existing loans to reduce your Fixed Obligation to Income Ratio below 50%." },
+  cibil_below_min:              { label: "CIBIL Score Too Low",           icon: XCircle,        color: "text-red-500",    tip: "Clear overdue loans, avoid late payments, and dispute errors on your CIBIL report." },
+  bounces_exceeded_global:      { label: "Too Many Cheque Bounces",       icon: XCircle,        color: "text-red-500",    tip: "Maintain a minimum balance to prevent bounces for at least 6 months before applying." },
+  bounces_exceeded_strict:      { label: "Cheque Bounces (Strict Bank)",  icon: XCircle,        color: "text-red-600",    tip: "Target banks with more lenient bounce policies, or clear your record over 6 months." },
+  salary_credits_insufficient:  { label: "Insufficient Salary Credits",   icon: AlertTriangle,  color: "text-amber-500",  tip: "Ensure salary is credited regularly for at least 3–6 months in the same account." },
+  age_out_of_range:             { label: "Age Not in Eligible Range",     icon: Info,           color: "text-blue-500",   tip: "Some banks have stricter age limits. Try a shorter loan tenure." },
+  employment_type_not_allowed:  { label: "Employment Type Restricted",    icon: Info,           color: "text-blue-500",   tip: "Some banks don't lend to self-employed. Try salaried-friendly banks." },
+  loan_type_not_offered:        { label: "Loan Type Not Offered",         icon: Info,           color: "text-blue-500",   tip: "Select a different loan type or a bank that offers this product." },
+  amount_below_min:             { label: "Amount Below Bank Minimum",     icon: AlertTriangle,  color: "text-amber-500",  tip: "Try requesting a higher loan amount to meet bank minimums." },
+  inactive:                     { label: "Account History Insufficient",  icon: XCircle,        color: "text-red-500",    tip: "Use an account with at least 6 months of active transactions for upload." },
+};
+
+function groupRejections(rejected: RejectedBank[]): { reason: RejectionReason; banks: string[] }[] {
+  const map: Record<string, string[]> = {};
+  for (const r of rejected) {
+    if (!map[r.reason]) map[r.reason] = [];
+    map[r.reason].push(r.bankName);
+  }
+  return Object.entries(map).map(([reason, banks]) => ({ reason: reason as RejectionReason, banks }));
+}
+
+function RejectionReport({
+  audit, userDetails, loanRequirement, statementAnalysis, onRetry, onDownload, downloading,
+}: {
+  audit: import("@/lib/store").DecisionAudit | null;
+  userDetails: Partial<import("@/lib/store").UserDetails>;
+  loanRequirement: Partial<import("@/lib/store").LoanRequirement>;
+  statementAnalysis: import("@/lib/store").StatementAnalysis | null;
+  onRetry: () => void;
+  onDownload: () => void;
+  downloading: boolean;
+}) {
+  const income = audit?.inputSnapshot.effectiveIncome ?? statementAnalysis?.avgMonthlyIncome ?? userDetails.monthlyIncome ?? 0;
+  const foir = audit?.inputSnapshot.foir ?? statementAnalysis?.foir ?? 0;
+  const bounces = audit?.inputSnapshot.bounceCount ?? statementAnalysis?.bounceCount ?? 0;
+  const cibil = audit?.inputSnapshot.cibilScore ?? userDetails.cibilScore;
+  const grouped = audit ? groupRejections(audit.rejectedBanks) : [];
+  const totalRejected = audit?.rejectedBanks.length ?? 0;
+  const fmt = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${v.toLocaleString("en-IN")}`;
+
+  return (
+    <div className="min-h-dvh bg-[var(--surface)] w-full max-w-md mx-auto px-4 py-6 pb-10">
+      {/* Header */}
+      <div className="rounded-2xl p-5 mb-5 text-white" style={{ background: "linear-gradient(135deg, #7f1d1d 0%, #b91c1c 100%)" }}>
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <XCircle size={20} className="text-red-200" />
+              <h2 className="text-xl font-semibold">No Banks Eligible</h2>
+            </div>
+            <p className="text-white/70 text-sm">{totalRejected} banks checked · 0 approved</p>
+          </div>
+          <button onClick={onDownload} disabled={downloading}
+            className="flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl disabled:opacity-60">
+            {downloading ? <Loader2 size={13} className="animate-spin" /> : <FileDown size={13} />}
+            {downloading ? "Generating…" : "Full Report"}
+          </button>
+        </div>
+        {/* Profile snapshot */}
+        <div className="grid grid-cols-4 gap-2">
+          <div className="bg-white/10 rounded-xl p-2 text-center">
+            <p className="text-white/60 text-xs mb-0.5">Income</p>
+            <p className="text-sm font-semibold">{income >= 100000 ? `₹${(income/100000).toFixed(1)}L` : `₹${(income/1000).toFixed(0)}K`}</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-2 text-center">
+            <p className="text-white/60 text-xs mb-0.5">FOIR</p>
+            <p className={`text-sm font-semibold ${foir > 0.55 ? "text-red-300" : foir > 0.40 ? "text-amber-300" : "text-green-300"}`}>{Math.round(foir * 100)}%</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-2 text-center">
+            <p className="text-white/60 text-xs mb-0.5">Bounces</p>
+            <p className={`text-sm font-semibold ${bounces > 2 ? "text-red-300" : bounces > 0 ? "text-amber-300" : "text-green-300"}`}>{bounces}</p>
+          </div>
+          <div className="bg-white/10 rounded-xl p-2 text-center">
+            <p className="text-white/60 text-xs mb-0.5">CIBIL</p>
+            <p className={`text-sm font-semibold ${!cibil ? "text-white/50" : cibil >= 700 ? "text-green-300" : cibil >= 650 ? "text-amber-300" : "text-red-300"}`}>{cibil ?? "N/A"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Why rejected */}
+      <div className="mb-5">
+        <h3 className="text-sm font-semibold text-[var(--ink)] mb-3 flex items-center gap-2">
+          <AlertTriangle size={14} className="text-amber-500" /> Reasons for Rejection
+        </h3>
+        <div className="space-y-2.5">
+          {grouped.map(({ reason, banks }) => {
+            const meta = REASON_META[reason] ?? { label: reason, icon: Info, color: "text-gray-500", tip: "" };
+            const Icon = meta.icon;
+            return (
+              <div key={reason} className="bg-[var(--bg)] border border-[var(--line-soft)] rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-red-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon size={15} className={meta.color} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[var(--ink)] mb-0.5">{meta.label}</p>
+                    <p className="text-xs text-[var(--ink-muted)] leading-relaxed mb-2">{meta.tip}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {banks.slice(0, 6).map((b) => (
+                        <span key={b} className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full font-medium">{b}</span>
+                      ))}
+                      {banks.length > 6 && <span className="text-xs text-[var(--ink-muted)]">+{banks.length - 6} more</span>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+          {grouped.length === 0 && (
+            <div className="bg-[var(--bg)] border border-[var(--line-soft)] rounded-2xl p-4 text-sm text-[var(--ink-muted)]">
+              Profile did not meet minimum eligibility criteria across all 33 banks.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* How to improve */}
+      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 mb-5">
+        <h3 className="text-sm font-semibold text-emerald-800 mb-3 flex items-center gap-2">
+          <TrendingUp size={14} /> How to Become Eligible
+        </h3>
+        <div className="space-y-2.5">
+          {foir > 0.50 && (
+            <div className="flex items-start gap-2.5">
+              <span className="w-5 h-5 bg-emerald-600 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">1</span>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">Reduce existing EMIs</p>
+                <p className="text-xs text-emerald-700">Your FOIR is {Math.round(foir*100)}%. Pay off loans to bring it below 50%.</p>
+              </div>
+            </div>
+          )}
+          {cibil !== undefined && cibil < 700 && (
+            <div className="flex items-start gap-2.5">
+              <span className="w-5 h-5 bg-emerald-600 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">{foir > 0.50 ? 2 : 1}</span>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">Improve CIBIL score</p>
+                <p className="text-xs text-emerald-700">Score is {cibil}. Pay dues on time — most banks need 700+.</p>
+              </div>
+            </div>
+          )}
+          {bounces > 0 && (
+            <div className="flex items-start gap-2.5">
+              <span className="w-5 h-5 bg-emerald-600 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                {[foir > 0.50, cibil !== undefined && cibil < 700].filter(Boolean).length + 1}
+              </span>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">Stop cheque bounces</p>
+                <p className="text-xs text-emerald-700">Maintain adequate balance — {bounces} bounce{bounces > 1 ? "s" : ""} found in statement.</p>
+              </div>
+            </div>
+          )}
+          {income < 25000 && (
+            <div className="flex items-start gap-2.5">
+              <span className="w-5 h-5 bg-emerald-600 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                {[foir > 0.50, cibil !== undefined && cibil < 700, bounces > 0].filter(Boolean).length + 1}
+              </span>
+              <div>
+                <p className="text-sm font-medium text-emerald-900">Declare higher income</p>
+                <p className="text-xs text-emerald-700">Most banks need ₹25,000+ monthly. Add all income sources.</p>
+              </div>
+            </div>
+          )}
+          <div className="flex items-start gap-2.5">
+            <span className="w-5 h-5 bg-emerald-500 text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">✓</span>
+            <div>
+              <p className="text-sm font-medium text-emerald-900">Re-check eligibility in 3–6 months</p>
+              <p className="text-xs text-emerald-700">After improvements, run a fresh postmoney check — Zero CIBIL impact.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Loan details applied */}
+      <div className="bg-[var(--bg)] border border-[var(--line-soft)] rounded-2xl p-4 mb-5">
+        <h3 className="text-xs font-semibold text-[var(--ink-muted)] uppercase tracking-wide mb-3">Loan Applied For</h3>
+        <div className="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <p className="text-xs text-[var(--ink-muted)] mb-0.5">Type</p>
+            <p className="text-sm font-semibold text-[var(--ink)] capitalize">{loanRequirement.loanType ?? "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--ink-muted)] mb-0.5">Amount</p>
+            <p className="text-sm font-semibold text-[var(--ink)]">{loanRequirement.amount ? fmt(loanRequirement.amount) : "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-[var(--ink-muted)] mb-0.5">Tenure</p>
+            <p className="text-sm font-semibold text-[var(--ink)]">{loanRequirement.tenure ? `${Math.round(loanRequirement.tenure / 12)}yr` : "—"}</p>
+          </div>
+        </div>
+      </div>
+
+      <button onClick={onRetry}
+        className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 text-base">
+        <RefreshCcw size={18} /> Start Fresh
+      </button>
+      <p className="text-center text-xs text-[var(--ink-muted)] mt-3">No additional CIBIL impact for re-checking</p>
+    </div>
+  );
+}
+
 function ResultsInner() {
   const router = useRouter();
   const params = useSearchParams();
@@ -197,14 +401,7 @@ function ResultsInner() {
   }
 
   if (!bankOffers.length) {
-    return (
-      <div className="min-h-dvh flex flex-col items-center justify-center w-full max-w-md mx-auto px-5 text-center py-6 bg-[var(--surface)]">
-        <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mx-auto mb-5 text-4xl">😔</div>
-        <h2 className="text-xl font-semibold text-[var(--ink)] mb-2">No Eligible Banks Found</h2>
-        <p className="text-[var(--ink-muted)] text-sm mb-6">Try increasing your income or reducing existing EMIs, then try again.</p>
-        <button onClick={() => router.push("/")} className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-lg">Try Again</button>
-      </div>
-    );
+    return <RejectionReport audit={decisionAudit} userDetails={userDetails} loanRequirement={loanRequirement} statementAnalysis={statementAnalysis} onRetry={() => router.push("/")} onDownload={downloadReport} downloading={downloading} />;
   }
 
   return (
