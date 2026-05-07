@@ -43,7 +43,7 @@ export default function Landing() {
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="postmoney" style={{ height: 32, width: "auto" }} />
+          <img src="/logo.png" alt="postmoney" style={{ height: 28, width: "auto" }} />
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
