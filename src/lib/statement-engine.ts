@@ -188,38 +188,102 @@ function detectBank(text: string): string {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Date matching — supports numeric (DD/MM/YYYY) and string-month (DD-MMM-YYYY)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MONTH_NUM: Record<string, string> = {
+  jan: "01", feb: "02", mar: "03", apr: "04", may: "05", jun: "06",
+  jul: "07", aug: "08", sep: "09", oct: "10", nov: "11", dec: "12",
+};
+
+// DD/MM/YYYY · DD-MM-YYYY · DD.MM.YYYY (1 or 2 digit day)
+const DATE_NUM_RE = /\b(\d{1,2})[\/\-\.](\d{2})[\/\-\.](\d{2,4})\b/;
+// DD-MMM-YYYY · DD/MMM/YYYY · DD MMM YYYY · DD MMM YY (e.g. 01-May-2026)
+const DATE_STR_RE = /\b(\d{1,2})[\-\/\s](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[\-\/\s](\d{2,4})\b/i;
+
+interface DateMatch { monthKey: string; raw: string; }
+
+function getDateMatch(line: string): DateMatch | null {
+  // String-month format first (more specific — avoids mis-parsing DD-MM-YYYY as string)
+  const sm = line.match(DATE_STR_RE);
+  if (sm) {
+    const day = parseInt(sm[1]);
+    const month = MONTH_NUM[sm[2].toLowerCase().slice(0, 3)];
+    const yr = sm[3].length === 2 ? "20" + sm[3] : sm[3];
+    const y = parseInt(yr);
+    if (day >= 1 && day <= 31 && month && y >= 2018 && y <= 2032)
+      return { monthKey: `${yr}-${month}`, raw: sm[0] };
+  }
+  // Numeric format
+  const nm = line.match(DATE_NUM_RE);
+  if (nm) {
+    const day = parseInt(nm[1]), mo = parseInt(nm[2]);
+    const yr = nm[3].length === 2 ? "20" + nm[3] : nm[3];
+    const y = parseInt(yr);
+    if (day >= 1 && day <= 31 && mo >= 1 && mo <= 12 && y >= 2018 && y <= 2032)
+      return { monthKey: `${yr}-${nm[2].padStart(2, "0")}`, raw: nm[0] };
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Amount extraction
 // ─────────────────────────────────────────────────────────────────────────────
 
 function extractAmounts(str: string): number[] {
-  return (str.match(/\d{1,3}(?:,\d{2,3})*(?:\.\d{2})?/g) ?? [])
+  // Order matters: put 4+ digit plain number first so it wins over the \d{1,3} prefix match.
+  // Pattern 1: plain 4-9 digit integer or decimal (e.g. 50000, 15000.00)
+  // Pattern 2: Indian comma format with at least one comma  (e.g. 1,50,000.00 / 50,000)
+  return (str.match(/\b\d{4,9}(?:\.\d{1,2})?\b|\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?/g) ?? [])
     .map((s) => parseFloat(s.replace(/,/g, "")))
-    .filter((n) => !isNaN(n) && n > 0);
+    .filter((n) => !isNaN(n) && n >= 1);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Multi-line merger — some banks put date on one line, amounts on the next
+// ─────────────────────────────────────────────────────────────────────────────
+
+function mergeTransactionLines(lines: string[]): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const dm = getDateMatch(line);
+    if (dm) {
+      const hasAmounts = extractAmounts(line.replace(dm.raw, " ")).length >= 2;
+      if (!hasAmounts) {
+        // Try merging with next 1-3 lines to get a parseable combined line
+        let merged = line;
+        let consumed = 0;
+        for (let j = 1; j <= 3 && i + j < lines.length; j++) {
+          merged += " " + lines[i + j];
+          if (extractAmounts(merged.replace(dm.raw, " ")).length >= 2) {
+            consumed = j;
+            break;
+          }
+        }
+        out.push(merged);
+        i += consumed + 1;
+        continue;
+      }
+    }
+    out.push(line);
+    i++;
+  }
+  return out;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Transaction line parser
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DATE_RE = /\b(\d{2})[\/\-\.](\d{2})[\/\-\.](\d{2,4})\b/;
-
-function parseMonthKey(line: string): string | null {
-  const m = line.match(DATE_RE);
-  if (!m) return null;
-  const day = m[1], month = m[2];
-  let year = m[3];
-  if (year.length === 2) year = "20" + year;
-  // Validate
-  const d = parseInt(day), mo = parseInt(month), yr = parseInt(year);
-  if (d < 1 || d > 31 || mo < 1 || mo > 12 || yr < 2020 || yr > 2030) return null;
-  return `${yr}-${month.padStart(2, "0")}`;
-}
-
 function parseTx(line: string): ParsedTx | null {
-  const monthKey = parseMonthKey(line);
-  if (!monthKey) return null;
+  const dm = getDateMatch(line);
+  if (!dm) return null;
 
-  const amounts = extractAmounts(line);
+  // Strip the date before extracting amounts to avoid year digits being treated as amounts
+  const noDate = line.replace(dm.raw, " ");
+  const amounts = extractAmounts(noDate);
   if (amounts.length < 2) return null;
 
   const lower = line.toLowerCase();
@@ -237,8 +301,7 @@ function parseTx(line: string): ParsedTx | null {
   } else if (isDebit && !isCredit) {
     debit = txAmount;
   } else if (amounts.length >= 3) {
-    // Typical 4-col format: debit | credit | balance (one of debit/credit is 0 or absent)
-    // amounts = [debit?, credit?, balance] — try to detect by amount count
+    // Typical 4-col: [narration_amounts…, debit_or_credit, balance]
     const a = amounts[amounts.length - 3];
     const b = amounts[amounts.length - 2];
     if (b === 0 || b === balance) {
@@ -246,23 +309,27 @@ function parseTx(line: string): ParsedTx | null {
     } else if (a === 0) {
       credit = b;
     } else {
-      // Guess: debit reduces balance, credit increases it
       debit = a;
       credit = 0;
     }
   } else {
-    // 2 amounts: txAmount + balance, can't tell — treat as debit (conservative)
+    // Only 2 amounts — treat as debit (conservative)
     debit = txAmount;
   }
 
-  // Narration = everything between date match end and first large amount
-  const narration = line.replace(DATE_RE, "").replace(/\d{1,3}(?:,\d{2,3})*(?:\.\d{2})?/g, "").trim().slice(0, 80);
+  // Narration = date-stripped line minus all numeric tokens
+  const narration = noDate
+    .replace(/\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?|\b\d{4,9}(?:\.\d{1,2})?\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 80);
+
   const cat = categorise(line);
   const isBounce = cat === "BOUNCE";
 
   return {
-    date: line.match(DATE_RE)?.[0] ?? "",
-    monthKey,
+    date: dm.raw,
+    monthKey: dm.monthKey,
     narration: narration || line.slice(0, 60),
     debit,
     credit,
@@ -456,7 +523,8 @@ function buildMonthlySummaries(txs: ParsedTx[]): MonthSummary[] {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function analyseStatement(text: string, declaredIncome = 0): StatementIntelligence {
-  const lines = text.split(/\n/).map((l) => l.trim()).filter(Boolean);
+  const rawLines = text.split(/\n/).map((l) => l.trim()).filter(Boolean);
+  const lines = mergeTransactionLines(rawLines);
   const detectedBank = detectBank(text);
 
   // Parse all transactions
@@ -615,6 +683,6 @@ export function analyseStatement(text: string, declaredIncome = 0): StatementInt
     // Meta
     detectedBank,
     parseQuality,
-    rawLineCount: lines.length,
+    rawLineCount: rawLines.length,
   };
 }

@@ -145,10 +145,11 @@ function MonthTable({ months }: { months: MonthSummary[] }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "income" | "obligations" | "spending" | "fraud" | "monthly";
+type Tab = "overview" | "income" | "obligations" | "spending" | "fraud" | "monthly" | "debug";
 
 export default function StatementAnalyserPage() {
   const fileRef = useRef<HTMLInputElement>(null);
+  const debugRef = useRef<HTMLInputElement>(null);
   const pwdRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -156,6 +157,7 @@ export default function StatementAnalyserPage() {
   const [tab, setTab] = useState<Tab>("overview");
   const [income, setIncome] = useState("");
   const [fileName, setFileName] = useState("");
+  const [debugData, setDebugData] = useState<{ lines: string[]; preview: string; pages: number; textLength: number } | null>(null);
 
   // Password popup state
   const [showPwdModal, setShowPwdModal] = useState(false);
@@ -200,7 +202,30 @@ export default function StatementAnalyserPage() {
     if (!file) return;
     setFileName(file.name);
     setResult(null);
+    setDebugData(null);
     runAnalysis(file);
+  }
+
+  async function handleDebugUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    setLoading(true);
+    setError("");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/debug-pdf", { method: "POST", body: form });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setDebugData(data);
+      setTab("debug");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Debug failed");
+    } finally {
+      setLoading(false);
+      if (debugRef.current) debugRef.current.value = "";
+    }
   }
 
   async function handlePasswordSubmit() {
@@ -307,12 +332,19 @@ export default function StatementAnalyserPage() {
                   className="w-full border border-gray-200 rounded-xl pl-8 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#0a3d2e]" />
               </div>
             </div>
-            <div className="flex items-end">
+            <div className="flex items-end gap-2">
               <label className={`flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer font-medium text-sm text-white transition-all ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#0a3d2e] hover:bg-[#0d4f3a]"}`}>
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
                 {loading ? "Analysing…" : "Upload & Analyse"}
                 <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden"
                   onChange={handleUpload} disabled={loading} />
+              </label>
+              <label className={`flex items-center gap-2 px-4 py-2.5 rounded-xl cursor-pointer text-sm font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all ${loading ? "opacity-40 cursor-not-allowed" : ""}`}
+                title="Extract raw PDF text to debug parsing issues">
+                <FileText size={15} />
+                Debug PDF
+                <input ref={debugRef} type="file" accept=".pdf,application/pdf" className="hidden"
+                  onChange={handleDebugUpload} disabled={loading} />
               </label>
             </div>
           </div>
@@ -325,6 +357,39 @@ export default function StatementAnalyserPage() {
             </div>
           )}
         </div>
+
+        {/* Debug panel */}
+        {debugData && !loading && (
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-6">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <FileText size={15} className="text-blue-500" />
+                <span className="font-semibold text-gray-900">Raw PDF Text</span>
+                <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{debugData.pages} pages · {debugData.textLength.toLocaleString()} chars · {debugData.lines.length} lines</span>
+              </div>
+              <button onClick={() => setDebugData(null)} className="text-xs text-gray-400 hover:text-gray-600">✕ Close</button>
+            </div>
+            <div className="p-4 max-h-96 overflow-y-auto">
+              <table className="w-full text-xs font-mono">
+                <thead><tr className="bg-gray-50"><th className="text-left px-2 py-1 text-gray-400 w-10">#</th><th className="text-left px-2 py-1 text-gray-400">Line</th></tr></thead>
+                <tbody>
+                  {debugData.lines.map((line, idx) => (
+                    <tr key={idx} className={`border-t border-gray-50 ${/\d{1,2}[\-\/\s](Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i.test(line) || /\d{1,2}[\/\-\.]\d{2}[\/\-\.]\d{2,4}/.test(line) ? "bg-emerald-50" : ""}`}>
+                      <td className="px-2 py-1 text-gray-300 select-none">{idx + 1}</td>
+                      <td className="px-2 py-1 text-gray-700 break-all">{line}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {debugData.lines.length === 0 && (
+                <p className="text-sm text-gray-400 text-center py-6">No text lines extracted — may be a scanned/image PDF.</p>
+              )}
+            </div>
+            <div className="px-6 py-3 bg-gray-50 rounded-b-2xl text-xs text-gray-400">
+              Rows highlighted in green have a recognisable date pattern. Use this to verify date formats before re-analysing.
+            </div>
+          </div>
+        )}
 
         {/* Loading state */}
         {loading && (
