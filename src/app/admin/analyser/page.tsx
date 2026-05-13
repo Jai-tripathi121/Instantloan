@@ -284,15 +284,21 @@ export default function StatementAnalyserPage() {
                 {/* Score breakdown */}
                 <div className="min-w-56 flex-1">
                   <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Score Breakdown</p>
-                  <ScoreBar label="Income Stability" score={result.scoreBreakdown.incomeStability} max={25} />
-                  <ScoreBar label="Bounce History"   score={result.scoreBreakdown.bounceHistory}   max={25} />
-                  <ScoreBar label="Balance Quality"  score={result.scoreBreakdown.balanceQuality}  max={20} />
-                  <ScoreBar label="FOIR"             score={result.scoreBreakdown.foirScore}        max={15} />
-                  <ScoreBar label="Spending Pattern" score={result.scoreBreakdown.spendingPattern}  max={15} />
-                  <div className="pt-2 border-t border-gray-100 flex justify-between text-sm">
-                    <span className="font-medium text-gray-600">Total</span>
-                    <span className="font-bold text-gray-900">{result.scoreBreakdown.total}/100</span>
-                  </div>
+                  {result.scoreBreakdown ? (
+                    <>
+                      <ScoreBar label="Income Stability" score={result.scoreBreakdown.incomeStability ?? 0} max={25} />
+                      <ScoreBar label="Bounce History"   score={result.scoreBreakdown.bounceHistory ?? 0}   max={25} />
+                      <ScoreBar label="Balance Quality"  score={result.scoreBreakdown.balanceQuality ?? 0}  max={20} />
+                      <ScoreBar label="FOIR"             score={result.scoreBreakdown.foirScore ?? 0}        max={15} />
+                      <ScoreBar label="Spending Pattern" score={result.scoreBreakdown.spendingPattern ?? 0}  max={15} />
+                      <div className="pt-2 border-t border-gray-100 flex justify-between text-sm">
+                        <span className="font-medium text-gray-600">Total</span>
+                        <span className="font-bold text-gray-900">{result.scoreBreakdown.total ?? 0}/100</span>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-400">Score not available</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -439,14 +445,15 @@ export default function StatementAnalyserPage() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-5 flex items-center gap-2"><Activity size={15} className="text-purple-500" />Spending Breakdown (avg/month)</h3>
                   <div className="space-y-2">
-                    {Object.entries(result.categorySpend)
-                      .filter(([, v]) => v > 0)
-                      .sort(([, a], [, b]) => b - a)
+                    {Object.entries(result.categorySpend ?? {})
+                      .filter(([, v]) => (v ?? 0) > 0)
+                      .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
                       .map(([cat, amount]) => {
                         const label = CAT_LABELS[cat as TxCategory] ?? cat;
                         const color = CAT_COLORS[cat as TxCategory] ?? "#6b7280";
-                        const maxAmt = Math.max(...Object.values(result.categorySpend).filter(Boolean) as number[]);
-                        const barW = maxAmt > 0 ? (amount / maxAmt) * 100 : 0;
+                        const allVals = Object.values(result.categorySpend ?? {}).filter(Boolean) as number[];
+                        const maxAmt = allVals.length > 0 ? Math.max(...allVals) : 1;
+                        const barW = maxAmt > 0 ? ((amount ?? 0) / maxAmt) * 100 : 0;
                         const isRisk = ["GAMBLING", "LOAN_APP", "BNPL"].includes(cat);
                         return (
                           <div key={cat} className={`flex items-center gap-3 p-2 rounded-xl ${isRisk ? "bg-red-50 border border-red-100" : "hover:bg-gray-50"}`}>
