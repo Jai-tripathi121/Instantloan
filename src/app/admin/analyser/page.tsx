@@ -5,9 +5,10 @@ import {
   ArrowLeft, Upload, Loader2, AlertTriangle, CheckCircle, XCircle,
   TrendingUp, TrendingDown, Shield, ShieldAlert, IndianRupee,
   BarChart2, Activity, FileText, Zap, Info, Sparkles, MessageCircle, Send,
-  RefreshCw, Bot,
+  RefreshCw, Bot, Download, ChevronDown,
 } from "lucide-react";
 import type { StatementIntelligence, MonthSummary, FraudSignal, TxCategory } from "@/lib/statement-engine";
+import { generateReport } from "@/lib/report-generator";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -221,6 +222,7 @@ export default function StatementAnalyserPage() {
   const [chatLoading, setChatLoading] = useState(false);
   const [debugAiReport, setDebugAiReport] = useState("");
   const [debugAiLoaded, setDebugAiLoaded] = useState(false);
+  const [showLangMenu, setShowLangMenu] = useState(false);
 
   // Password popup state
   const [showPwdModal, setShowPwdModal] = useState(false);
@@ -399,201 +401,12 @@ export default function StatementAnalyserPage() {
     }
   }
 
-  function downloadReport() {
+  function downloadReport(lang: "en" | "hi") {
     if (!result) return;
-    const breakdown = result.scoreBreakdown ?? {};
-    const decisionLabel = DECISION_COLORS[result.lendingDecision]?.label ?? result.lendingDecision;
-    const fmtN = (n: number) => {
-      if (n >= 10_000_000) return `₹${(n / 10_000_000).toFixed(1)}Cr`;
-      if (n >= 100_000) return `₹${(n / 100_000).toFixed(1)}L`;
-      if (n >= 1_000) return `₹${(n / 1_000).toFixed(0)}K`;
-      return `₹${n.toLocaleString("en-IN")}`;
-    };
-    const monthRows = result.monthlyBreakdown
-      .map(
-        (m) => `<tr>
-          <td>${m.label}</td>
-          <td style="color:#16a34a">${fmtN(m.totalCredits)}</td>
-          <td style="color:#dc2626">${fmtN(m.totalDebits)}</td>
-          <td style="color:#2563eb">${m.salaryAmount > 0 ? fmtN(m.salaryAmount) : "—"}</td>
-          <td style="color:#d97706">${m.emiTotal > 0 ? fmtN(m.emiTotal) : "—"}</td>
-          <td style="color:${m.minBalance < 5000 ? "#dc2626" : "#374151"}">${fmtN(m.minBalance)}</td>
-          <td>${fmtN(m.avgBalance)}</td>
-          <td style="text-align:center">${m.bounceCount > 0 ? `<span style="color:#dc2626;font-weight:bold">${m.bounceCount}</span>` : "—"}</td>
-        </tr>`,
-      )
-      .join("");
-    const fraudRows = result.fraudSignals.length === 0
-      ? `<tr><td colspan="2" style="color:#16a34a;padding:12px">✓ No fraud signals detected</td></tr>`
-      : result.fraudSignals
-          .map(
-            (s) => `<tr>
-              <td><span style="font-weight:600;color:${s.severity === "high" ? "#dc2626" : s.severity === "medium" ? "#d97706" : "#ca8a04"}">${s.type.replace(/_/g, " ")}</span><br><small>${s.detail}</small></td>
-              <td><span style="text-transform:uppercase;font-size:11px;font-weight:700;color:${s.severity === "high" ? "#dc2626" : "#d97706"}">${s.severity}</span></td>
-            </tr>`,
-          )
-          .join("");
-
-    const scoreColor = result.lendingScore >= 800 ? "#16a34a" : result.lendingScore >= 700 ? "#2563eb" : result.lendingScore >= 580 ? "#d97706" : "#dc2626";
-    const aiSection = aiInsights
-      ? `<div class="section">
-          <div class="section-title">✦ Post AI — Score 900 Roadmap</div>
-          <div style="white-space:pre-wrap;font-size:13px;line-height:1.7;color:#374151">${aiInsights.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div>
-        </div>`
-      : "";
-
-    const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Statement Analysis Report — PostMoney</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color:#111827; background:#fff; padding:40px; font-size:13px; }
-  .header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #0a3d2e; padding-bottom:16px; margin-bottom:24px; }
-  .logo { font-size:22px; font-weight:800; color:#0a3d2e; letter-spacing:-0.5px; }
-  .logo span { color:#16a34a; }
-  .report-meta { text-align:right; font-size:11px; color:#6b7280; }
-  .hero { display:grid; grid-template-columns:160px 1fr 1fr; gap:24px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:12px; padding:20px; margin-bottom:20px; }
-  .score-box { text-align:center; }
-  .score-num { font-size:52px; font-weight:800; line-height:1; color:${scoreColor}; }
-  .score-sub { font-size:12px; color:#9ca3af; margin-top:4px; }
-  .decision-badge { display:inline-block; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:600; background:${result.lendingDecision === "STRONG_APPROVE" ? "#d1fae5" : result.lendingDecision === "APPROVE" ? "#dbeafe" : result.lendingDecision === "REJECT" ? "#fee2e2" : "#fef3c7"}; color:${result.lendingDecision === "STRONG_APPROVE" ? "#065f46" : result.lendingDecision === "APPROVE" ? "#1e40af" : result.lendingDecision === "REJECT" ? "#991b1b" : "#92400e"}; margin-bottom:8px; }
-  .metric-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px; }
-  .metric { padding:4px 0; border-bottom:1px solid #f3f4f6; display:flex; justify-content:space-between; }
-  .metric label { color:#6b7280; font-size:11px; }
-  .metric value { font-weight:600; font-size:12px; }
-  .section { margin-bottom:20px; }
-  .section-title { font-size:13px; font-weight:700; color:#0a3d2e; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #e5e7eb; }
-  table { width:100%; border-collapse:collapse; font-size:12px; }
-  th { background:#f3f4f6; text-align:left; padding:7px 10px; font-size:11px; color:#6b7280; font-weight:600; }
-  td { padding:6px 10px; border-bottom:1px solid #f9fafb; }
-  tr:hover td { background:#fafafa; }
-  .bar-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
-  .bar-label { width:130px; font-size:11px; color:#6b7280; flex-shrink:0; }
-  .bar-track { flex:1; height:6px; background:#e5e7eb; border-radius:4px; overflow:hidden; }
-  .bar-fill { height:100%; border-radius:4px; }
-  .bar-score { width:50px; font-size:11px; font-weight:600; text-align:right; }
-  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .footer { margin-top:32px; padding-top:12px; border-top:1px solid #e5e7eb; display:flex; justify-content:space-between; font-size:10px; color:#9ca3af; }
-  @media print { body { padding:20px; } .no-print { display:none; } }
-</style>
-</head>
-<body>
-<div class="header">
-  <div>
-    <div class="logo">Post<span>Money</span></div>
-    <div style="font-size:12px;color:#6b7280;margin-top:4px">Statement Intelligence Report</div>
-  </div>
-  <div class="report-meta">
-    <div style="font-weight:600">${result.detectedBank}</div>
-    <div>${result.statementMonths} months · ${result.transactionCount} transactions</div>
-    <div>Generated: ${new Date().toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"numeric" })}</div>
-    <div>Parse Quality: <strong style="color:${result.parseQuality === "high" ? "#16a34a" : "#d97706"}">${result.parseQuality.toUpperCase()}</strong></div>
-  </div>
-</div>
-
-<!-- Hero -->
-<div class="hero">
-  <div class="score-box">
-    <div class="score-num">${result.lendingScore}</div>
-    <div class="score-sub">/ 900</div>
-    <div style="margin-top:8px">
-      <div class="decision-badge">${decisionLabel}</div>
-    </div>
-    <div style="font-size:11px;margin-top:6px;color:${result.fraudRisk === "high" ? "#dc2626" : result.fraudRisk === "medium" ? "#d97706" : "#16a34a"}">
-      Fraud: ${result.fraudRisk.toUpperCase()}
-    </div>
-  </div>
-  <div>
-    <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:8px">Key Metrics</div>
-    <div class="metric-grid">
-      <div class="metric"><label>Avg Income</label><value>${fmtN(result.avgMonthlyIncome)}/mo</value></div>
-      <div class="metric"><label>Avg Balance</label><value>${fmtN(result.avgMonthlyBalance)}</value></div>
-      <div class="metric"><label>Min Balance</label><value>${fmtN(result.minMonthlyBalance)}</value></div>
-      <div class="metric"><label>FOIR</label><value>${Math.round(result.foir * 100)}%</value></div>
-      <div class="metric"><label>Total EMI/mo</label><value>${fmtN(result.totalObligations)}</value></div>
-      <div class="metric"><label>Bounces</label><value>${result.bounceCount}</value></div>
-      <div class="metric"><label>Salary Months</label><value>${result.salaryMonths}/${result.statementMonths}</value></div>
-      <div class="metric"><label>Income Source</label><value>${result.primaryIncomeSource}</value></div>
-    </div>
-  </div>
-  <div>
-    <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;margin-bottom:10px">Score Breakdown</div>
-    ${[
-      ["Income Stability", breakdown.incomeStability ?? 0, 25],
-      ["Bounce History",   breakdown.bounceHistory ?? 0,   25],
-      ["Balance Quality",  breakdown.balanceQuality ?? 0,  20],
-      ["FOIR",             breakdown.foirScore ?? 0,        15],
-      ["Spending Pattern", breakdown.spendingPattern ?? 0,  15],
-    ].map(([label, score, max]) => {
-      const pctW = Number(max) > 0 ? (Number(score) / Number(max)) * 100 : 0;
-      const clr = pctW >= 80 ? "#16a34a" : pctW >= 50 ? "#2563eb" : pctW >= 30 ? "#d97706" : "#dc2626";
-      return `<div class="bar-row">
-        <div class="bar-label">${label}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pctW}%;background:${clr}"></div></div>
-        <div class="bar-score" style="color:${clr}">${score}/${max}</div>
-      </div>`;
-    }).join("")}
-    <div style="text-align:right;font-size:12px;font-weight:700;margin-top:4px;border-top:1px solid #e5e7eb;padding-top:6px">
-      Total: ${breakdown.total ?? 0}/100
-    </div>
-  </div>
-</div>
-
-<div class="two-col">
-  <!-- Monthly Breakdown -->
-  <div class="section" style="grid-column:1/-1">
-    <div class="section-title">Monthly Breakdown</div>
-    <table>
-      <thead><tr><th>Month</th><th>Credits</th><th>Debits</th><th>Salary</th><th>EMI</th><th>Min Balance</th><th>Avg Balance</th><th>Bounces</th></tr></thead>
-      <tbody>${monthRows}</tbody>
-    </table>
-  </div>
-
-  <!-- Fraud Signals -->
-  <div class="section">
-    <div class="section-title">Fraud Signals</div>
-    <table>
-      <thead><tr><th>Signal</th><th>Severity</th></tr></thead>
-      <tbody>${fraudRows}</tbody>
-    </table>
-  </div>
-
-  <!-- Obligations -->
-  <div class="section">
-    <div class="section-title">Obligations & Behaviour</div>
-    <table>
-      <tbody>
-        <tr><td>Existing EMIs</td><td><strong>${fmtN(result.existingEMIs)}/mo</strong></td></tr>
-        <tr><td>Credit Card Dues</td><td><strong>${result.creditCardDues > 0 ? fmtN(result.creditCardDues) + "/mo" : "None"}</strong></td></tr>
-        <tr><td>BNPL</td><td><strong>${result.bnplUsage ? fmtN(result.bnplAmount) + "/mo" : "No"}</strong></td></tr>
-        <tr><td>Loan App Usage</td><td><strong style="color:${result.loanAppUsage ? "#dc2626" : "#16a34a"}">${result.loanAppUsage ? "⚠ Detected" : "None"}</strong></td></tr>
-        <tr><td>Gambling</td><td><strong style="color:${result.gamblingDetected ? "#dc2626" : "#16a34a"}">${result.gamblingDetected ? "⚠ Detected" : "None"}</strong></td></tr>
-        <tr><td>Investments (SIP)</td><td><strong style="color:${result.hasInvestments ? "#16a34a" : "#6b7280"}">${result.hasInvestments ? fmtN(result.investmentAmount) + "/mo ✓" : "None"}</strong></td></tr>
-        <tr><td>Insurance</td><td><strong style="color:${result.hasInsurance ? "#16a34a" : "#6b7280"}">${result.hasInsurance ? "Detected ✓" : "None"}</strong></td></tr>
-        <tr><td>Cash Withdrawal Ratio</td><td><strong>${Math.round(result.cashWithdrawalRatio * 100)}% of spend</strong></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-${aiSection}
-
-<div class="footer">
-  <div>PostMoney Statement Intelligence · Confidential · Internal Use Only</div>
-  <div>Powered by Post AI · ${new Date().toLocaleString("en-IN")}</div>
-</div>
-
-<script>window.onload = function(){ window.print(); }</script>
-</body>
-</html>`;
-
+    setShowLangMenu(false);
+    const html = generateReport(result, aiInsights, lang);
     const win = window.open("", "_blank");
-    if (win) {
-      win.document.write(html);
-      win.document.close();
-    }
+    if (win) { win.document.write(html); win.document.close(); }
   }
 
   const dec = result ? DECISION_COLORS[result.lendingDecision] ?? DECISION_COLORS.MANUAL_REVIEW : null;
@@ -612,12 +425,38 @@ ${aiSection}
           <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">Internal</span>
         </div>
         {result && (
-          <button
-            onClick={downloadReport}
-            className="ml-auto flex items-center gap-1.5 px-4 py-2 bg-[#0a3d2e] text-white text-sm font-medium rounded-xl hover:bg-[#0d4f3a] transition-all"
-          >
-            <FileText size={14} /> Download Report
-          </button>
+          <div className="ml-auto relative">
+            <button
+              onClick={() => setShowLangMenu((v) => !v)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#0a3d2e] text-white text-sm font-medium rounded-xl hover:bg-[#0d4f3a] transition-all"
+            >
+              <Download size={14} /> Download Report <ChevronDown size={13} className={`transition-transform ${showLangMenu ? "rotate-180" : ""}`} />
+            </button>
+            {showLangMenu && (
+              <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                <button
+                  onClick={() => downloadReport("en")}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100"
+                >
+                  <span className="text-base">🇬🇧</span>
+                  <div className="text-left">
+                    <p className="font-medium">English</p>
+                    <p className="text-xs text-gray-400">Download in English</p>
+                  </div>
+                </button>
+                <button
+                  onClick={() => downloadReport("hi")}
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                >
+                  <span className="text-base">🇮🇳</span>
+                  <div className="text-left">
+                    <p className="font-medium">हिंदी</p>
+                    <p className="text-xs text-gray-400">हिंदी में डाउनलोड करें</p>
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
