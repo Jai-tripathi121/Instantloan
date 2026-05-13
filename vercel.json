@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "src/app/api/analyse-statement/route.ts": {
+      "includeFiles": "node_modules/pdf-parse/**"
+    },
+    "src/app/api/debug-pdf/route.ts": {
+      "includeFiles": "node_modules/pdf-parse/**"
+    }
+  }
+}
