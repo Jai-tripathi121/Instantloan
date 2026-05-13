@@ -104,9 +104,13 @@ function isPasswordError(err: unknown): boolean {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PDFParseLib = { PDFParse: new (opts: Record<string, unknown>) => { getText(): Promise<{ text: string; total?: number }> }; PasswordException: new (...a: unknown[]) => Error };
 
+// Use createRequire to bypass turbopack's require() interception —
+// without this, pdfjs-dist's dynamic worker path resolution fails in Vercel.
+import { createRequire } from "module";
+const nativeRequire = createRequire(import.meta.url);
+
 async function parsePdf(buffer: Buffer, password?: string): Promise<{ text: string; numpages: number }> {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const lib = require("pdf-parse") as PDFParseLib;
+  const lib = nativeRequire("pdf-parse") as PDFParseLib;
   const parser = new lib.PDFParse({ data: new Uint8Array(buffer), ...(password ? { password } : {}) });
   const result = await parser.getText();
   return { text: result.text ?? "", numpages: result.total ?? 0 };

@@ -49,6 +49,10 @@ if (typeof (globalThis as any).DOMMatrix === "undefined") {
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 import { NextRequest, NextResponse } from "next/server";
+import { createRequire } from "module";
+
+// Use createRequire to bypass turbopack's require() interception
+const nativeRequire = createRequire(import.meta.url);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PDFParseLib = { PDFParse: new (opts: Record<string, unknown>) => { getText(): Promise<{ text: string; total?: number }> } };
@@ -61,8 +65,7 @@ export async function POST(req: NextRequest) {
     if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const lib = require("pdf-parse") as PDFParseLib;
+    const lib = nativeRequire("pdf-parse") as PDFParseLib;
     const parser = new lib.PDFParse({ data: new Uint8Array(buffer), ...(password ? { password } : {}) });
     const result = await parser.getText();
     const text = result.text ?? "";
