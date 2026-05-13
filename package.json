@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "node -e \"const fs=require('fs'),path=require('path');const src=path.resolve('node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs');const dst=path.resolve('.next/standalone/node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs');if(fs.existsSync(src)&&fs.existsSync(path.dirname(dst))){fs.copyFileSync(src,dst);console.log('Copied pdf.worker.mjs to standalone');}else{console.log('Skipping worker copy (standalone dir not present)');}\"",
     "start": "next start",
     "lint": "eslint"
   },

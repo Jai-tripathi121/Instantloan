@@ -11,10 +11,10 @@ const nextConfig: NextConfig = {
   // (Vercel uses standalone mode; nft won't auto-detect dynamically loaded workers)
   outputFileTracingIncludes: {
     "/api/analyse-statement": [
-      "./node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs",
+      "./node_modules/pdf-parse/dist/**/*",
     ],
     "/api/debug-pdf": [
-      "./node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs",
+      "./node_modules/pdf-parse/dist/**/*",
     ],
   },
 };
