@@ -4,10 +4,11 @@ import { useEffect, useState, useMemo } from "react";
 import { getAllApplications, updateApplicationStatus, LoanApplication, BankConfig, GlobalSettings, getAllBankConfigs, saveBankConfig, getGlobalSettings, saveGlobalSettings } from "@/lib/firestore";
 import { DEFAULT_BANKS, BankCriteria } from "@/lib/bank-data";
 import BankLogo from "@/components/BankLogo";
+import Link from "next/link";
 import {
   LayoutDashboard, Users, IndianRupee, TrendingUp, RefreshCw, Search,
   ChevronDown, X, CheckCircle, Clock, FileText, XCircle, Banknote,
-  Eye, BarChart2, Download, Lock, Shield, Building2, Edit3, Save, ToggleLeft, ToggleRight, Sparkles
+  Eye, BarChart2, Download, Lock, Shield, Building2, Edit3, Save, ToggleLeft, ToggleRight, Sparkles, Activity
 } from "lucide-react";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; dot: string }> = {
@@ -221,6 +222,9 @@ export default function AdminPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Link href="/admin/analyser" className="flex items-center gap-1.5 text-xs text-white bg-[var(--brand)] hover:bg-[#0d4f3a] px-3 py-1.5 rounded-lg font-medium transition-all">
+            <Activity size={13} /> Analyser
+          </Link>
           <button onClick={exportCSV} className="flex items-center gap-1.5 text-xs text-gray-600 bg-[var(--bg-deep)] hover:bg-gray-200 px-3 py-1.5 rounded-lg font-medium transition-all">
             <Download size={13} /> Export
           </button>
