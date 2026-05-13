@@ -148,7 +148,7 @@ const CATEGORY_RULES: Array<{ cat: TxCategory; kw: string[] }> = [
   { cat: "TAX",             kw: ["income tax", "tds", "advance tax", "gst payment", "tax challan", "oltas"] },
   { cat: "NEFT_RTGS",       kw: ["neft", "rtgs", "wire transfer", "fund transfer"] },
   { cat: "UPI_TRANSFER",    kw: ["upi/", "upi-", "upi cr", "upi dr", "imps", "imps cr", "imps dr"] },
-  { cat: "BUSINESS_INFLOW", kw: ["vendor payment", "invoice", "business credit", "gst refund", "export proceeds", "trade credit", "b2b payment"] },
+  { cat: "BUSINESS_INFLOW", kw: ["vendor payment", "invoice", "business credit", "gst refund", "export proceeds", "trade credit", "b2b payment", "pvt ltd", "private limited", "pvt. ltd", "ltd-", "limited-", "company cr", "firm cr"] },
 ];
 
 function categorise(narration: string): TxCategory {
@@ -231,10 +231,13 @@ function getDateMatch(line: string): DateMatch | null {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function extractAmounts(str: string): number[] {
-  // Order matters: put 4+ digit plain number first so it wins over the \d{1,3} prefix match.
-  // Pattern 1: plain 4-9 digit integer or decimal (e.g. 50000, 15000.00)
-  // Pattern 2: Indian comma format with at least one comma  (e.g. 1,50,000.00 / 50,000)
-  return (str.match(/\b\d{4,9}(?:\.\d{1,2})?\b|\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?/g) ?? [])
+  // Strip 10+ digit strings (bank reference/cheque numbers like 0000193219109797)
+  // before amount extraction so they don't get partially matched.
+  const noRef = str.replace(/\b\d{10,}\b/g, " ");
+  // Pattern 1: Indian comma format with ≥1 comma  (e.g. 1,50,000.00 / 50,000 / 1,979.77)
+  // Pattern 2: plain 4-9 digit integer or decimal  (e.g. 50000, 15000.00)
+  // Pattern 3: any digits + mandatory 2 decimal places (e.g. 327.81, 5.00, 590.00)
+  return (noRef.match(/\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?|\b\d{4,9}(?:\.\d{1,2})?\b|\b\d+\.\d{2}\b/g) ?? [])
     .map((s) => parseFloat(s.replace(/,/g, "")))
     .filter((n) => !isNaN(n) && n >= 1);
 }
@@ -281,8 +284,10 @@ function parseTx(line: string): ParsedTx | null {
   const dm = getDateMatch(line);
   if (!dm) return null;
 
-  // Strip the date before extracting amounts to avoid year digits being treated as amounts
-  const noDate = line.replace(dm.raw, " ");
+  // Strip ALL date occurrences (transaction date + value date that HDFC places on same line)
+  const noDate = line
+    .replace(new RegExp(DATE_STR_RE.source, "gi"), " ")
+    .replace(new RegExp(DATE_NUM_RE.source, "g"), " ");
   const amounts = extractAmounts(noDate);
   if (amounts.length < 2) return null;
 
@@ -317,9 +322,10 @@ function parseTx(line: string): ParsedTx | null {
     debit = txAmount;
   }
 
-  // Narration = date-stripped line minus all numeric tokens
+  // Narration = date-stripped line minus ref numbers and numeric tokens
   const narration = noDate
-    .replace(/\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?|\b\d{4,9}(?:\.\d{1,2})?\b/g, "")
+    .replace(/\b\d{10,}\b/g, "")
+    .replace(/\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?|\b\d{4,9}(?:\.\d{1,2})?\b|\b\d+\.\d{2}\b/g, "")
     .replace(/\s+/g, " ")
     .trim()
     .slice(0, 80);
@@ -528,11 +534,39 @@ export function analyseStatement(text: string, declaredIncome = 0): StatementInt
   const detectedBank = detectBank(text);
 
   // Parse all transactions
-  const txs: ParsedTx[] = [];
+  const rawTxs: ParsedTx[] = [];
   for (const line of lines) {
     const tx = parseTx(line);
-    if (tx) txs.push(tx);
+    if (tx) rawTxs.push(tx);
   }
+
+  // ── Balance-comparison correction ────────────────────────────────────────
+  // Many banks (HDFC, SBI etc.) don't always include CR/DR markers in narrations.
+  // Compare consecutive balances to correct debit/credit direction.
+  const txs: ParsedTx[] = rawTxs.map((tx, i) => {
+    if (i === 0) return tx;
+    const prevBalance = rawTxs[i - 1].balance;
+    const diff = tx.balance - prevBalance;
+    // If both debit and credit are 0 (shouldn't happen) or if the direction contradicts the balance:
+    if (tx.credit === 0 && tx.debit === 0) return tx;
+    const isBalanceUp = diff > 0;
+    const isBalanceDown = diff < 0;
+    const txAmt = tx.credit > 0 ? tx.credit : tx.debit;
+    // Only correct when one direction is already assigned and balance contradicts it
+    if (tx.debit > 0 && isBalanceUp && Math.abs(diff - tx.debit) < tx.debit * 0.05) {
+      // Balance went up but we assigned debit — flip to credit
+      return { ...tx, debit: 0, credit: tx.debit };
+    }
+    if (tx.credit > 0 && isBalanceDown && Math.abs(Math.abs(diff) - tx.credit) < tx.credit * 0.05) {
+      // Balance went down but we assigned credit — flip to debit
+      return { ...tx, credit: 0, debit: tx.credit };
+    }
+    // For ambiguous txs where both were 0: use balance direction
+    if (tx.credit === 0 && tx.debit === 0 && txAmt > 0) {
+      return isBalanceUp ? { ...tx, credit: txAmt, debit: 0 } : { ...tx, debit: txAmt, credit: 0 };
+    }
+    return tx;
+  });
 
   const monthlyBreakdown = buildMonthlySummaries(txs);
   const totalMonths = monthlyBreakdown.length || 1;
@@ -543,7 +577,12 @@ export function analyseStatement(text: string, declaredIncome = 0): StatementInt
   const salaryAmounts = monthlyBreakdown.map((m) => m.salaryAmount).filter((v) => v > 0);
   const avgSalaryAmount = salaryAmounts.length ? Math.round(salaryAmounts.reduce((a, b) => a + b, 0) / salaryAmounts.length) : 0;
 
-  const businessTxs = txs.filter((t) => t.category === "BUSINESS_INFLOW");
+  // Business inflow: explicit BUSINESS_INFLOW + large NEFT_RTGS/IMPS credits (≥5000)
+  // Many small-business owners receive payments via RTGS/IMPS without "business" keywords
+  const businessTxs = txs.filter((t) =>
+    t.category === "BUSINESS_INFLOW" ||
+    ((t.category === "NEFT_RTGS" || t.category === "UPI_TRANSFER") && t.credit >= 5000)
+  );
   const businessByMonth: Record<string, number> = {};
   for (const tx of businessTxs) businessByMonth[tx.monthKey] = (businessByMonth[tx.monthKey] ?? 0) + tx.credit;
   const businessInflow = Object.keys(businessByMonth).length
