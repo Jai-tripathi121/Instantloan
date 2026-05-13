@@ -4,7 +4,8 @@ import Link from "next/link";
 import {
   ArrowLeft, Upload, Loader2, AlertTriangle, CheckCircle, XCircle,
   TrendingUp, TrendingDown, Shield, ShieldAlert, IndianRupee,
-  BarChart2, Activity, FileText, Zap, Info,
+  BarChart2, Activity, FileText, Zap, Info, Sparkles, MessageCircle, Send,
+  RefreshCw, Bot,
 } from "lucide-react";
 import type { StatementIntelligence, MonthSummary, FraudSignal, TxCategory } from "@/lib/statement-engine";
 
@@ -102,6 +103,57 @@ function ScoreBar({ label, score, max }: { label: string; score: number; max: nu
   );
 }
 
+function AiTextRenderer({ text, compact }: { text: string; compact?: boolean }) {
+  const lines = text.split("\n");
+  const nodes: React.ReactNode[] = [];
+  let key = 0;
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (!line) { nodes.push(<div key={key++} className="h-2" />); continue; }
+
+    // Section headers (ALL CAPS lines or lines ending with colon)
+    if (/^[A-Z][A-Z\s\-–—]{4,}$/.test(line) || /^[A-Z][A-Z\s]+:$/.test(line)) {
+      nodes.push(
+        <p key={key++} className={`font-bold text-gray-900 ${compact ? "text-xs mt-3 mb-1" : "text-sm mt-4 mb-1.5"} tracking-wide`}>
+          {line}
+        </p>,
+      );
+      continue;
+    }
+    // Month lines like "Month 1 — Foundation:" or "Month 1:"
+    if (/^Month \d/i.test(line)) {
+      nodes.push(
+        <p key={key++} className={`font-semibold text-violet-700 ${compact ? "text-xs mt-2" : "text-sm mt-3"}`}>
+          {line}
+        </p>,
+      );
+      continue;
+    }
+    // Bullet / numbered list
+    if (/^[\-•*]\s/.test(line) || /^\d+\.\s/.test(line)) {
+      const content = line.replace(/^[\-•*\d.]\s+/, "");
+      nodes.push(
+        <div key={key++} className={`flex gap-2 ${compact ? "text-xs" : "text-sm"} text-gray-700`}>
+          <span className="text-violet-400 flex-shrink-0 mt-0.5">•</span>
+          <span dangerouslySetInnerHTML={{ __html: content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }} />
+        </div>,
+      );
+      continue;
+    }
+    // Normal paragraph
+    nodes.push(
+      <p
+        key={key++}
+        className={`${compact ? "text-xs" : "text-sm"} text-gray-700 leading-relaxed`}
+        dangerouslySetInnerHTML={{ __html: line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") }}
+      />,
+    );
+  }
+
+  return <div className="space-y-0.5">{nodes}</div>;
+}
+
 function MonthTable({ months }: { months: MonthSummary[] }) {
   return (
     <div className="overflow-x-auto">
@@ -145,7 +197,7 @@ function MonthTable({ months }: { months: MonthSummary[] }) {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-type Tab = "overview" | "income" | "obligations" | "spending" | "fraud" | "monthly" | "debug";
+type Tab = "overview" | "income" | "obligations" | "spending" | "fraud" | "monthly" | "debug" | "ai";
 
 export default function StatementAnalyserPage() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -158,6 +210,17 @@ export default function StatementAnalyserPage() {
   const [income, setIncome] = useState("");
   const [fileName, setFileName] = useState("");
   const [debugData, setDebugData] = useState<{ lines: string[]; preview: string; pages: number; textLength: number } | null>(null);
+
+  // AI state
+  const [aiInsights, setAiInsights] = useState("");
+  const [aiInsightsLoaded, setAiInsightsLoaded] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const [debugAiReport, setDebugAiReport] = useState("");
+  const [debugAiLoaded, setDebugAiLoaded] = useState(false);
 
   // Password popup state
   const [showPwdModal, setShowPwdModal] = useState(false);
@@ -255,6 +318,84 @@ export default function StatementAnalyserPage() {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadInsights(force = false) {
+    if (!result) return;
+    if (aiInsightsLoaded && !force) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const res = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "insights", statementData: result }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setAiInsights(data.text ?? "");
+      setAiInsightsLoaded(true);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI request failed");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function loadDebugAi(force = false) {
+    if (!result) return;
+    if (debugAiLoaded && !force) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const res = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "debug",
+          statementData: result,
+          rawDebugInfo: debugData?.preview ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setDebugAiReport(data.text ?? "");
+      setDebugAiLoaded(true);
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : "AI request failed");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  async function sendChat() {
+    if (!chatInput.trim() || !result || chatLoading) return;
+    const userMsg = chatInput.trim();
+    setChatInput("");
+    setChatMessages((prev) => [...prev, { role: "user", text: userMsg }]);
+    setChatLoading(true);
+    try {
+      const res = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "chat",
+          message: userMsg,
+          history: chatMessages,
+          statementData: result,
+        }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setChatMessages((prev) => [...prev, { role: "assistant", text: data.text ?? "" }]);
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", text: `Error: ${err instanceof Error ? err.message : "Request failed"}` },
+      ]);
+    } finally {
+      setChatLoading(false);
     }
   }
 
@@ -468,8 +609,9 @@ export default function StatementAnalyserPage() {
                   ? <ShieldAlert size={13} className="text-red-500" />
                   : <Shield size={13} className="text-emerald-500" />],
                 ["monthly",      "Monthly",    <FileText size={13} />],
+                ["ai",           "AI Insights", <Sparkles size={13} className="text-violet-500" />],
               ] as [Tab, string, React.ReactNode][]).map(([id, label, icon]) => (
-                <button key={id} onClick={() => setTab(id)}
+                <button key={id} onClick={() => { setTab(id); if (id === "ai") loadInsights(); }}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all flex-shrink-0 ${
                     tab === id ? "bg-[#0a3d2e] text-white" : "text-gray-600 hover:bg-gray-50"
                   }`}>
@@ -717,6 +859,171 @@ export default function StatementAnalyserPage() {
                     ? <MonthTable months={result.monthlyBreakdown} />
                     : <p className="text-sm text-gray-400 text-center py-8">No monthly data extracted. PDF parse quality may be low.</p>
                   }
+                </div>
+              )}
+
+              {/* ── AI Insights ── */}
+              {tab === "ai" && (
+                <div>
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                      <Sparkles size={15} className="text-violet-500" />
+                      AI Insights — Powered by Claude
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => loadDebugAi(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        title="Run AI parse analysis"
+                      >
+                        <FileText size={12} /> Parse Debug
+                      </button>
+                      <button
+                        onClick={() => loadInsights(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-violet-600 border border-violet-200 rounded-lg hover:bg-violet-50"
+                      >
+                        <RefreshCw size={12} /> Regenerate
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Error state */}
+                  {aiError && (
+                    <div className="mb-4 flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-sm text-red-700">
+                      <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-medium">AI Error</p>
+                        <p className="text-xs mt-0.5 text-red-600">{aiError}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Insights section */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                    {/* Score roadmap */}
+                    <div className="lg:col-span-2 bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl p-5">
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-semibold text-violet-900 flex items-center gap-2">
+                          <Sparkles size={14} /> Score 900 Roadmap
+                        </p>
+                        <span className="text-xs bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full">
+                          {result.lendingScore} → 900
+                        </span>
+                      </div>
+
+                      {aiLoading && !aiInsights ? (
+                        <div className="flex items-center gap-3 py-8 justify-center">
+                          <Loader2 size={20} className="animate-spin text-violet-500" />
+                          <span className="text-sm text-violet-600">Claude is analysing your statement…</span>
+                        </div>
+                      ) : aiInsights ? (
+                        <AiTextRenderer text={aiInsights} />
+                      ) : (
+                        <div className="text-center py-8">
+                          <Bot size={32} className="text-violet-200 mx-auto mb-3" />
+                          <p className="text-sm text-violet-400">Click a tab to generate insights</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Parse debug report */}
+                    {(debugAiLoaded || debugAiReport) && (
+                      <div className="lg:col-span-2 bg-gray-50 border border-gray-200 rounded-2xl p-5">
+                        <p className="text-sm font-semibold text-gray-700 flex items-center gap-2 mb-3">
+                          <FileText size={14} /> Parse Debug Analysis
+                        </p>
+                        {aiLoading && !debugAiReport ? (
+                          <div className="flex items-center gap-2 py-4 text-sm text-gray-500">
+                            <Loader2 size={16} className="animate-spin" /> Analysing parse quality…
+                          </div>
+                        ) : (
+                          <AiTextRenderer text={debugAiReport} compact />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Chat */}
+                  <div className="mt-5 border border-gray-200 rounded-2xl overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-100 flex items-center gap-2">
+                      <MessageCircle size={14} className="text-gray-500" />
+                      <span className="text-sm font-medium text-gray-700">Chat with your Statement</span>
+                      <span className="text-xs text-gray-400 ml-auto">Ask anything about the data</span>
+                    </div>
+
+                    {/* Messages */}
+                    <div className="min-h-48 max-h-80 overflow-y-auto p-4 space-y-3 bg-white">
+                      {chatMessages.length === 0 && (
+                        <div className="text-center py-6">
+                          <MessageCircle size={28} className="text-gray-200 mx-auto mb-2" />
+                          <p className="text-sm text-gray-400">Ask Claude about your bank statement</p>
+                          <div className="flex flex-wrap justify-center gap-2 mt-3">
+                            {[
+                              "What is my average salary?",
+                              "Why is my FOIR high?",
+                              "How many bounces do I have?",
+                              "What are my top spending categories?",
+                            ].map((q) => (
+                              <button
+                                key={q}
+                                onClick={() => { setChatInput(q); }}
+                                className="text-xs px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full text-gray-600 hover:bg-violet-50 hover:border-violet-200 hover:text-violet-700 transition-all"
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {chatMessages.map((msg, idx) => (
+                        <div key={idx} className={`flex gap-2 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                          {msg.role === "assistant" && (
+                            <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <Bot size={12} className="text-violet-600" />
+                            </div>
+                          )}
+                          <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                            msg.role === "user"
+                              ? "bg-[#0a3d2e] text-white rounded-br-sm"
+                              : "bg-gray-100 text-gray-800 rounded-bl-sm"
+                          }`}>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex gap-2 justify-start">
+                          <div className="w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
+                            <Bot size={12} className="text-violet-600" />
+                          </div>
+                          <div className="bg-gray-100 px-3 py-2 rounded-2xl rounded-bl-sm">
+                            <Loader2 size={14} className="animate-spin text-gray-400" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Input */}
+                    <div className="border-t border-gray-100 p-3 bg-white flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Ask about income, EMIs, balance, spending…"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendChat()}
+                        className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-violet-400"
+                      />
+                      <button
+                        onClick={sendChat}
+                        disabled={chatLoading || !chatInput.trim()}
+                        className="px-3 py-2 bg-[#0a3d2e] text-white rounded-xl hover:bg-[#0d4f3a] disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1"
+                      >
+                        <Send size={14} />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
