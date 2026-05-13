@@ -243,6 +243,38 @@ function extractAmounts(str: string): number[] {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Metadata line detection — bank statement headers/footers that should never
+// be parsed as transactions.  The HDFC header repeats on every page and
+// contains dates (e.g. A/C Open Date 19/10/2022) plus numeric codes (MICR,
+// Branch Code) that get mis-identified as transaction amounts.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const METADATA_PATTERNS = [
+  /a\/c open date/i,
+  /statement of account/i,
+  /account status/i,
+  /account branch/i,
+  /branch code/i,
+  /\bmicr\b/i,
+  /\bifsc\b/i,
+  /od limit/i,
+  /cust(?:omer)?\s*id/i,
+  /account\s*no\s*:/i,
+  /account type/i,
+  /nomination\s*:/i,
+  /opening balance/i,
+  /closing balance/i,
+  /rtgs\/neft ifsc/i,
+  /page no\s*\./i,
+  /^--\s*\d+\s*of\s*\d+\s*--$/,          // "-- 1 of 22 --"
+  /^date\s+narration/i,                   // column header row
+];
+
+function isMetadataLine(line: string): boolean {
+  return METADATA_PATTERNS.some((p) => p.test(line));
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Multi-line merger — some banks put date on one line, amounts on the next
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -251,6 +283,9 @@ function mergeTransactionLines(lines: string[]): string[] {
   let i = 0;
   while (i < lines.length) {
     const line = lines[i];
+    // Never start a merge from a metadata/header line — it can only produce
+    // fake transactions when the engine absorbs subsequent number-bearing lines.
+    if (isMetadataLine(line)) { out.push(line); i++; continue; }
     const dm = getDateMatch(line);
     if (dm) {
       const hasAmounts = extractAmounts(line.replace(dm.raw, " ")).length >= 2;
@@ -281,6 +316,7 @@ function mergeTransactionLines(lines: string[]): string[] {
 // ─────────────────────────────────────────────────────────────────────────────
 
 function parseTx(line: string): ParsedTx | null {
+  if (isMetadataLine(line)) return null;
   const dm = getDateMatch(line);
   if (!dm) return null;
 
@@ -534,11 +570,23 @@ export function analyseStatement(text: string, declaredIncome = 0): StatementInt
   const detectedBank = detectBank(text);
 
   // Parse all transactions
-  const rawTxs: ParsedTx[] = [];
+  const allParsed: ParsedTx[] = [];
   for (const line of lines) {
     const tx = parseTx(line);
-    if (tx) rawTxs.push(tx);
+    if (tx) allParsed.push(tx);
   }
+
+  // ── Balance-range sanity filter ───────────────────────────────────────────
+  // Removes transactions whose debit/credit is far larger than the highest
+  // balance ever seen.  This catches cases where a bank-header number (e.g.
+  // MICR code 110240433) slips through and gets mis-identified as an amount.
+  // We use maxBalance * 3 as the ceiling; a single tx can legitimately exceed
+  // max balance (e.g. a large inflow) but not by orders of magnitude.
+  const maxObservedBalance = allParsed.reduce((m, t) => Math.max(m, t.balance), 0);
+  const amountCap = Math.max(maxObservedBalance * 3, 2_000_000); // floor of ₹20L
+  const rawTxs = allParsed.filter(
+    (t) => t.debit <= amountCap && t.credit <= amountCap && t.balance <= amountCap * 10,
+  );
 
   // ── Balance-comparison correction ────────────────────────────────────────
   // Many banks (HDFC, SBI etc.) don't always include CR/DR markers in narrations.
