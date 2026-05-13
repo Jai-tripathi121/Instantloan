@@ -117,6 +117,7 @@ export interface StatementIntelligence {
   detectedBank: string;
   parseQuality: "high" | "medium" | "low";  // how well we parsed the PDF
   rawLineCount: number;
+  engineVersion: number;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -727,6 +728,7 @@ export function analyseStatement(text: string, declaredIncome = 0): StatementInt
     bounceCount,
     salaryCredits: salaryMonths,
     transactionCount: txs.length,
+    engineVersion: 3,   // bump to confirm fresh build deployed
 
     // Income
     incomeStabilityScore,
