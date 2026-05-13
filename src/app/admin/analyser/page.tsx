@@ -149,21 +149,23 @@ type Tab = "overview" | "income" | "obligations" | "spending" | "fraud" | "month
 
 export default function StatementAnalyserPage() {
   const fileRef = useRef<HTMLInputElement>(null);
+  const pwdRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<StatementIntelligence | null>(null);
   const [tab, setTab] = useState<Tab>("overview");
   const [income, setIncome] = useState("");
-  const [password, setPassword] = useState("");
   const [fileName, setFileName] = useState("");
 
-  async function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setFileName(file.name);
-    setError("");
-    setResult(null);
+  // Password popup state
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pdfPassword, setPdfPassword] = useState("");
+  const [pwdError, setPwdError] = useState("");
+
+  async function runAnalysis(file: File, password?: string) {
     setLoading(true);
+    setError("");
     try {
       const form = new FormData();
       form.append("file", file);
@@ -171,14 +173,63 @@ export default function StatementAnalyserPage() {
       if (password) form.append("password", password);
       const res = await fetch("/api/analyse-statement", { method: "POST", body: form });
       const data = await res.json();
+      if (res.status === 422 && data.error?.toLowerCase().includes("password")) {
+        // PDF is password-protected — show popup
+        setPendingFile(file);
+        setPdfPassword("");
+        setPwdError("");
+        setShowPwdModal(true);
+        setLoading(false);
+        return;
+      }
       if (data.error) throw new Error(data.error);
       setResult(data as StatementIntelligence);
       setTab("overview");
+      setShowPwdModal(false);
+      setPendingFile(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed");
     } finally {
       setLoading(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setFileName(file.name);
+    setResult(null);
+    runAnalysis(file);
+  }
+
+  async function handlePasswordSubmit() {
+    if (!pendingFile) return;
+    if (!pdfPassword.trim()) { setPwdError("Please enter the password"); return; }
+    setPwdError("");
+    setShowPwdModal(false);
+    const res = await fetch("/api/analyse-statement", {
+      method: "POST",
+      body: (() => { const f = new FormData(); f.append("file", pendingFile); f.append("declaredIncome", income || "0"); f.append("password", pdfPassword.trim()); return f; })(),
+    });
+    setLoading(true);
+    try {
+      const data = await res.json();
+      if (res.status === 422) {
+        // Wrong password
+        setShowPwdModal(true);
+        setPwdError("Incorrect password — try again");
+        setLoading(false);
+        return;
+      }
+      if (data.error) throw new Error(data.error);
+      setResult(data as StatementIntelligence);
+      setTab("overview");
+      setPendingFile(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Analysis failed");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -200,6 +251,50 @@ export default function StatementAnalyserPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-6">
+        {/* Password popup modal */}
+        {showPwdModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Shield size={18} className="text-amber-600" />
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">PDF is Password Protected</p>
+                  <p className="text-xs text-gray-400">{fileName}</p>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                Enter the PDF password to unlock and analyse the statement.
+                <span className="block mt-1 text-xs text-gray-400">Common passwords: Date of Birth (01011990), last 4 digits of mobile, or account number.</span>
+              </p>
+              <input
+                ref={pwdRef}
+                type="text"
+                placeholder="Enter PDF password"
+                value={pdfPassword}
+                onChange={(e) => { setPdfPassword(e.target.value); setPwdError(""); }}
+                onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
+                autoFocus
+                className={`w-full border-2 rounded-xl px-3 py-2.5 text-sm mb-1 focus:outline-none ${pwdError ? "border-red-400 focus:border-red-400" : "border-gray-200 focus:border-[#0a3d2e]"}`}
+              />
+              {pwdError && <p className="text-xs text-red-500 mb-3">{pwdError}</p>}
+              {!pwdError && <div className="mb-3" />}
+              <div className="flex gap-2">
+                <button onClick={() => { setShowPwdModal(false); setPendingFile(null); }}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 font-medium">
+                  Cancel
+                </button>
+                <button onClick={handlePasswordSubmit}
+                  className="flex-1 py-2.5 rounded-xl bg-[#0a3d2e] text-white text-sm font-medium hover:bg-[#0d4f3a] flex items-center justify-center gap-2">
+                  {loading ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle size={14} />}
+                  Unlock & Analyse
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Upload card */}
         <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6 shadow-sm">
           <div className="flex items-start gap-4 flex-wrap">
@@ -212,12 +307,6 @@ export default function StatementAnalyserPage() {
                   className="w-full border border-gray-200 rounded-xl pl-8 pr-3 py-2.5 text-sm focus:outline-none focus:border-[#0a3d2e]" />
               </div>
             </div>
-            <div className="flex-1 min-w-48">
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">PDF Password (if protected)</label>
-              <input type="text" placeholder="e.g. DDMMYYYY" value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-[#0a3d2e]" />
-            </div>
             <div className="flex items-end">
               <label className={`flex items-center gap-2 px-5 py-2.5 rounded-xl cursor-pointer font-medium text-sm text-white transition-all ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#0a3d2e] hover:bg-[#0d4f3a]"}`}>
                 {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
@@ -227,7 +316,7 @@ export default function StatementAnalyserPage() {
               </label>
             </div>
           </div>
-          {fileName && !loading && (
+          {fileName && !loading && !showPwdModal && (
             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1"><FileText size={12} />{fileName}</p>
           )}
           {error && (
