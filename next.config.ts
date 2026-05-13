@@ -6,6 +6,17 @@ const nextConfig: NextConfig = {
   // turbopack. This avoids dynamic require resolution errors and worker
   // path issues that occur when pdfjs-dist is bundled.
   serverExternalPackages: ["pdf-parse", "pdfjs-dist"],
+
+  // Ensure pdf-parse worker file is included in Next.js standalone output
+  // (Vercel uses standalone mode; nft won't auto-detect dynamically loaded workers)
+  outputFileTracingIncludes: {
+    "/api/analyse-statement": [
+      "./node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs",
+    ],
+    "/api/debug-pdf": [
+      "./node_modules/pdf-parse/dist/pdf-parse/cjs/pdf.worker.mjs",
+    ],
+  },
 };
 
 export default nextConfig;
