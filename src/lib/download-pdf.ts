@@ -1,48 +1,59 @@
 export async function downloadReportAsPdf(html: string, filename: string): Promise<void> {
-  // Dynamically import html2pdf.js (browser-only)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const html2pdf = (await import("html2pdf.js")).default as any;
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+    import("html2canvas"),
+    import("jspdf"),
+  ]);
 
-  // Extract <style> blocks and <body> content from the full HTML document
-  const styleMatches = [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)];
-  const combinedStyles = styleMatches.map((m) => m[1]).join("\n");
-
-  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const bodyContent = bodyMatch ? bodyMatch[1] : html;
-
-  // Mount a temporary container outside viewport
-  const container = document.createElement("div");
-  container.style.cssText = "position:fixed;left:-9999px;top:0;width:794px;background:#0d0d0d;";
-
-  const styleEl = document.createElement("style");
-  styleEl.textContent = combinedStyles;
-  container.appendChild(styleEl);
-
-  const bodyEl = document.createElement("div");
-  bodyEl.innerHTML = bodyContent;
-  container.appendChild(bodyEl);
-
-  document.body.appendChild(container);
+  // Hidden iframe renders the full HTML document faithfully
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText =
+    "position:fixed;left:-9999px;top:0;width:794px;height:1px;border:none;opacity:0;pointer-events:none;";
+  document.body.appendChild(iframe);
 
   try {
-    await html2pdf()
-      .set({
-        margin: 0,
-        filename,
-        image: { type: "jpeg", quality: 0.95 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#0d0d0d",
-          windowWidth: 794,
-          scrollY: 0,
-        },
-        jsPDF: { unit: "px", format: "a4", orientation: "portrait", hotfixes: ["px_scaling"] },
-        pagebreak: { mode: ["avoid-all", "css"] },
-      })
-      .from(container)
-      .save();
+    await new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("iframe load timeout")), 15000);
+      iframe.onload = () => { clearTimeout(timer); resolve(); };
+      iframe.srcdoc = html;
+    });
+
+    const doc = iframe.contentDocument;
+    if (!doc) throw new Error("iframe document not accessible");
+
+    // Expand iframe to full content height so nothing is clipped
+    const scrollH = doc.documentElement.scrollHeight;
+    iframe.style.height = `${scrollH}px`;
+
+    const canvas = await html2canvas(doc.documentElement, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#0d0d0d",
+      windowWidth: 794,
+      windowHeight: scrollH,
+      scrollX: 0,
+      scrollY: 0,
+      logging: false,
+    });
+
+    // A4 in px at 96 dpi: 794 × 1123
+    const PAGE_W = 794;
+    const PAGE_H = 1123;
+    const pdf = new jsPDF({ unit: "px", format: [PAGE_W, PAGE_H], orientation: "portrait", compress: true });
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
+    const totalPages = Math.ceil(canvas.height / (canvas.width * (PAGE_H / PAGE_W)));
+
+    for (let i = 0; i < totalPages; i++) {
+      if (i > 0) pdf.addPage([PAGE_W, PAGE_H], "portrait");
+      // Place full-width image starting at negative y-offset per page
+      const scaledH = (canvas.height / canvas.width) * PAGE_W;
+      pdf.addImage(imgData, "JPEG", 0, -i * PAGE_H, PAGE_W, scaledH, undefined, "FAST");
+    }
+
+    // Trigger direct download — no dialog
+    pdf.save(filename);
   } finally {
-    document.body.removeChild(container);
+    document.body.removeChild(iframe);
   }
 }
