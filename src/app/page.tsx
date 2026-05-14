@@ -128,6 +128,11 @@ export default function Landing() {
             <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "var(--accent-soft)", color: "var(--warn)", fontSize: 9 }}>80% OFF</span>
           </div>
           <p style={{ color: "var(--ink-muted)", fontSize: 9, marginTop: 4 }}>Non-refundable · Instant delivery</p>
+          <Link href="/sample-report"
+            className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border"
+            style={{ background: "var(--surface)", borderColor: "var(--brand)", color: "var(--brand)", fontSize: 9, fontWeight: 600 }}>
+            <span>▶</span> See Sample AI Report
+          </Link>
         </div>
 
         {/* CTA */}

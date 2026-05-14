@@ -2,11 +2,193 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState } from "react";
 import { useAppStore, BankOffer } from "@/lib/store";
+import type { StatementAnalysis } from "@/lib/store";
 import { t } from "@/lib/i18n";
-import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck, FileDown, Loader2, XCircle, AlertTriangle, TrendingUp, RefreshCcw, Info } from "lucide-react";
+import { CheckCircle, Share2, TrendingDown, ChevronRight, Award, Sparkles, ShieldCheck, FileDown, Loader2, XCircle, AlertTriangle, TrendingUp, RefreshCcw, Info, Brain, Download } from "lucide-react";
 import type { RejectionReason, RejectedBank } from "@/lib/store";
 import type { RiskGrade } from "@/lib/store";
 import { saveSession } from "@/lib/firestore";
+import type { StatementIntelligence } from "@/lib/statement-engine";
+import { generateReport } from "@/lib/report-generator";
+
+// ─── Convert StatementAnalysis → StatementIntelligence (fills defaults) ───────
+
+function toIntelligence(sa: StatementAnalysis): StatementIntelligence {
+  return {
+    avgMonthlyIncome: sa.avgMonthlyIncome,
+    avgMonthlyBalance: sa.avgMonthlyBalance,
+    totalObligations: sa.totalObligations,
+    foir: sa.foir,
+    bounceCount: sa.bounceCount,
+    salaryCredits: sa.salaryCredits,
+    transactionCount: sa.transactionCount,
+    incomeStabilityScore: 0,
+    primaryIncomeSource: "SALARY",
+    salaryMonths: sa.salaryCredits,
+    avgSalaryAmount: sa.avgMonthlyIncome,
+    businessInflow: 0,
+    minMonthlyBalance: sa.minMonthlyBalance ?? 0,
+    avgMinMonthlyBalance: sa.avgMonthlyBalance,
+    existingEMIs: sa.totalObligations,
+    creditCardDues: 0,
+    bnplUsage: sa.bnplUsage ?? false,
+    bnplAmount: sa.bnplAmount ?? 0,
+    cashWithdrawalRatio: 0,
+    categorySpend: {},
+    hasInvestments: sa.hasInvestments ?? false,
+    investmentAmount: sa.investmentAmount ?? 0,
+    hasInsurance: sa.hasInsurance ?? false,
+    fraudSignals: sa.fraudSignals ?? [],
+    fraudRisk: (sa.fraudRisk ?? "low") as "low" | "medium" | "high",
+    loanAppUsage: sa.loanAppUsage ?? false,
+    gamblingDetected: sa.gamblingDetected ?? false,
+    lendingScore: sa.lendingScore ?? 600,
+    lendingDecision: (sa.lendingDecision ?? "MANUAL_REVIEW") as "STRONG_APPROVE" | "APPROVE" | "MANUAL_REVIEW" | "REJECT",
+    scoreBreakdown: sa.scoreBreakdown ?? { incomeStability: 0, bounceHistory: 0, balanceQuality: 0, foirScore: 0, spendingPattern: 0, total: 0 },
+    monthlyBreakdown: sa.monthlyBreakdown ?? [],
+    statementMonths: sa.statementMonths ?? 0,
+    detectedBank: sa.detectedBank ?? "Unknown",
+    parseQuality: "medium",
+    rawLineCount: 0,
+  } as StatementIntelligence;
+}
+
+// ─── AI Score Card (shown before bank offers) ─────────────────────────────────
+
+function AiScoreCard({ analysis, lang }: { analysis: StatementAnalysis; lang: string }) {
+  const score = analysis.lendingScore ?? 0;
+  const decision = analysis.lendingDecision ?? "MANUAL_REVIEW";
+  const [loadingEn, setLoadingEn] = useState(false);
+  const [loadingHi, setLoadingHi] = useState(false);
+  const [insightsCache, setInsightsCache] = useState<{ en?: string; hi?: string }>({});
+
+  if (!score) return null;
+
+  const isGood = score >= 700;
+  const scoreColor = score >= 800 ? "#4ade80" : score >= 700 ? "#60a5fa" : score >= 580 ? "#fb923c" : "#f87171";
+  const pct = Math.min(100, Math.round(((score - 300) / 600) * 100));
+
+  const DECISION_LABELS: Record<string, { label: string; bg: string; text: string }> = {
+    STRONG_APPROVE: { label: "Strong Approve ✓", bg: "#052e16", text: "#4ade80" },
+    APPROVE:        { label: "Approved ✓",        bg: "#0c1a3a", text: "#60a5fa" },
+    MANUAL_REVIEW:  { label: "Manual Review",     bg: "#1c1208", text: "#fb923c" },
+    REJECT:         { label: "Needs Work",         bg: "#1c0606", text: "#f87171" },
+  };
+  const decisionStyle = DECISION_LABELS[decision] ?? DECISION_LABELS.MANUAL_REVIEW;
+
+  async function downloadPdf(dlLang: "en" | "hi") {
+    const setter = dlLang === "en" ? setLoadingEn : setLoadingHi;
+    setter(true);
+    try {
+      let insights = insightsCache[dlLang];
+      if (!insights) {
+        const res = await fetch("/api/ai-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "insights", statementData: toIntelligence(analysis), lang: dlLang }),
+        });
+        const data = await res.json() as { text?: string; error?: string };
+        if (!data.text) throw new Error(data.error ?? "AI error");
+        insights = data.text;
+        setInsightsCache((prev) => ({ ...prev, [dlLang]: insights }));
+      }
+      const html = generateReport(toIntelligence(analysis), insights, dlLang);
+      const win = window.open("", "_blank");
+      if (win) {
+        win.document.write(html);
+        win.document.close();
+        setTimeout(() => win.print(), 800);
+      }
+    } catch {
+      alert("Could not generate AI report. Please try again.");
+    } finally {
+      setter(false);
+    }
+  }
+
+  const breakdown = analysis.scoreBreakdown;
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-[var(--line-soft)] mb-5"
+      style={{ background: "linear-gradient(135deg, #0d0d0d 0%, #111827 100%)" }}>
+      {/* Header */}
+      <div className="px-5 pt-5 pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#1e293b" }}>
+              <Brain size={16} style={{ color: "#60a5fa" }} />
+            </div>
+            <div>
+              <p className="font-semibold text-white text-sm">AI Statement Score</p>
+              <p className="text-xs" style={{ color: "#64748b" }}>Post AI Analysis</p>
+            </div>
+          </div>
+          <div className="px-3 py-1 rounded-full text-xs font-semibold"
+            style={{ background: decisionStyle.bg, color: decisionStyle.text, border: `1px solid ${decisionStyle.text}40` }}>
+            {decisionStyle.label}
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="flex items-end gap-3 mb-3">
+          <div>
+            <span style={{ fontSize: 48, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{score}</span>
+            <span style={{ color: "#475569", fontSize: 16, marginLeft: 4 }}>/900</span>
+          </div>
+          <div className="mb-1.5">
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isGood ? "bg-emerald-900/50 text-emerald-400" : "bg-amber-900/50 text-amber-400"}`}>
+              {isGood ? "● Good" : "● Needs Improvement"}
+            </span>
+          </div>
+        </div>
+
+        {/* Score bar */}
+        <div className="h-2 rounded-full mb-4" style={{ background: "#1e293b" }}>
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${pct}%`, background: `linear-gradient(90deg, #f87171, #fb923c, ${scoreColor})` }} />
+        </div>
+
+        {/* Breakdown */}
+        {breakdown && (
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[
+              { label: "Income", val: breakdown.incomeStability, max: 25 },
+              { label: "Bounces", val: breakdown.bounceHistory, max: 25 },
+              { label: "Balance", val: breakdown.balanceQuality, max: 20 },
+              { label: "FOIR", val: breakdown.foirScore, max: 15 },
+              { label: "Spending", val: breakdown.spendingPattern, max: 15 },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl p-2.5 text-center" style={{ background: "#1e293b" }}>
+                <p style={{ color: "#64748b", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em" }}>{item.label}</p>
+                <p style={{ color: scoreColor, fontSize: 13, fontWeight: 700, marginTop: 2 }}>{item.val}<span style={{ color: "#475569", fontSize: 9 }}>/{item.max}</span></p>
+              </div>
+            ))}
+            <div className="rounded-xl p-2.5 text-center" style={{ background: "#162032" }}>
+              <p style={{ color: "#64748b", fontSize: 9, textTransform: "uppercase", letterSpacing: "0.05em" }}>Total</p>
+              <p style={{ color: "#60a5fa", fontSize: 13, fontWeight: 700, marginTop: 2 }}>{breakdown.total}<span style={{ color: "#475569", fontSize: 9 }}>/100</span></p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Download buttons */}
+      <div className="px-5 pb-5 flex gap-2">
+        <button onClick={() => downloadPdf("en")} disabled={loadingEn}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold text-xs disabled:opacity-60 transition-all active:scale-95"
+          style={{ background: "#1e293b", color: "#e2e8f0" }}>
+          {loadingEn ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+          {loadingEn ? "Generating…" : "AI Report (EN)"}
+        </button>
+        <button onClick={() => downloadPdf("hi")} disabled={loadingHi}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold text-xs disabled:opacity-60 transition-all active:scale-95"
+          style={{ background: "#1e293b", color: "#e2e8f0" }}>
+          {loadingHi ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+          {loadingHi ? "जनरेट हो रहा…" : "AI रिपोर्ट (HI)"}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 const GRADE_CONFIG: Record<RiskGrade, { label: string; bg: string; text: string; bar: string }> = {
   A: { label: "Grade A", bg: "bg-emerald-100", text: "text-emerald-700", bar: "bg-emerald-500" },
@@ -146,7 +328,7 @@ function groupRejections(rejected: RejectedBank[]): { reason: RejectionReason; b
 }
 
 function RejectionReport({
-  audit, userDetails, loanRequirement, statementAnalysis, onRetry, onDownload, downloading,
+  audit, userDetails, loanRequirement, statementAnalysis, onRetry, onDownload, downloading, lang,
 }: {
   audit: import("@/lib/store").DecisionAudit | null;
   userDetails: Partial<import("@/lib/store").UserDetails>;
@@ -155,6 +337,7 @@ function RejectionReport({
   onRetry: () => void;
   onDownload: () => void;
   downloading: boolean;
+  lang: string;
 }) {
   const income = audit?.inputSnapshot.effectiveIncome ?? statementAnalysis?.avgMonthlyIncome ?? userDetails.monthlyIncome ?? 0;
   const foir = audit?.inputSnapshot.foir ?? statementAnalysis?.foir ?? 0;
@@ -202,6 +385,8 @@ function RejectionReport({
           </div>
         </div>
       </div>
+
+      {statementAnalysis && <AiScoreCard analysis={statementAnalysis} lang={lang} />}
 
       {/* Why rejected */}
       <div className="mb-5">
@@ -401,7 +586,7 @@ function ResultsInner() {
   }
 
   if (!bankOffers.length) {
-    return <RejectionReport audit={decisionAudit} userDetails={userDetails} loanRequirement={loanRequirement} statementAnalysis={statementAnalysis} onRetry={() => router.push("/")} onDownload={downloadReport} downloading={downloading} />;
+    return <RejectionReport audit={decisionAudit} userDetails={userDetails} loanRequirement={loanRequirement} statementAnalysis={statementAnalysis} onRetry={() => router.push("/")} onDownload={downloadReport} downloading={downloading} lang={lang} />;
   }
 
   return (
@@ -442,6 +627,8 @@ function ResultsInner() {
           </div>
         </div>
       </div>
+
+      {statementAnalysis && <AiScoreCard analysis={statementAnalysis} lang={lang} />}
 
       <div className="space-y-4">
         {bankOffers.map((offer, i) => (

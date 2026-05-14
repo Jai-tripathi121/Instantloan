@@ -67,6 +67,24 @@ export interface StatementAnalysis {
   bounceCount: number;
   salaryCredits: number;
   transactionCount: number;
+  // Rich fields from StatementIntelligence (populated when PDF is successfully parsed)
+  lendingScore?: number;
+  lendingDecision?: string;
+  scoreBreakdown?: { incomeStability: number; bounceHistory: number; balanceQuality: number; foirScore: number; spendingPattern: number; total: number };
+  detectedBank?: string;
+  statementMonths?: number;
+  minMonthlyBalance?: number;
+  avgMonthlyBalance2?: number;
+  fraudRisk?: string;
+  loanAppUsage?: boolean;
+  gamblingDetected?: boolean;
+  bnplUsage?: boolean;
+  bnplAmount?: number;
+  hasInvestments?: boolean;
+  investmentAmount?: number;
+  hasInsurance?: boolean;
+  fraudSignals?: { type: string; severity: string }[];
+  monthlyBreakdown?: { label: string; totalCredits: number; totalDebits: number; minBalance: number; bounceCount: number; salaryAmount: number; emiTotal: number }[];
 }
 
 export interface BankOffer {
