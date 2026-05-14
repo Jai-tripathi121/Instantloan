@@ -93,12 +93,8 @@ function AiScoreCard({ analysis, lang }: { analysis: StatementAnalysis; lang: st
         setInsightsCache((prev) => ({ ...prev, [dlLang]: insights }));
       }
       const html = generateReport(toIntelligence(analysis), insights, dlLang);
-      const win = window.open("", "_blank");
-      if (win) {
-        win.document.write(html);
-        win.document.close();
-        setTimeout(() => win.print(), 800);
-      }
+      const { downloadReportAsPdf } = await import("@/lib/download-pdf");
+      await downloadReportAsPdf(html, `PostMoney_AI_Report_${dlLang.toUpperCase()}.pdf`);
     } catch {
       alert("Could not generate AI report. Please try again.");
     } finally {
@@ -172,19 +168,24 @@ function AiScoreCard({ analysis, lang }: { analysis: StatementAnalysis; lang: st
       </div>
 
       {/* Download buttons */}
-      <div className="px-5 pb-5 flex gap-2">
-        <button onClick={() => downloadPdf("en")} disabled={loadingEn}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold text-xs disabled:opacity-60 transition-all active:scale-95"
-          style={{ background: "#1e293b", color: "#e2e8f0" }}>
-          {loadingEn ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-          {loadingEn ? "Generating…" : "AI Report (EN)"}
-        </button>
-        <button onClick={() => downloadPdf("hi")} disabled={loadingHi}
-          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-semibold text-xs disabled:opacity-60 transition-all active:scale-95"
-          style={{ background: "#1e293b", color: "#e2e8f0" }}>
-          {loadingHi ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
-          {loadingHi ? "जनरेट हो रहा…" : "AI रिपोर्ट (HI)"}
-        </button>
+      <div className="px-5 pb-5">
+        <p className="text-xs font-semibold mb-2.5" style={{ color: "#94a3b8", letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          Download AI Report
+        </p>
+        <div className="flex gap-2">
+          <button onClick={() => downloadPdf("en")} disabled={loadingEn}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm disabled:opacity-50 transition-all active:scale-95"
+            style={{ background: "linear-gradient(135deg, #2563eb 0%, #4f46e5 100%)", color: "#fff", boxShadow: "0 4px 14px rgba(79,70,229,0.5)" }}>
+            {loadingEn ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+            {loadingEn ? "Generating…" : "English PDF"}
+          </button>
+          <button onClick={() => downloadPdf("hi")} disabled={loadingHi}
+            className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm disabled:opacity-50 transition-all active:scale-95"
+            style={{ background: "linear-gradient(135deg, #7c3aed 0%, #db2777 100%)", color: "#fff", boxShadow: "0 4px 14px rgba(124,58,237,0.5)" }}>
+            {loadingHi ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+            {loadingHi ? "जनरेट हो रहा…" : "हिंदी PDF"}
+          </button>
+        </div>
       </div>
     </div>
   );
