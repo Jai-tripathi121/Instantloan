@@ -84,14 +84,12 @@ const DECISION_LABELS: Record<string, Record<Lang, string>> = {
   REJECT:         { en:"Reject",         hi:"अस्वीकृत" },
 };
 
-// ─── PostMoney Logo SVG (white on dark) ────────────────────────────────────────
-const LOGO_SVG = `<svg viewBox="0 0 200 105" width="110" height="58" xmlns="http://www.w3.org/2000/svg">
-  <text x="2" y="52" font-family="'Helvetica Neue','Arial Black',Arial,sans-serif"
-    font-size="56" font-weight="900" fill="#ffffff" letter-spacing="-1">post,</text>
-  <rect x="2" y="61" width="196" height="1.5" fill="rgba(255,255,255,0.4)"/>
-  <text x="2" y="100" font-family="'Helvetica Neue','Arial Black',Arial,sans-serif"
-    font-size="48" font-weight="800" fill="#ffffff" letter-spacing="-1">Money</text>
-</svg>`;
+// ─── PostMoney Logo (CSS-rendered, matches brand) ─────────────────────────────
+const LOGO_HTML = `<div style="font-family:'Arial Black','Helvetica Neue',Arial,sans-serif;line-height:1;user-select:none">
+  <div style="font-size:38px;font-weight:900;color:#ffffff;letter-spacing:-1.5px;line-height:1">post,</div>
+  <div style="height:1.5px;background:rgba(255,255,255,0.3);margin:5px 0 4px"></div>
+  <div style="font-size:34px;font-weight:800;color:#ffffff;letter-spacing:-1px;line-height:1">Money</div>
+</div>`;
 
 // ─── SVG Arc Gauge ─────────────────────────────────────────────────────────────
 function buildGauge(score: number, color: string): string {
@@ -268,14 +266,17 @@ export function generateReport(data: StatementIntelligence, aiInsights: string, 
 <meta charset="UTF-8">
 <title>${t.reportTitle} — PostMoney</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{margin:0;padding:0;box-sizing:border-box;
+  -webkit-print-color-adjust:exact !important;
+  print-color-adjust:exact !important;
+  forced-color-adjust:none !important;
+}
+html{color-scheme:dark;background:#0d0d0d !important}
 html,body{
   font-family:${font};
-  background:#0d0d0d;
+  background:#0d0d0d !important;
   color:#d1d5db;
   font-size:12.5px;
-  -webkit-print-color-adjust:exact;
-  print-color-adjust:exact;
 }
 
 /* ── Page wrapper (A4) ── */
@@ -426,10 +427,15 @@ tbody tr:nth-child(odd) td{background:#0f0f0f}
 
 /* ── Print ── */
 @media print{
-  html,body{background:#0d0d0d}
+  html,body{background:#0d0d0d !important}
   @page{size:A4;margin:0}
-  .page{width:100%;min-height:0}
+  .page{width:100%;min-height:0;background:#0d0d0d !important}
   .hero,.card,.two-col{page-break-inside:avoid}
+  /* Ensure all dark backgrounds survive Chrome "Background graphics" unchecked */
+  .hdr,.hero,.card,.card-hdr,.mc,.ai-top,.ai-body,.ai-card,.two-col .card{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+  }
 }
 </style>
 </head>
@@ -439,7 +445,7 @@ tbody tr:nth-child(odd) td{background:#0f0f0f}
 <!-- ══ HEADER ══ -->
 <div class="hdr">
   <div>
-    ${LOGO_SVG}
+    ${LOGO_HTML}
     <div class="hdr-report">${t.reportTitle}</div>
   </div>
   <div class="hdr-meta">
