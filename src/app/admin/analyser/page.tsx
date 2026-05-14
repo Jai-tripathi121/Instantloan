@@ -113,8 +113,9 @@ function AiTextRenderer({ text, compact }: { text: string; compact?: boolean }) 
     const line = raw.trimEnd();
     if (!line) { nodes.push(<div key={key++} className="h-2" />); continue; }
 
-    // Section headers (ALL CAPS lines or lines ending with colon)
-    if (/^[A-Z][A-Z\s\-–—]{4,}$/.test(line) || /^[A-Z][A-Z\s]+:$/.test(line)) {
+    // Section headers (ALL CAPS lines or lines ending with colon, or Hindi section markers)
+    const isHindiHeader = /^(वर्तमान स्कोर|तुरंत करें|6-माह का|अनुमानित स्कोर|ट्रैक करने)/.test(line);
+    if (/^[A-Z][A-Z\s\-–—]{4,}$/.test(line) || /^[A-Z][A-Z\s]+:$/.test(line) || isHindiHeader) {
       nodes.push(
         <p key={key++} className={`font-bold text-gray-900 ${compact ? "text-xs mt-3 mb-1" : "text-sm mt-4 mb-1.5"} tracking-wide`}>
           {line}
@@ -122,8 +123,8 @@ function AiTextRenderer({ text, compact }: { text: string; compact?: boolean }) 
       );
       continue;
     }
-    // Month lines like "Month 1 — Foundation:" or "Month 1:"
-    if (/^Month \d/i.test(line)) {
+    // Month lines like "Month 1 — Foundation:" or "Month 1:" or "माह 1 —"
+    if (/^Month \d/i.test(line) || /^माह \d/.test(line)) {
       nodes.push(
         <p key={key++} className={`font-semibold text-violet-700 ${compact ? "text-xs mt-2" : "text-sm mt-3"}`}>
           {line}
@@ -215,6 +216,8 @@ export default function StatementAnalyserPage() {
   // AI state
   const [aiInsights, setAiInsights] = useState("");
   const [aiInsightsLoaded, setAiInsightsLoaded] = useState(false);
+  const [hiInsights, setHiInsights] = useState("");
+  const [hiInsightsLoaded, setHiInsightsLoaded] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
   const [chatMessages, setChatMessages] = useState<{ role: "user" | "assistant"; text: string }[]>([]);
@@ -223,6 +226,7 @@ export default function StatementAnalyserPage() {
   const [debugAiReport, setDebugAiReport] = useState("");
   const [debugAiLoaded, setDebugAiLoaded] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [reportLoading, setReportLoading] = useState(false);
 
   // Password popup state
   const [showPwdModal, setShowPwdModal] = useState(false);
@@ -401,10 +405,53 @@ export default function StatementAnalyserPage() {
     }
   }
 
-  function downloadReport(lang: "en" | "hi") {
+  async function downloadReport(lang: "en" | "hi") {
     if (!result) return;
     setShowLangMenu(false);
-    const html = generateReport(result, aiInsights, lang);
+
+    let insights = lang === "en" ? aiInsights : hiInsights;
+
+    if (lang === "hi" && !hiInsightsLoaded) {
+      setReportLoading(true);
+      try {
+        const res = await fetch("/api/ai-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "insights", statementData: result, lang: "hi" }),
+        });
+        const data = await res.json();
+        if (!data.error) {
+          insights = data.text ?? "";
+          setHiInsights(insights);
+          setHiInsightsLoaded(true);
+        }
+      } catch {
+        // Proceed without AI insights if fetch fails
+      } finally {
+        setReportLoading(false);
+      }
+    } else if (lang === "en" && !aiInsightsLoaded) {
+      setReportLoading(true);
+      try {
+        const res = await fetch("/api/ai-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mode: "insights", statementData: result, lang: "en" }),
+        });
+        const data = await res.json();
+        if (!data.error) {
+          insights = data.text ?? "";
+          setAiInsights(insights);
+          setAiInsightsLoaded(true);
+        }
+      } catch {
+        // Proceed without AI insights if fetch fails
+      } finally {
+        setReportLoading(false);
+      }
+    }
+
+    const html = generateReport(result, insights, lang);
     const win = window.open("", "_blank");
     if (win) { win.document.write(html); win.document.close(); }
   }
@@ -428,9 +475,12 @@ export default function StatementAnalyserPage() {
           <div className="ml-auto relative">
             <button
               onClick={() => setShowLangMenu((v) => !v)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#0a3d2e] text-white text-sm font-medium rounded-xl hover:bg-[#0d4f3a] transition-all"
+              disabled={reportLoading}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#0a3d2e] text-white text-sm font-medium rounded-xl hover:bg-[#0d4f3a] transition-all disabled:opacity-60 disabled:cursor-wait"
             >
-              <Download size={14} /> Download Report <ChevronDown size={13} className={`transition-transform ${showLangMenu ? "rotate-180" : ""}`} />
+              {reportLoading ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+              {reportLoading ? "Generating…" : "Download Report"}
+              {!reportLoading && <ChevronDown size={13} className={`transition-transform ${showLangMenu ? "rotate-180" : ""}`} />}
             </button>
             {showLangMenu && (
               <div className="absolute right-0 top-full mt-1.5 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">

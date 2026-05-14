@@ -13,7 +13,9 @@ type ClaudeMessage = { role: "user" | "assistant"; content: string };
 
 // ─── Prompt builders ──────────────────────────────────────────────────────────
 
-function buildInsightsPrompt(data: StatementIntelligence): string {
+function buildInsightsPrompt(data: StatementIntelligence, lang: "en" | "hi" = "en"): string {
+  if (lang === "hi") return buildInsightsPromptHindi(data);
+
   const breakdown = data.scoreBreakdown ?? {};
   const monthSample = data.monthlyBreakdown
     .slice(-6)
@@ -92,6 +94,87 @@ KEY METRICS TO TRACK
 [3-4 specific metrics with exact rupee/percentage targets to hit by month 6]
 
 Be direct and specific to Indian banking. Mention UPI, NACH, SIP, ECS where relevant. Give exact rupee amounts.`;
+}
+
+function buildInsightsPromptHindi(data: StatementIntelligence): string {
+  const breakdown = data.scoreBreakdown ?? {};
+  const monthSample = data.monthlyBreakdown
+    .slice(-6)
+    .map(
+      (m) =>
+        `  ${m.label}: जमा ₹${fmt(m.totalCredits)}, निकासी ₹${fmt(m.totalDebits)}, न्यूनतम शेष ₹${fmt(m.minBalance)}, बाउंस ${m.bounceCount}`,
+    )
+    .join("\n");
+
+  return `आप PostMoney के एक वरिष्ठ वित्तीय विश्लेषक हैं — एक भारतीय फिनटेक लेंडिंग प्लेटफॉर्म। इस ग्राहक को 900 का लेंडिंग स्कोर प्राप्त करने के लिए एक ठोस 6-महीने का रोडमैप दें।
+
+## आवेदक का स्टेटमेंट डेटा
+- बैंक: ${data.detectedBank}
+- अवधि: ${data.statementMonths} माह | ${data.transactionCount} लेनदेन
+- वर्तमान लेंडिंग स्कोर: ${data.lendingScore}/900 → लक्ष्य: 900
+- निर्णय: ${data.lendingDecision}
+- औसत मासिक आय: ₹${fmt(data.avgMonthlyIncome)}
+- औसत मासिक शेष: ₹${fmt(data.avgMonthlyBalance)}
+- न्यूनतम शेष (कभी भी): ₹${fmt(data.minMonthlyBalance)}
+- FOIR: ${Math.round(data.foir * 100)}% (सुरक्षित = <50%)
+- कुल बाउंस: ${data.bounceCount}
+- धोखाधड़ी जोखिम: ${data.fraudRisk}
+- लोन ऐप उपयोग: ${data.loanAppUsage ? "हाँ ⚠️" : "नहीं"}
+- जुआ पाया गया: ${data.gamblingDetected ? "हाँ ⚠️" : "नहीं"}
+- BNPL उपयोग: ${data.bnplUsage ? `हाँ — ₹${fmt(data.bnplAmount)}/माह` : "नहीं"}
+- निवेश (SIP आदि): ${data.hasInvestments ? `हाँ — ₹${fmt(data.investmentAmount)}/माह` : "कोई नहीं"}
+- बीमा: ${data.hasInsurance ? "हाँ" : "कोई नहीं"}
+
+## स्कोर विवरण (100 अंकों में से)
+- आय स्थिरता: ${breakdown.incomeStability ?? 0}/25
+- बाउंस इतिहास: ${breakdown.bounceHistory ?? 0}/25
+- शेष गुणवत्ता: ${breakdown.balanceQuality ?? 0}/20
+- FOIR स्कोर: ${breakdown.foirScore ?? 0}/15
+- खर्च पैटर्न: ${breakdown.spendingPattern ?? 0}/15
+- कुल: ${breakdown.total ?? 0}/100
+
+## पिछले 6 माह
+${monthSample}
+
+---
+
+निम्नलिखित संरचना में उत्तर दें (सादा हिंदी पाठ, कोई markdown चिह्न नहीं):
+
+वर्तमान स्कोर विश्लेषण
+[2-3 वाक्यों में बताएं कि स्कोर कम क्यों है, विशिष्ट संख्याओं के साथ]
+
+तुरंत करें — इस सप्ताह
+[3-5 तत्काल, विशिष्ट कार्य। उदाहरण: "सभी लोन ऐप गतिविधि बंद करें — KreditBee/CASHe की हर एक enquiry से स्कोर गिरता है"]
+
+6-माह का रोडमैप
+
+माह 1 — [विषय]:
+[2-3 विशिष्ट कार्य जिनमें सटीक ₹ लक्ष्य हों]
+
+माह 2 — [विषय]:
+[कार्य]
+
+माह 3 — [विषय]:
+[कार्य]
+
+माह 4 — [विषय]:
+[कार्य]
+
+माह 5 — [विषय]:
+[कार्य]
+
+माह 6 — [विषय]:
+[कार्य]
+
+अनुमानित स्कोर प्रगति
+माह 1: ${data.lendingScore} → [अनुमान]
+माह 2: [अनुमान] → [अनुमान]
+[माह 6 → 900 तक जारी रखें]
+
+ट्रैक करने के लिए मुख्य आंकड़े
+[3-4 विशिष्ट मेट्रिक्स जिनके सटीक ₹/% लक्ष्य माह 6 तक हासिल करने हों]
+
+सीधे और व्यावहारिक रहें। UPI, NACH, SIP, ECS का उल्लेख करें जहाँ प्रासंगिक हो। सटीक रुपये की राशि दें।`;
 }
 
 function buildDebugPrompt(data: StatementIntelligence, rawDebugInfo?: string): string {
@@ -213,9 +296,10 @@ export async function POST(req: NextRequest) {
       history?: { role: "user" | "assistant"; text: string }[];
       statementData: StatementIntelligence;
       rawDebugInfo?: string;
+      lang?: "en" | "hi";
     };
 
-    const { mode, message, history = [], statementData, rawDebugInfo } = body;
+    const { mode, message, history = [], statementData, rawDebugInfo, lang = "en" } = body;
 
     if (!statementData) {
       return NextResponse.json({ error: "No statement data provided" }, { status: 400 });
@@ -225,7 +309,7 @@ export async function POST(req: NextRequest) {
 
     if (mode === "insights") {
       text = await callClaude([
-        { role: "user", content: buildInsightsPrompt(statementData) },
+        { role: "user", content: buildInsightsPrompt(statementData, lang as "en" | "hi") },
       ]);
     } else if (mode === "debug") {
       text = await callClaude([
