@@ -6,7 +6,7 @@ import { t } from "@/lib/i18n";
 import { getSession, saveSession, clearSession, UserSession } from "@/lib/firestore";
 import {
   User, Phone, CreditCard, Calendar, Briefcase, IndianRupee,
-  CheckCircle, Send, ArrowLeft, ChevronRight, RotateCcw, MapPin, Loader2,
+  CheckCircle, Send, ArrowLeft, ChevronRight, RotateCcw, MapPin, Loader2, MessageCircle,
 } from "lucide-react";
 
 const STEP_LABELS: Record<string, { label: string; step: string }> = {
@@ -36,6 +36,8 @@ export default function Details() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [mobileError, setMobileError] = useState("");
+  const [otpChannel, setOtpChannel] = useState<"whatsapp" | "sms">("whatsapp");
+  const [otpVia, setOtpVia] = useState<string>("");
 
   // ── Session resume state ──────────────────────────────────────
   const [phase, setPhase] = useState<Phase>(
@@ -83,12 +85,17 @@ export default function Details() {
     setMobileError(""); setOtpLoading(true); setOtpError("");
     const res = await fetch("/api/send-otp", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mobile }),
+      body: JSON.stringify({ mobile, channel: otpChannel }),
     });
-    const data = await res.json();
+    const data = await res.json() as { otp?: string; via?: string; delivered?: boolean };
     setOtpLoading(false);
-    if (res.ok) { setOtpSent(true); if (data.otp) setOtp(data.otp); }
-    else setOtpError("Could not send OTP. Please try again.");
+    if (res.ok) {
+      setOtpSent(true);
+      setOtpVia(data.via ?? "");
+      if (data.otp) setOtp(data.otp); // auto-fill if delivery not configured
+    } else {
+      setOtpError("Could not send OTP. Please try again.");
+    }
   }
 
   async function verifyOtp() {
@@ -223,17 +230,54 @@ export default function Details() {
             {mobileError && <p className="text-xs text-red-500 mt-1">{mobileError}</p>}
           </div>
 
+          {!verified && !otpSent && (
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-[var(--ink-muted)] mb-2 uppercase tracking-wide">Send OTP via</p>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => setOtpChannel("whatsapp")}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
+                    otpChannel === "whatsapp"
+                      ? "border-[#25D366] bg-[#e7fef0] text-[#128C7E]"
+                      : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-muted)]"
+                  }`}>
+                  <MessageCircle size={16} />
+                  WhatsApp
+                </button>
+                <button
+                  onClick={() => setOtpChannel("sms")}
+                  className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
+                    otpChannel === "sms"
+                      ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
+                      : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-muted)]"
+                  }`}>
+                  <Phone size={16} />
+                  SMS
+                </button>
+              </div>
+            </div>
+          )}
+
           {!verified && (
             <button onClick={sendOtp} disabled={otpLoading || mobile.length !== 10}
               className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-base mb-4 disabled:opacity-60 flex items-center justify-center gap-2">
-              <Send size={16} />
-              {otpLoading ? "Sending..." : otpSent ? "Resend OTP" : t(lang, "btnSendOtp")}
+              {otpLoading
+                ? <Loader2 size={16} className="animate-spin" />
+                : otpChannel === "whatsapp" ? <MessageCircle size={16} /> : <Phone size={16} />}
+              {otpLoading ? "Sending..." : otpSent ? `Resend via ${otpChannel === "whatsapp" ? "WhatsApp" : "SMS"}` : `Send OTP via ${otpChannel === "whatsapp" ? "WhatsApp" : "SMS"}`}
             </button>
           )}
 
           {otpSent && !verified && (
             <div className="bg-[var(--brand-soft)] rounded-2xl p-4 border border-[var(--brand-soft)]">
-              <p className="text-xs text-[var(--brand)] font-medium mb-3">OTP sent to +91 {mobile}</p>
+              <div className="flex items-center gap-2 mb-3">
+                {otpVia === "whatsapp"
+                  ? <MessageCircle size={14} className="text-[#25D366]" />
+                  : <Phone size={14} style={{ color: "var(--brand)" }} />}
+                <p className="text-xs font-medium" style={{ color: "var(--brand)" }}>
+                  OTP sent via {otpVia === "whatsapp" ? "WhatsApp" : otpVia === "sms" ? "SMS" : "message"} to +91 {mobile}
+                </p>
+              </div>
               <input
                 type="number" inputMode="numeric" placeholder="6-digit OTP"
                 value={otp} onChange={(e) => setOtp(e.target.value)}
