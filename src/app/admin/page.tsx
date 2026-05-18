@@ -80,13 +80,32 @@ export default function AdminPage() {
   }
 
   async function loadGlobalSettings() {
-    try { setGlobalSettings(await getGlobalSettings()); } catch { }
+    try {
+      const res = await fetch(`/api/admin/settings?password=${encodeURIComponent(ADMIN_PASS)}`);
+      if (res.ok) {
+        const data = await res.json() as import("@/lib/firestore").GlobalSettings;
+        setGlobalSettings(data);
+      }
+    } catch { }
   }
 
   async function saveGlobal() {
     setSavingGlobal(true);
-    try { await saveGlobalSettings(globalEdit); setGlobalSettings(globalEdit); setEditingGlobal(false); } catch { }
-    setSavingGlobal(false);
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: ADMIN_PASS, settings: globalEdit }),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string };
+      if (!res.ok || data.error) throw new Error(data.error ?? "Save failed");
+      setGlobalSettings(globalEdit);
+      setEditingGlobal(false);
+    } catch (err) {
+      alert("Save failed: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setSavingGlobal(false);
+    }
   }
 
   function handleLogin() {
