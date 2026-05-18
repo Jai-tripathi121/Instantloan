@@ -18,8 +18,8 @@ export default function LanguageSwitcher() {
     <div className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border border-white/20 text-white/90"
-        style={{ background: "rgba(255,255,255,0.1)" }}
+        className="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-xl border"
+        style={{ background: "var(--surface)", borderColor: "var(--line)", color: "var(--ink)" }}
       >
         <Globe size={13} />
         <span>{current.native}</span>
