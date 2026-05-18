@@ -365,10 +365,11 @@ export default function AdminPage() {
                   ["Max Bounces (Strict)", globalSettings.maxBouncesStrict != null ? String(globalSettings.maxBouncesStrict) : "2"],
                   ["Max Bounces (All)", globalSettings.maxBouncesAll != null ? String(globalSettings.maxBouncesAll) : "4"],
                   ["Platform Active", globalSettings.platformActive === false ? "❌ Off" : "✅ On"],
+                  ["Payment (₹99)", globalSettings.paymentEnabled === false ? "🆓 Free / Bypassed" : "💳 Enabled"],
                 ].map(([label, val]) => (
-                  <div key={label} className="bg-[var(--bg)] rounded-xl p-3">
+                  <div key={label} className={`bg-[var(--bg)] rounded-xl p-3 ${label === "Payment (₹99)" ? "col-span-2 sm:col-span-1" : ""}`}>
                     <p className="text-xs text-[var(--ink-muted)] mb-0.5 font-medium">{label}</p>
-                    <p className="font-semibold text-[var(--ink)] text-sm">{val}</p>
+                    <p className={`font-semibold text-sm ${label === "Payment (₹99)" && globalSettings.paymentEnabled === false ? "text-emerald-600" : "text-[var(--ink)]"}`}>{val}</p>
                   </div>
                 ))}
               </div>
@@ -390,12 +391,31 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer w-fit">
-                  <input type="checkbox" checked={globalEdit.platformActive !== false}
-                    onChange={(e) => setGlobalEdit((p) => ({ ...p, platformActive: e.target.checked }))}
-                    className="w-4 h-4 accent-blue-800" />
-                  <span className="text-sm font-medium text-[var(--ink-soft)]">Platform Active (uncheck to disable new applications)</span>
-                </label>
+                <div className="flex flex-col gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer w-fit">
+                    <input type="checkbox" checked={globalEdit.platformActive !== false}
+                      onChange={(e) => setGlobalEdit((p) => ({ ...p, platformActive: e.target.checked }))}
+                      className="w-4 h-4 accent-blue-800" />
+                    <span className="text-sm font-medium text-[var(--ink-soft)]">Platform Active (uncheck to disable new applications)</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div
+                      onClick={() => setGlobalEdit((p) => ({ ...p, paymentEnabled: p.paymentEnabled === false ? true : false }))}
+                      className={`relative w-12 h-6 rounded-full transition-all cursor-pointer ${globalEdit.paymentEnabled === false ? "bg-emerald-500" : "bg-[var(--brand)]"}`}>
+                      <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all ${globalEdit.paymentEnabled === false ? "left-6" : "left-0.5"}`} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--ink)]">
+                        {globalEdit.paymentEnabled === false ? "🆓 Payment OFF — Free Access (₹0)" : "💳 Payment ON — ₹99 Required"}
+                      </p>
+                      <p className="text-xs text-[var(--ink-muted)]">
+                        {globalEdit.paymentEnabled === false
+                          ? "Payment page is bypassed. Users go straight to results for free."
+                          : "Users must pay ₹99 via Razorpay before seeing results."}
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
             )}
           </div>

@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { getGlobalSettings } from "@/lib/firestore";
 import { t } from "@/lib/i18n";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Wallet, Home, Car, Building2, Coins, GraduationCap, Landmark, CreditCard, ChevronRight, Search, RotateCcw, Shield, BadgeCheck, Clock3, Zap } from "lucide-react";
@@ -26,8 +27,14 @@ export default function Landing() {
   const { userDetails, otpVerified, lastRoute, loanRequirement, step, resetSession, lang } = useAppStore();
   const [mounted, setMounted] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
+  const [paymentEnabled, setPaymentEnabled] = useState(true); // default true until fetched
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    getGlobalSettings().then((s) => {
+      if (s.paymentEnabled === false) setPaymentEnabled(false);
+    }).catch(() => {});
+  }, []);
 
   const hasSession = mounted && otpVerified && !!userDetails.mobile;
   const resumeRoute = lastRoute || RESUME_ROUTES[step] || "/details";
@@ -43,7 +50,7 @@ export default function Landing() {
       <div className="flex items-center justify-between px-5 pt-5 pb-4">
         <div className="flex items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="postmoney" style={{ height: 28, width: "auto" }} />
+          <img src="/logo.png" alt="postmoney" style={{ height: 28, width: "auto", filter: "brightness(0)" }} />
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -120,14 +127,24 @@ export default function Landing() {
         </div>
 
         {/* Price pill */}
-        <div className="rounded-2xl p-4 mb-4 border text-center" style={{ background: "var(--bg-deep)", borderColor: "var(--line)" }}>
+        <div className="rounded-2xl p-4 mb-4 border text-center" style={{ background: paymentEnabled ? "var(--bg-deep)" : "#f0fdf4", borderColor: paymentEnabled ? "var(--line)" : "#86efac" }}>
           <p style={{ color: "var(--ink-muted)", fontSize: 9, fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.06em" }}>One-time AI report</p>
-          <div className="flex items-baseline justify-center gap-2 mt-1">
-            <span style={{ fontSize: 36, color: "var(--brand)", fontWeight: 600 }}>₹99</span>
-            <span style={{ color: "var(--ink-muted)", fontSize: 14, textDecoration: "line-through" }}>₹499</span>
-            <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "var(--accent-soft)", color: "var(--warn)", fontSize: 9 }}>80% OFF</span>
-          </div>
-          <p style={{ color: "var(--ink-muted)", fontSize: 9, marginTop: 4 }}>Non-refundable · Instant delivery</p>
+          {paymentEnabled ? (
+            <div className="flex items-baseline justify-center gap-2 mt-1">
+              <span style={{ fontSize: 36, color: "var(--brand)", fontWeight: 600 }}>₹99</span>
+              <span style={{ color: "var(--ink-muted)", fontSize: 14, textDecoration: "line-through" }}>₹499</span>
+              <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "var(--accent-soft)", color: "var(--warn)", fontSize: 9 }}>80% OFF</span>
+            </div>
+          ) : (
+            <div className="flex items-baseline justify-center gap-2 mt-1">
+              <span style={{ fontSize: 36, color: "#16a34a", fontWeight: 700 }}>FREE</span>
+              <span style={{ color: "var(--ink-muted)", fontSize: 14, textDecoration: "line-through" }}>₹99</span>
+              <span className="px-2 py-0.5 rounded-full font-semibold" style={{ background: "#dcfce7", color: "#15803d", fontSize: 9 }}>100% OFF</span>
+            </div>
+          )}
+          <p style={{ color: "var(--ink-muted)", fontSize: 9, marginTop: 4 }}>
+            {paymentEnabled ? "Non-refundable · Instant delivery" : "Limited time free access · Instant delivery"}
+          </p>
           <Link href="/sample-report"
             className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full border"
             style={{ background: "var(--surface)", borderColor: "var(--brand)", color: "var(--brand)", fontSize: 9, fontWeight: 600 }}>

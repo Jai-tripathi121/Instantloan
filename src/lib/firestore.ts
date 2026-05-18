@@ -77,6 +77,7 @@ export interface GlobalSettings {
   maxBouncesStrict?: number;
   maxBouncesAll?: number;
   platformActive?: boolean;
+  paymentEnabled?: boolean;   // false = free access, bypass ₹99 payment
   updatedAt?: unknown;
 }
 

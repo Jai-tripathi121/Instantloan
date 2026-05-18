@@ -1,8 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppStore } from "@/lib/store";
-import { saveSession } from "@/lib/firestore";
+import { saveSession, getGlobalSettings } from "@/lib/firestore";
 import { t } from "@/lib/i18n";
 import { ArrowLeft, Lock, CheckCircle, ChevronRight, Sparkles, Smartphone, Copy, Check, Building2, CreditCard } from "lucide-react";
 
@@ -33,6 +33,24 @@ export default function Payment() {
   const { setPaymentDone, userDetails, loanRequirement, setLastRoute, lang } = useAppStore();
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<"razorpay" | "upi" | "bank">("razorpay");
+  const [bypassing, setBypassing] = useState(false);
+
+  // Auto-bypass if admin has disabled payment
+  useEffect(() => {
+    setLastRoute("/payment");
+    getGlobalSettings().then((s) => {
+      if (s.paymentEnabled === false) {
+        setBypassing(true);
+        setPaymentDone(true);
+        saveSession(userDetails.mobile ?? "", {
+          step: 4, lastRoute: "/processing", paymentDone: true,
+          userDetails: { name: userDetails.name, pan: userDetails.pan, dob: userDetails.dob, employmentType: userDetails.employmentType, monthlyIncome: userDetails.monthlyIncome, cibilScore: userDetails.cibilScore },
+          loanRequirement: { loanType: loanRequirement.loanType, amount: loanRequirement.amount, tenure: loanRequirement.tenure },
+        }).catch(() => {});
+        router.replace("/processing");
+      }
+    }).catch(() => {});
+  }, []);
   const [copiedUpi, setCopiedUpi] = useState(false);
   const [copiedAcc, setCopiedAcc] = useState(false);
   const [copiedIfsc, setCopiedIfsc] = useState(false);
@@ -96,6 +114,20 @@ export default function Payment() {
     });
     setLastRoute("/results");
     router.push("/processing");
+  }
+
+  if (bypassing) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-[var(--surface)]">
+        <div className="text-center px-8">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: "var(--brand-soft)" }}>
+            <CheckCircle size={24} style={{ color: "var(--brand)" }} />
+          </div>
+          <p className="font-semibold text-[var(--ink)] mb-1">Free Access Enabled</p>
+          <p className="text-sm text-[var(--ink-muted)]">Taking you to your results…</p>
+        </div>
+      </div>
+    );
   }
 
   return (
