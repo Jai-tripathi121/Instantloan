@@ -4,94 +4,67 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 
 const ADMIN_PASS = process.env.ADMIN_PASSWORD ?? "postmoney@2026";
-const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "";
-const API_KEY    = process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "";
 
-// ── Firestore REST helpers (no Admin SDK required) ─────────────────────────
+// Lazy-init Admin SDK using Application Default Credentials (ADC).
+// On Firebase App Hosting / Google Cloud this works with zero extra env vars.
+// Falls back to explicit service-account env vars if set.
+let _db: import("firebase-admin/firestore").Firestore | null = null;
 
-function toFirestoreValue(v: unknown): Record<string, unknown> {
-  if (v === null || v === undefined) return { nullValue: null };
-  if (typeof v === "boolean") return { booleanValue: v };
-  if (typeof v === "number") return Number.isInteger(v) ? { integerValue: String(v) } : { doubleValue: v };
-  if (typeof v === "string") return { stringValue: v };
-  if (Array.isArray(v)) return { arrayValue: { values: v.map(toFirestoreValue) } };
-  if (typeof v === "object") {
-    return {
-      mapValue: {
-        fields: Object.fromEntries(
-          Object.entries(v as Record<string, unknown>)
-            .filter(([, val]) => val !== undefined)
-            .map(([k, val]) => [k, toFirestoreValue(val)])
-        ),
-      },
-    };
+async function getDb(): Promise<import("firebase-admin/firestore").Firestore> {
+  if (_db) return _db;
+
+  const { getApps, initializeApp, cert, applicationDefault } = await import("firebase-admin/app");
+  const { getFirestore } = await import("firebase-admin/firestore");
+
+  if (!getApps().length) {
+    const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID ?? process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+
+    if (
+      process.env.FIREBASE_ADMIN_PROJECT_ID &&
+      process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
+      process.env.FIREBASE_ADMIN_PRIVATE_KEY
+    ) {
+      // Explicit service-account credentials
+      initializeApp({
+        credential: cert({
+          projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
+          privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n"),
+        }),
+      });
+    } else {
+      // Application Default Credentials — works automatically on Firebase App Hosting
+      initializeApp({
+        credential: applicationDefault(),
+        projectId,
+      });
+    }
   }
-  return { stringValue: String(v) };
-}
 
-function fromFirestoreValue(v: Record<string, unknown>): unknown {
-  if ("booleanValue" in v) return v.booleanValue;
-  if ("integerValue" in v) return Number(v.integerValue);
-  if ("doubleValue" in v) return Number(v.doubleValue);
-  if ("stringValue" in v) return v.stringValue;
-  if ("nullValue" in v) return null;
-  if ("arrayValue" in v) {
-    const arr = (v.arrayValue as { values?: unknown[] }).values ?? [];
-    return arr.map((i) => fromFirestoreValue(i as Record<string, unknown>));
-  }
-  if ("mapValue" in v) {
-    const fields = (v.mapValue as { fields?: Record<string, unknown> }).fields ?? {};
-    return Object.fromEntries(
-      Object.entries(fields).map(([k, fv]) => [k, fromFirestoreValue(fv as Record<string, unknown>)])
-    );
-  }
-  return null;
+  _db = getFirestore();
+  return _db;
 }
-
-async function firestoreGet(docPath: string): Promise<Record<string, unknown>> {
-  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${docPath}?key=${API_KEY}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Firestore GET ${res.status}: ${await res.text()}`);
-  const body = await res.json() as { fields?: Record<string, unknown> };
-  if (!body.fields) return {};
-  return Object.fromEntries(
-    Object.entries(body.fields).map(([k, v]) => [k, fromFirestoreValue(v as Record<string, unknown>)])
-  );
-}
-
-async function firestorePatch(docPath: string, fields: Record<string, unknown>): Promise<void> {
-  const fieldPaths = Object.keys(fields).map((k) => `updateMask.fieldPaths=${encodeURIComponent(k)}`).join("&");
-  const url = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/${docPath}?${fieldPaths}&key=${API_KEY}`;
-  const body = {
-    fields: Object.fromEntries(
-      Object.entries(fields).map(([k, v]) => [k, toFirestoreValue(v)])
-    ),
-  };
-  const res = await fetch(url, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Firestore PATCH ${res.status}: ${await res.text()}`);
-}
-
-// ── Route handlers ─────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json() as { password: string; settings: Record<string, unknown> };
+
     if (body.password !== ADMIN_PASS) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if (!PROJECT_ID) return NextResponse.json({ error: "Firebase not configured" }, { status: 503 });
+
+    const db = await getDb();
+    const { FieldValue } = await import("firebase-admin/firestore");
 
     const clean = Object.fromEntries(
-      Object.entries(body.settings).filter(([, v]) => v !== undefined)
+      Object.entries(body.settings).filter(([, v]) => v !== undefined && v !== null)
     );
-    // Add server timestamp as a string (REST API doesn't support serverTimestamp in PATCH easily)
-    clean.updatedAt = new Date().toISOString();
 
-    await firestorePatch("config/global", clean);
+    await db.doc("config/global").set(
+      { ...clean, updatedAt: FieldValue.serverTimestamp() },
+      { merge: true }
+    );
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
@@ -104,10 +77,10 @@ export async function GET(req: NextRequest) {
   if (pass !== ADMIN_PASS) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!PROJECT_ID) return NextResponse.json({});
   try {
-    const data = await firestoreGet("config/global");
-    return NextResponse.json(data);
+    const db = await getDb();
+    const snap = await db.doc("config/global").get();
+    return NextResponse.json(snap.exists ? snap.data() : {});
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
