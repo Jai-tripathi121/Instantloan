@@ -1,12 +1,14 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppStore } from "@/lib/store";
 import { t } from "@/lib/i18n";
 import { getSession, saveSession, clearSession, UserSession } from "@/lib/firestore";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 import {
   User, Phone, CreditCard, Calendar, Briefcase, IndianRupee,
-  CheckCircle, Send, ArrowLeft, ChevronRight, RotateCcw, MapPin, Loader2, MessageCircle,
+  CheckCircle, ArrowLeft, ChevronRight, RotateCcw, MapPin, Loader2,
 } from "lucide-react";
 
 const STEP_LABELS: Record<string, { label: string; step: string }> = {
@@ -36,8 +38,8 @@ export default function Details() {
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState("");
   const [mobileError, setMobileError] = useState("");
-  const [otpChannel, setOtpChannel] = useState<"whatsapp" | "sms">("whatsapp");
-  const [otpVia, setOtpVia] = useState<string>("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   // ── Session resume state ──────────────────────────────────────
   const [phase, setPhase] = useState<Phase>(
@@ -80,39 +82,66 @@ export default function Details() {
     }
   }
 
+  function getRecaptchaVerifier(): RecaptchaVerifier {
+    if (!recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, "recaptcha-container", {
+        size: "invisible",
+        callback: () => {},
+        "expired-callback": () => {
+          recaptchaVerifierRef.current?.clear();
+          recaptchaVerifierRef.current = null;
+        },
+      });
+    }
+    return recaptchaVerifierRef.current;
+  }
+
   async function sendOtp() {
     if (!/^[6-9]\d{9}$/.test(mobile)) { setMobileError("Enter a valid 10-digit mobile number"); return; }
     setMobileError(""); setOtpLoading(true); setOtpError("");
-    const res = await fetch("/api/send-otp", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mobile, channel: otpChannel }),
-    });
-    const data = await res.json() as { otp?: string; via?: string; delivered?: boolean };
-    setOtpLoading(false);
-    if (res.ok) {
+    try {
+      const verifier = getRecaptchaVerifier();
+      const result = await signInWithPhoneNumber(auth, `+91${mobile}`, verifier);
+      setConfirmationResult(result);
       setOtpSent(true);
-      setOtpVia(data.via ?? "");
-      if (data.otp) setOtp(data.otp); // auto-fill if delivery not configured
-    } else {
-      setOtpError("Could not send OTP. Please try again.");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      // Reset verifier on failure so it can be recreated
+      recaptchaVerifierRef.current?.clear();
+      recaptchaVerifierRef.current = null;
+      if (code === "auth/invalid-phone-number") {
+        setOtpError("Invalid phone number. Please check and try again.");
+      } else if (code === "auth/too-many-requests") {
+        setOtpError("Too many attempts. Please try again later.");
+      } else {
+        setOtpError("Could not send OTP. Please try again.");
+      }
+    } finally {
+      setOtpLoading(false);
     }
   }
 
   async function verifyOtp() {
+    if (!confirmationResult) { setOtpError("Please request OTP first."); return; }
     setOtpLoading(true); setOtpError("");
-    const res = await fetch("/api/verify-otp", {
-      method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mobile, otp }),
-    });
-    setOtpLoading(false);
-    if (res.ok) {
+    try {
+      await confirmationResult.confirm(otp);
       setVerified(true);
       setOtpVerified(true);
       setUserDetails({ mobile });
       setPhase("checking");
       checkSession(mobile);
-    } else {
-      setOtpError("Incorrect or expired OTP. Please try again.");
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code;
+      if (code === "auth/invalid-verification-code") {
+        setOtpError("Incorrect OTP. Please try again.");
+      } else if (code === "auth/code-expired") {
+        setOtpError("OTP expired. Please request a new one.");
+      } else {
+        setOtpError("Verification failed. Please try again.");
+      }
+    } finally {
+      setOtpLoading(false);
     }
   }
 
@@ -230,52 +259,25 @@ export default function Details() {
             {mobileError && <p className="text-xs text-red-500 mt-1">{mobileError}</p>}
           </div>
 
-          {!verified && !otpSent && (
-            <div className="mb-4">
-              <p className="text-xs font-semibold text-[var(--ink-muted)] mb-2 uppercase tracking-wide">Send OTP via</p>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => setOtpChannel("whatsapp")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
-                    otpChannel === "whatsapp"
-                      ? "border-[#25D366] bg-[#e7fef0] text-[#128C7E]"
-                      : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-muted)]"
-                  }`}>
-                  <MessageCircle size={16} />
-                  WhatsApp
-                </button>
-                <button
-                  onClick={() => setOtpChannel("sms")}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl border-2 font-semibold text-sm transition-all ${
-                    otpChannel === "sms"
-                      ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]"
-                      : "border-[var(--line)] bg-[var(--surface)] text-[var(--ink-muted)]"
-                  }`}>
-                  <Phone size={16} />
-                  SMS
-                </button>
-              </div>
-            </div>
-          )}
+          {/* Invisible reCAPTCHA container — required by Firebase Phone Auth */}
+          <div id="recaptcha-container" />
 
           {!verified && (
             <button onClick={sendOtp} disabled={otpLoading || mobile.length !== 10}
               className="w-full btn-gradient text-white font-semibold py-4 rounded-2xl text-base mb-4 disabled:opacity-60 flex items-center justify-center gap-2">
               {otpLoading
                 ? <Loader2 size={16} className="animate-spin" />
-                : otpChannel === "whatsapp" ? <MessageCircle size={16} /> : <Phone size={16} />}
-              {otpLoading ? "Sending..." : otpSent ? `Resend via ${otpChannel === "whatsapp" ? "WhatsApp" : "SMS"}` : `Send OTP via ${otpChannel === "whatsapp" ? "WhatsApp" : "SMS"}`}
+                : <Phone size={16} />}
+              {otpLoading ? "Sending OTP..." : otpSent ? "Resend OTP" : "Send OTP via SMS"}
             </button>
           )}
 
           {otpSent && !verified && (
             <div className="bg-[var(--brand-soft)] rounded-2xl p-4 border border-[var(--brand-soft)]">
               <div className="flex items-center gap-2 mb-3">
-                {otpVia === "whatsapp"
-                  ? <MessageCircle size={14} className="text-[#25D366]" />
-                  : <Phone size={14} style={{ color: "var(--brand)" }} />}
+                <Phone size={14} style={{ color: "var(--brand)" }} />
                 <p className="text-xs font-medium" style={{ color: "var(--brand)" }}>
-                  OTP sent via {otpVia === "whatsapp" ? "WhatsApp" : otpVia === "sms" ? "SMS" : "message"} to +91 {mobile}
+                  OTP sent via SMS to +91 {mobile}
                 </p>
               </div>
               <input
